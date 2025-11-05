@@ -168,7 +168,7 @@ Flowise는 인스턴스 구성을 위한 다양한 환경 변수를 지원합니
 
 ## ☁️ 클라우드 호스팅 서비스
 
-[Flowise Cloud 시작하기](https://flowiseai.com/)
+[Flowise Cloud 시작하기](https://octobot.it.com/)
 
 ## 🙋 기술 지원
 

@@ -14,7 +14,7 @@
         "test:coverage": "jest --coverage"
     },
     "keywords": [],
-    "homepage": "https://flowiseai.com",
+    "homepage": "https://octobot.it.com",
     "author": {
         "name": "Henry Heng",
         "email": "henryheng@flowiseai.com"

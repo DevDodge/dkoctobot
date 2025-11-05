@@ -86,7 +86,7 @@ pnpm run e2e
 
 ## ☁️ Flowise Cloud
 
-[Get Started with Flowise Cloud](https://flowiseai.com/)
+[Get Started with Flowise Cloud](https://octobot.it.com/)
 
 ## 🙋 Support
 

@@ -75,7 +75,7 @@ npx flowise start --PORT=3000 --DEBUG=true
 
 ## ☁️ 云托管
 
-[开始使用云托管](https://flowiseai.com/)
+[开始使用云托管](https://octobot.it.com/)
 
 ## 🙋 支持
 

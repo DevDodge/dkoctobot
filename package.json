@@ -2,7 +2,7 @@
     "name": "flowise",
     "version": "3.0.8",
     "private": true,
-    "homepage": "https://flowiseai.com",
+    "homepage": "https://octobot.it.com",
     "workspaces": [
         "packages/*",
         "flowise",

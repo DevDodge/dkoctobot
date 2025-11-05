@@ -168,7 +168,7 @@ Flowise 支持不同的环境变量来配置您的实例。您可以在 `package
 
 ## ☁️ 云托管
 
-[开始使用云托管](https://flowiseai.com/)
+[开始使用云托管](https://octobot.it.com/)
 
 ## 🙋 支持
 

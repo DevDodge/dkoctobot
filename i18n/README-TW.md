@@ -180,7 +180,7 @@ Flowise 支持不同的環境變數來配置您的實例。您可以在 `package
 
 ## ☁️ Flowise 雲端平台
 
-[開始使用 Flowise 雲端平台](https://flowiseai.com/)
+[開始使用 Flowise 雲端平台](https://octobot.it.com/)
 
 ## 🙋 支持
 

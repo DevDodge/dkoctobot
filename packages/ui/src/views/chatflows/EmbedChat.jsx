@@ -109,7 +109,7 @@ export const defaultThemeConfig = {
     },
     disclaimer: {
         title: 'Disclaimer',
-        message: 'By using this chatbot, you agree to the <a target="_blank" href="https://flowiseai.com/terms">Terms & Condition</a>',
+        message: 'By using this chatbot, you agree to the <a target="_blank" href="https://octobot.it.com/terms">Terms & Condition</a>',
         textColor: 'black',
         buttonColor: '#3b82f6',
         buttonText: 'Start Chatting',
@@ -137,7 +137,7 @@ export const defaultThemeConfig = {
         renderHTML: true,
         botMessage: {
             backgroundColor: '#f7f8ff',
-            textColor: '#303235',
+            textColor: '#ed309d',
             showAvatar: true,
             avatarSrc: 'https://raw.githubusercontent.com/zahidkhawaja/langchain-chat-nextjs/main/public/parroticon.png'
         },
@@ -150,7 +150,7 @@ export const defaultThemeConfig = {
         textInput: {
             placeholder: 'Type your question',
             backgroundColor: '#ffffff',
-            textColor: '#303235',
+            textColor: '#ed309d',
             sendButtonColor: '#3B81F6',
             maxChars: 50,
             maxCharsWarningMessage: 'You exceeded the characters limit. Please input less than 50 characters.',
@@ -161,17 +161,17 @@ export const defaultThemeConfig = {
             receiveSoundLocation: 'receive_message.mp3'
         },
         feedback: {
-            color: '#303235'
+            color: '#ed309d'
         },
         dateTimeToggle: {
             date: true,
             time: true
         },
         footer: {
-            textColor: '#303235',
+            textColor: '#ed309d',
             text: 'Powered by',
-            company: 'Flowise',
-            companyLink: 'https://flowiseai.com'
+            company: 'DK - OctoBot',
+            companyLink: 'https://octobot.it.com'
         }
     }
 }

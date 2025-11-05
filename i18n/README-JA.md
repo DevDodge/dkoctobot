@@ -168,7 +168,7 @@ Flowise は、インスタンスを設定するためのさまざまな環境変
 
 ## ☁️ クラウドホスト
 
-[Flowise Cloud の使い方を始める](https://flowiseai.com/)
+[Flowise Cloud の使い方を始める](https://octobot.it.com/)
 
 ## 🙋 サポート
 

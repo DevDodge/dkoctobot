@@ -6,7 +6,7 @@ With regard to the FlowiseAI Inc Software:
 This software and associated documentation files (the "Software") may only be
 used in production, if you (and any entity that you represent) have agreed to,
 and are in compliance with, the FlowiseAI Inc Subscription Terms available
-at https://flowiseai.com/terms, or other agreements governing
+at https://octobot.it.com/terms, or other agreements governing
 the use of the Software, as mutually agreed by you and FlowiseAI Inc, Inc ("FlowiseAI"),
 and otherwise have a valid FlowiseAI Inc Enterprise Edition subscription ("Commercial Subscription")
 for the correct number of hosts as defined in the "Commercial Terms ("Hosts"). Subject to the foregoing sentence,

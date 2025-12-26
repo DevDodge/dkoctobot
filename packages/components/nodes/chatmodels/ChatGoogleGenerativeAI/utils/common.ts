@@ -462,6 +462,7 @@ export function mapGenerateContentResultToChatResult(
     const [candidate] = response.candidates
     const { content: candidateContent, ...generationInfo } = candidate
     let content: MessageContent | undefined
+    const inlineDataItems: any[] = []
 
     if (Array.isArray(candidateContent?.parts) && candidateContent.parts.length === 1 && candidateContent.parts[0].text) {
         content = candidateContent.parts[0].text
@@ -482,6 +483,18 @@ export function mapGenerateContentResultToChatResult(
                     type: 'codeExecutionResult',
                     codeExecutionResult: p.codeExecutionResult
                 }
+            } else if ('inlineData' in p && p.inlineData) {
+                // Extract inline image data for processing by Agent
+                inlineDataItems.push({
+                    type: 'gemini_inline_data',
+                    mimeType: p.inlineData.mimeType,
+                    data: p.inlineData.data
+                })
+                // Return the inline data as part of the content structure
+                return {
+                    type: 'inlineData',
+                    inlineData: p.inlineData
+                }
             }
             return p
         })
@@ -496,6 +509,12 @@ export function mapGenerateContentResultToChatResult(
     } else if (Array.isArray(content) && content.length > 0) {
         const block = content.find((b) => 'text' in b) as { text: string } | undefined
         text = block?.text ?? text
+    }
+
+    // Build response_metadata with inline data if present
+    const response_metadata: any = {}
+    if (inlineDataItems.length > 0) {
+        response_metadata.inlineData = inlineDataItems
     }
 
     const generation: ChatGeneration = {
@@ -525,7 +544,8 @@ export function mapGenerateContentResultToChatResult(
                     })
                     .filter((s: any) => s !== null)
             },
-            usage_metadata: extra?.usageMetadata
+            usage_metadata: extra?.usageMetadata,
+            response_metadata: Object.keys(response_metadata).length > 0 ? response_metadata : undefined
         }),
         generationInfo
     }
@@ -556,6 +576,8 @@ export function convertResponseContentToChatGenerationChunk(
     const [candidate] = response.candidates
     const { content: candidateContent, ...generationInfo } = candidate
     let content: MessageContent | undefined
+    const inlineDataItems: any[] = []
+
     // Checks if some parts do not have text. If false, it means that the content is a string.
     if (Array.isArray(candidateContent?.parts) && candidateContent.parts.every((p) => 'text' in p)) {
         content = candidateContent.parts.map((p) => p.text).join('')
@@ -575,6 +597,18 @@ export function convertResponseContentToChatGenerationChunk(
                 return {
                     type: 'codeExecutionResult',
                     codeExecutionResult: p.codeExecutionResult
+                }
+            } else if ('inlineData' in p && p.inlineData) {
+                // Extract inline image data for processing by Agent
+                inlineDataItems.push({
+                    type: 'gemini_inline_data',
+                    mimeType: p.inlineData.mimeType,
+                    data: p.inlineData.data
+                })
+                // Return the inline data as part of the content structure
+                return {
+                    type: 'inlineData',
+                    inlineData: p.inlineData
                 }
             }
             return p
@@ -605,6 +639,12 @@ export function convertResponseContentToChatGenerationChunk(
         )
     }
 
+    // Build response_metadata with inline data if present
+    const response_metadata: any = {}
+    if (inlineDataItems.length > 0) {
+        response_metadata.inlineData = inlineDataItems
+    }
+
     return new ChatGenerationChunk({
         text,
         message: new AIMessageChunk({
@@ -626,7 +666,8 @@ export function convertResponseContentToChatGenerationChunk(
                     })
                     .filter((s: any) => s !== null)
             },
-            usage_metadata: extra.usageMetadata
+            usage_metadata: extra.usageMetadata,
+            response_metadata: Object.keys(response_metadata).length > 0 ? response_metadata : undefined
         }),
         generationInfo
     })

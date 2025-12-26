@@ -107,3 +107,5 @@
 
 ## IIS config (local deployment)
 web.config
+start-flowise.bat
+ecosystem.config.js

@@ -363,13 +363,23 @@ export function convertMessageContentToParts(message: BaseMessage, isMultimodalM
     }
 
     if (isAIMessage(message) && message.tool_calls?.length) {
-        functionCalls = message.tool_calls.map((tc) => {
-            return {
+        // Get thoughtSignatures from additional_kwargs for Gemini 3 models
+        const thoughtSignatures = (message.additional_kwargs as any)?.thoughtSignatures || []
+        functionCalls = message.tool_calls.map((tc, index) => {
+            // Find matching thoughtSignature for this function call
+            // For parallel function calls, only the first one has a signature
+            const sig = thoughtSignatures.find((s: any) => s.functionName === tc.name && s.index === index)
+            const part: any = {
                 functionCall: {
                     name: tc.name,
                     args: tc.args
                 }
             }
+            // Include thoughtSignature if present (required for Gemini 3 models)
+            if (sig?.thoughtSignature) {
+                part.thoughtSignature = sig.thoughtSignature
+            }
+            return part
         })
     }
 
@@ -500,7 +510,20 @@ export function mapGenerateContentResultToChatResult(
                 }
             }),
             additional_kwargs: {
-                ...generationInfo
+                ...generationInfo,
+                // Store thoughtSignatures for Gemini 3 models function calling
+                thoughtSignatures: candidateContent?.parts
+                    ?.map((p: any, index: number) => {
+                        if ('functionCall' in p && p.thoughtSignature) {
+                            return {
+                                functionName: p.functionCall.name,
+                                thoughtSignature: p.thoughtSignature,
+                                index
+                            }
+                        }
+                        return null
+                    })
+                    .filter((s: any) => s !== null)
             },
             usage_metadata: extra?.usageMetadata
         }),
@@ -588,9 +611,21 @@ export function convertResponseContentToChatGenerationChunk(
             content: content || '',
             name: !candidateContent ? undefined : candidateContent.role,
             tool_call_chunks: toolCallChunks,
-            // Each chunk can have unique "generationInfo", and merging strategy is unclear,
-            // so leave blank for now.
-            additional_kwargs: {},
+            // Store thoughtSignatures for Gemini 3 models function calling (streaming)
+            additional_kwargs: {
+                thoughtSignatures: candidateContent?.parts
+                    ?.map((p: any, index: number) => {
+                        if ('functionCall' in p && p.thoughtSignature) {
+                            return {
+                                functionName: p.functionCall.name,
+                                thoughtSignature: p.thoughtSignature,
+                                index
+                            }
+                        }
+                        return null
+                    })
+                    .filter((s: any) => s !== null)
+            },
             usage_metadata: extra.usageMetadata
         }),
         generationInfo

@@ -93,6 +93,7 @@ export class HuggingFaceInference extends LLM implements HFInput {
         try {
             const client = await this._prepareHFInference()
             const stream = await this.caller.call(async () =>
+                // @ts-ignore - chatCompletionStream may not exist in all @huggingface/inference versions
                 client.chatCompletionStream({
                     model: this.model,
                     messages: [{ role: 'user', content: prompt }],
@@ -136,6 +137,7 @@ export class HuggingFaceInference extends LLM implements HFInput {
                 messages: [{ role: 'user', content: prompt }],
                 ...this.invocationParams(options)
             }
+            // @ts-ignore - chatCompletion may not exist in all @huggingface/inference versions
             const res = await this.caller.callWithOptions({ signal: options.signal }, client.chatCompletion.bind(client), args)
             const content = res.choices[0]?.message?.content || ''
             if (!content) {
@@ -188,11 +190,13 @@ export class HuggingFaceInference extends LLM implements HFInput {
 
     /** @ignore */
     static async imports(): Promise<{
-        InferenceClient: typeof import('@huggingface/inference').InferenceClient
+        // Use HfInference for compatibility with @huggingface/inference v2.x
+        InferenceClient: typeof import('@huggingface/inference').HfInference
     }> {
         try {
-            const { InferenceClient } = await import('@huggingface/inference')
-            return { InferenceClient }
+            const { HfInference } = await import('@huggingface/inference')
+            // Return HfInference as InferenceClient for backward compatibility
+            return { InferenceClient: HfInference as any }
         } catch (e) {
             throw new Error('Please install huggingface as a dependency with, e.g. `pnpm install @huggingface/inference`')
         }

@@ -25,6 +25,7 @@ export class HuggingFaceInferenceEmbeddings extends Embeddings implements Huggin
         this.endpoint = fields?.endpoint ?? ''
         const hf = new HfInference(this.apiKey)
         // v4 uses Inference Providers by default; only override if custom endpoint provided
+        // @ts-ignore - endpoint() return type may vary across @huggingface/inference versions
         this.client = this.endpoint ? hf.endpoint(this.endpoint) : hf
     }
 

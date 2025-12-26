@@ -1,13 +1,5 @@
 import * as uuid from 'uuid'
-import type {
-    ChromaClient as ChromaClientT,
-    ChromaClientArgs,
-    Collection,
-    CollectionConfiguration,
-    CollectionMetadata,
-    Metadata,
-    Where
-} from 'chromadb'
+import type { ChromaClient as ChromaClientT, Collection, CollectionMetadata, Metadata, Where } from 'chromadb'
 
 import type { EmbeddingsInterface } from '@langchain/core/embeddings'
 import { VectorStore } from '@langchain/core/vectorstores'
@@ -18,9 +10,9 @@ type SharedChromaLibArgs = {
     collectionName?: string
     filter?: object
     collectionMetadata?: CollectionMetadata
-    collectionConfiguration?: CollectionConfiguration
+    collectionConfiguration?: any // CollectionConfiguration type may not exist in all chromadb versions
     chromaCloudAPIKey?: string
-    clientParams?: Omit<ChromaClientArgs, 'path'>
+    clientParams?: any // ChromaClientArgs type may not exist in all chromadb versions
 }
 
 export type ChromaLibArgs =
@@ -48,7 +40,7 @@ export class Chroma extends VectorStore {
 
     numDimensions?: number
 
-    clientParams?: Omit<ChromaClientArgs, 'path'>
+    clientParams?: any
 
     url: string
 
@@ -110,6 +102,7 @@ export class Chroma extends VectorStore {
             try {
                 this.collection = await this.index.getOrCreateCollection({
                     name: this.collectionName,
+                    // @ts-ignore - embeddingFunction type mismatch with chromadb types
                     embeddingFunction: null,
                     ...(this.collectionMetadata && { metadata: this.collectionMetadata })
                 })

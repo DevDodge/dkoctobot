@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 // material-ui
@@ -16,6 +16,7 @@ import { StyledPermissionButton } from '@/ui-component/button/RBACButtons'
 import ViewHeader from '@/layout/MainLayout/ViewHeader'
 import ErrorBoundary from '@/ErrorBoundary'
 import TablePagination, { DEFAULT_ITEMS_PER_PAGE } from '@/ui-component/pagination/TablePagination'
+import FolderSidebar from '@/ui-component/folders/FolderSidebar'
 
 // API
 import chatflowsApi from '@/api/chatflows'
@@ -40,6 +41,7 @@ const Chatflows = () => {
     const [images, setImages] = useState({})
     const [search, setSearch] = useState('')
     const { error, setError } = useError()
+    const [selectedFolder, setSelectedFolder] = useState(null)
 
     const getAllChatflowsApi = useApi(chatflowsApi.getAllChatflows)
     const [view, setView] = useState(localStorage.getItem('flowDisplayStyle') || 'card')
@@ -52,15 +54,24 @@ const Chatflows = () => {
     const onChange = (page, pageLimit) => {
         setCurrentPage(page)
         setPageLimit(pageLimit)
-        applyFilters(page, pageLimit)
+        applyFilters(page, pageLimit, selectedFolder)
     }
 
-    const applyFilters = (page, limit) => {
+    const applyFilters = useCallback((page, limit, folderId) => {
         const params = {
             page: page || currentPage,
             limit: limit || pageLimit
         }
+        if (folderId) {
+            params.folderId = folderId
+        }
         getAllChatflowsApi.request(params)
+    }, [currentPage, pageLimit, getAllChatflowsApi])
+
+    const handleFolderSelect = (folderId) => {
+        setSelectedFolder(folderId)
+        setCurrentPage(1) // Reset to first page when changing folder
+        applyFilters(1, pageLimit, folderId)
     }
 
     const handleChange = (event, nextView) => {
@@ -90,7 +101,7 @@ const Chatflows = () => {
     }
 
     useEffect(() => {
-        applyFilters(currentPage, pageLimit)
+        applyFilters(currentPage, pageLimit, selectedFolder)
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
@@ -129,105 +140,128 @@ const Chatflows = () => {
     }, [getAllChatflowsApi.data])
 
     return (
-        <MainCard>
+        <MainCard sx={{
+            p: 0,
+            m: -2.5, // Negative margin to counter main layout padding (20px = 2.5 * 8px)
+            width: 'calc(100% + 40px)', // Full width including the negated margins
+            '& .MuiCardContent-root': { p: 0 }
+        }}>
             {error ? (
                 <ErrorBoundary error={error} />
             ) : (
-                <Stack flexDirection='column' sx={{ gap: 3 }}>
-                    <ViewHeader
-                        onSearchChange={onSearchChange}
-                        search={true}
-                        searchPlaceholder='Search Name or Category'
-                        title='Chatflows'
-                        description='Build single-agent systems, chatbots and simple LLM flows'
-                    >
-                        <ToggleButtonGroup
-                            sx={{ borderRadius: 2, maxHeight: 40 }}
-                            value={view}
-                            color='primary'
-                            disabled={total === 0}
-                            exclusive
-                            onChange={handleChange}
-                        >
-                            <ToggleButton
-                                sx={{
-                                    borderColor: theme.palette.grey[900] + 25,
-                                    borderRadius: 2,
-                                    color: theme?.customization?.isDarkMode ? 'white' : 'inherit'
-                                }}
-                                variant='contained'
-                                value='card'
-                                title='Card View'
-                            >
-                                <IconLayoutGrid />
-                            </ToggleButton>
-                            <ToggleButton
-                                sx={{
-                                    borderColor: theme.palette.grey[900] + 25,
-                                    borderRadius: 2,
-                                    color: theme?.customization?.isDarkMode ? 'white' : 'inherit'
-                                }}
-                                variant='contained'
-                                value='list'
-                                title='List View'
-                            >
-                                <IconList />
-                            </ToggleButton>
-                        </ToggleButtonGroup>
-                        <StyledPermissionButton
-                            permissionId={'chatflows:create'}
-                            variant='contained'
-                            onClick={addNew}
-                            startIcon={<IconPlus />}
-                            sx={{ borderRadius: 2, height: 40 }}
-                        >
-                            Add New
-                        </StyledPermissionButton>
-                    </ViewHeader>
+                <Stack flexDirection='row' sx={{ height: 'calc(100vh - 180px)' }}>
+                    {/* Folder Sidebar */}
+                    <FolderSidebar
+                        selectedFolder={selectedFolder}
+                        onFolderSelect={handleFolderSelect}
+                        onChatflowMoved={() => applyFilters(currentPage, pageLimit, selectedFolder)}
+                    />
 
-                    {isLoading && (
-                        <Box display='grid' gridTemplateColumns='repeat(3, 1fr)' gap={gridSpacing}>
-                            <Skeleton variant='rounded' height={160} />
-                            <Skeleton variant='rounded' height={160} />
-                            <Skeleton variant='rounded' height={160} />
-                        </Box>
-                    )}
-                    {!isLoading && total > 0 && (
-                        <>
-                            {!view || view === 'card' ? (
+                    {/* Main Content */}
+                    <Box sx={{ flex: 1, overflow: 'auto', px: 2 }}>
+                        <Stack flexDirection='column' sx={{ gap: 3 }}>
+                            <ViewHeader
+                                onSearchChange={onSearchChange}
+                                search={true}
+                                searchPlaceholder='Search Name or Category'
+                                title='Chatflows'
+                                description='Build single-agent systems, chatbots and simple LLM flows'
+                            >
+                                <ToggleButtonGroup
+                                    sx={{ borderRadius: 2, maxHeight: 40 }}
+                                    value={view}
+                                    color='primary'
+                                    disabled={total === 0}
+                                    exclusive
+                                    onChange={handleChange}
+                                >
+                                    <ToggleButton
+                                        sx={{
+                                            borderColor: theme.palette.grey[900] + 25,
+                                            borderRadius: 2,
+                                            color: theme?.customization?.isDarkMode ? 'white' : 'inherit'
+                                        }}
+                                        variant='contained'
+                                        value='card'
+                                        title='Card View'
+                                    >
+                                        <IconLayoutGrid />
+                                    </ToggleButton>
+                                    <ToggleButton
+                                        sx={{
+                                            borderColor: theme.palette.grey[900] + 25,
+                                            borderRadius: 2,
+                                            color: theme?.customization?.isDarkMode ? 'white' : 'inherit'
+                                        }}
+                                        variant='contained'
+                                        value='list'
+                                        title='List View'
+                                    >
+                                        <IconList />
+                                    </ToggleButton>
+                                </ToggleButtonGroup>
+                                <StyledPermissionButton
+                                    permissionId={'chatflows:create'}
+                                    variant='contained'
+                                    onClick={addNew}
+                                    startIcon={<IconPlus />}
+                                    sx={{ borderRadius: 2, height: 40 }}
+                                >
+                                    Add New
+                                </StyledPermissionButton>
+                            </ViewHeader>
+
+                            {isLoading && (
                                 <Box display='grid' gridTemplateColumns='repeat(3, 1fr)' gap={gridSpacing}>
-                                    {getAllChatflowsApi.data?.data?.filter(filterFlows).map((data, index) => (
-                                        <ItemCard key={index} onClick={() => goToCanvas(data)} data={data} images={images[data.id]} />
-                                    ))}
+                                    <Skeleton variant='rounded' height={160} />
+                                    <Skeleton variant='rounded' height={160} />
+                                    <Skeleton variant='rounded' height={160} />
                                 </Box>
-                            ) : (
-                                <FlowListTable
-                                    data={getAllChatflowsApi.data?.data}
-                                    images={images}
-                                    isLoading={isLoading}
-                                    filterFunction={filterFlows}
-                                    updateFlowsApi={getAllChatflowsApi}
-                                    setError={setError}
-                                    currentPage={currentPage}
-                                    pageLimit={pageLimit}
-                                />
                             )}
-                            {/* Pagination and Page Size Controls */}
-                            <TablePagination currentPage={currentPage} limit={pageLimit} total={total} onChange={onChange} />
-                        </>
-                    )}
-                    {!isLoading && (!getAllChatflowsApi.data?.data || getAllChatflowsApi.data?.data.length === 0) && (
-                        <Stack sx={{ alignItems: 'center', justifyContent: 'center' }} flexDirection='column'>
-                            <Box sx={{ p: 2, height: 'auto' }}>
-                                <img
-                                    style={{ objectFit: 'cover', height: '25vh', width: 'auto' }}
-                                    src={WorkflowEmptySVG}
-                                    alt='WorkflowEmptySVG'
-                                />
-                            </Box>
-                            <div>No Chatflows Yet</div>
+                            {!isLoading && total > 0 && (
+                                <>
+                                    {!view || view === 'card' ? (
+                                        <Box display='grid' gridTemplateColumns='repeat(3, 1fr)' gap={gridSpacing}>
+                                            {getAllChatflowsApi.data?.data?.filter(filterFlows).map((data, index) => (
+                                                <ItemCard
+                                                    key={index}
+                                                    onClick={() => goToCanvas(data)}
+                                                    data={data}
+                                                    images={images[data.id]}
+                                                    draggable={true}
+                                                />
+                                            ))}
+                                        </Box>
+                                    ) : (
+                                        <FlowListTable
+                                            data={getAllChatflowsApi.data?.data}
+                                            images={images}
+                                            isLoading={isLoading}
+                                            filterFunction={filterFlows}
+                                            updateFlowsApi={getAllChatflowsApi}
+                                            setError={setError}
+                                            currentPage={currentPage}
+                                            pageLimit={pageLimit}
+                                        />
+                                    )}
+                                    {/* Pagination and Page Size Controls */}
+                                    <TablePagination currentPage={currentPage} limit={pageLimit} total={total} onChange={onChange} />
+                                </>
+                            )}
+                            {!isLoading && (!getAllChatflowsApi.data?.data || getAllChatflowsApi.data?.data.length === 0) && (
+                                <Stack sx={{ alignItems: 'center', justifyContent: 'center' }} flexDirection='column'>
+                                    <Box sx={{ p: 2, height: 'auto' }}>
+                                        <img
+                                            style={{ objectFit: 'cover', height: '25vh', width: 'auto' }}
+                                            src={WorkflowEmptySVG}
+                                            alt='WorkflowEmptySVG'
+                                        />
+                                    </Box>
+                                    <div>No Chatflows Yet</div>
+                                </Stack>
+                            )}
                         </Stack>
-                    )}
+                    </Box>
                 </Stack>
             )}
             <ConfirmDialog />

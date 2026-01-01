@@ -37,6 +37,9 @@ import ChatFeedbackDialog from '../dialog/ChatFeedbackDialog'
 import AllowedDomainsDialog from '../dialog/AllowedDomainsDialog'
 import SpeechToTextDialog from '../dialog/SpeechToTextDialog'
 import ExportAsTemplateDialog from '@/ui-component/dialog/ExportAsTemplateDialog'
+import MoveToFolderDialog from '@/ui-component/dialog/MoveToFolderDialog'
+import chatflowFoldersApi from '@/api/chatflowFolders'
+import FolderIcon from '@mui/icons-material/Folder'
 
 const StyledMenu = styled((props) => (
     <Menu
@@ -99,6 +102,7 @@ export default function FlowListMenu({ chatflow, isAgentCanvas, isAgentflowV2, s
 
     const [exportTemplateDialogOpen, setExportTemplateDialogOpen] = useState(false)
     const [exportTemplateDialogProps, setExportTemplateDialogProps] = useState({})
+    const [moveToFolderDialogOpen, setMoveToFolderDialogOpen] = useState(false)
 
     const title = isAgentCanvas ? 'Agents' : 'Chatflow'
 
@@ -175,6 +179,43 @@ export default function FlowListMenu({ chatflow, isAgentCanvas, isAgentflowV2, s
             chatflow: chatflow
         })
         setSpeechToTextDialogOpen(true)
+    }
+
+    const handleMoveToFolder = () => {
+        setAnchorEl(null)
+        setMoveToFolderDialogOpen(true)
+    }
+
+    const saveMoveToFolder = async (folderId) => {
+        setMoveToFolderDialogOpen(false)
+        try {
+            // folderId can be null for uncategorized
+            const targetFolderId = folderId === 'uncategorized' ? null : folderId
+            await chatflowFoldersApi.moveChatflowToFolder(chatflow.id, targetFolderId)
+            await refreshFlows()
+            enqueueSnackbar({
+                message: 'Chatflow moved successfully',
+                options: {
+                    key: new Date().getTime() + Math.random(),
+                    variant: 'success',
+                    autoHideDuration: 2000
+                }
+            })
+        } catch (error) {
+            enqueueSnackbar({
+                message: typeof error.response?.data === 'object' ? error.response.data.message : error.response?.data || 'Error moving chatflow',
+                options: {
+                    key: new Date().getTime() + Math.random(),
+                    variant: 'error',
+                    persist: true,
+                    action: (key) => (
+                        <Button style={{ color: 'white' }} onClick={() => closeSnackbar(key)}>
+                            <IconX />
+                        </Button>
+                    )
+                }
+            })
+        }
     }
 
     const saveFlowRename = async (chatflowName) => {
@@ -430,6 +471,16 @@ export default function FlowListMenu({ chatflow, isAgentCanvas, isAgentflowV2, s
                     <FileCategoryIcon />
                     Update Category
                 </PermissionMenuItem>
+                {!isAgentCanvas && (
+                    <PermissionMenuItem
+                        permissionId='chatflows:update'
+                        onClick={handleMoveToFolder}
+                        disableRipple
+                    >
+                        <FolderIcon />
+                        Move to Folder
+                    </PermissionMenuItem>
+                )}
                 <Divider sx={{ my: 0.5 }} />
                 <PermissionMenuItem
                     permissionId={isAgentCanvas ? 'agentflows:delete' : 'chatflows:delete'}
@@ -487,6 +538,12 @@ export default function FlowListMenu({ chatflow, isAgentCanvas, isAgentflowV2, s
                     onCancel={() => setExportTemplateDialogOpen(false)}
                 />
             )}
+            <MoveToFolderDialog
+                show={moveToFolderDialogOpen}
+                chatflowName={chatflow?.name}
+                onCancel={() => setMoveToFolderDialogOpen(false)}
+                onConfirm={saveMoveToFolder}
+            />
         </div>
     )
 }

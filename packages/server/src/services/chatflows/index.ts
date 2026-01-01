@@ -138,7 +138,7 @@ const deleteChatflow = async (chatflowId: string, orgId: string, workspaceId: st
     }
 }
 
-const getAllChatflows = async (type?: ChatflowType, workspaceId?: string, page: number = -1, limit: number = -1) => {
+const getAllChatflows = async (type?: ChatflowType, workspaceId?: string, page: number = -1, limit: number = -1, folderId?: string | null) => {
     try {
         const appServer = getRunningExpressApp()
 
@@ -161,6 +161,17 @@ const getAllChatflows = async (type?: ChatflowType, workspaceId?: string, page: 
             queryBuilder.andWhere('chat_flow.type = :type', { type: 'CHATFLOW' })
         }
         if (workspaceId) queryBuilder.andWhere('chat_flow.workspaceId = :workspaceId', { workspaceId })
+
+        // Filter by folder
+        if (folderId === 'uncategorized') {
+            // Show only chatflows without a folder
+            queryBuilder.andWhere('(chat_flow.folderId IS NULL OR chat_flow.folderId = :empty)', { empty: '' })
+        } else if (folderId) {
+            // Show only chatflows in the specified folder
+            queryBuilder.andWhere('chat_flow.folderId = :folderId', { folderId })
+        }
+        // If folderId is not provided, show all chatflows (default behavior)
+
         const [data, total] = await queryBuilder.getManyAndCount()
 
         if (page > 0 && limit > 0) {

@@ -30,12 +30,25 @@ const CardWrapper = styled(MainCard)(({ theme }) => ({
 
 // ===========================|| CONTRACT CARD ||=========================== //
 
-const ItemCard = ({ data, images, icons, onClick }) => {
+const ItemCard = ({ data, images, icons, onClick, draggable = false }) => {
     const theme = useTheme()
     const customization = useSelector((state) => state.customization)
 
+    const handleDragStart = (e) => {
+        if (!draggable || !data?.id) return
+        e.dataTransfer.setData('application/chatflow-id', data.id)
+        e.dataTransfer.setData('text/plain', data.name || 'Chatflow')
+        e.dataTransfer.effectAllowed = 'move'
+    }
+
     return (
-        <CardWrapper content={false} onClick={onClick} sx={{ border: 1, borderColor: theme.palette.grey[900] + 25, borderRadius: 2 }}>
+        <CardWrapper
+            content={false}
+            onClick={onClick}
+            sx={{ border: 1, borderColor: theme.palette.grey[900] + 25, borderRadius: 2 }}
+            draggable={draggable}
+            onDragStart={handleDragStart}
+        >
             <Box sx={{ height: '100%', p: 2.25 }}>
                 <Grid container justifyContent='space-between' direction='column' sx={{ height: '100%', gap: 3 }}>
                     <Box display='flex' flexDirection='column' sx={{ width: '100%' }}>
@@ -187,7 +200,8 @@ ItemCard.propTypes = {
     data: PropTypes.object,
     images: PropTypes.array,
     icons: PropTypes.array,
-    onClick: PropTypes.func
+    onClick: PropTypes.func,
+    draggable: PropTypes.bool
 }
 
 export default ItemCard

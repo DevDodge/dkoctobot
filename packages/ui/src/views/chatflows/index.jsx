@@ -20,6 +20,7 @@ import FolderSidebar from '@/ui-component/folders/FolderSidebar'
 
 // API
 import chatflowsApi from '@/api/chatflows'
+// import chatflowFoldersApi from '@/api/chatflowFolders' // Removed as FolderSidebar handles it
 
 // Hooks
 import useApi from '@/hooks/useApi'
@@ -43,7 +44,12 @@ const Chatflows = () => {
     const { error, setError } = useError()
     const [selectedFolder, setSelectedFolder] = useState(null)
 
+    // State to hold folders list from Sidebar
+    const [folders, setFolders] = useState([])
+
     const getAllChatflowsApi = useApi(chatflowsApi.getAllChatflows)
+
+    // View state
     const [view, setView] = useState(localStorage.getItem('flowDisplayStyle') || 'card')
 
     /* Table Pagination */
@@ -57,16 +63,19 @@ const Chatflows = () => {
         applyFilters(page, pageLimit, selectedFolder)
     }
 
-    const applyFilters = useCallback((page, limit, folderId) => {
-        const params = {
-            page: page || currentPage,
-            limit: limit || pageLimit
-        }
-        if (folderId) {
-            params.folderId = folderId
-        }
-        getAllChatflowsApi.request(params)
-    }, [currentPage, pageLimit, getAllChatflowsApi])
+    const applyFilters = useCallback(
+        (page, limit, folderId) => {
+            const params = {
+                page: page || currentPage,
+                limit: limit || pageLimit
+            }
+            if (folderId) {
+                params.folderId = folderId
+            }
+            getAllChatflowsApi.request(params)
+        },
+        [currentPage, pageLimit, getAllChatflowsApi]
+    )
 
     const handleFolderSelect = (folderId) => {
         setSelectedFolder(folderId)
@@ -102,6 +111,7 @@ const Chatflows = () => {
 
     useEffect(() => {
         applyFilters(currentPage, pageLimit, selectedFolder)
+        // FolderSidebar will fetch folders on mount and call onFoldersChange
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
@@ -139,22 +149,35 @@ const Chatflows = () => {
         }
     }, [getAllChatflowsApi.data])
 
+    const [folderRefreshSignal, setFolderRefreshSignal] = useState(0)
+
+    const handleFlowUpdate = () => {
+        setFolderRefreshSignal((prev) => prev + 1)
+    }
+
     return (
-        <MainCard sx={{
-            p: 0,
-            m: -2.5, // Negative margin to counter main layout padding (20px = 2.5 * 8px)
-            width: 'calc(100% + 40px)', // Full width including the negated margins
-            '& .MuiCardContent-root': { p: 0 }
-        }}>
+        <MainCard
+            sx={{
+                p: 0,
+                margin: '-20px', // Explicit negative margin to negate main layout padding
+                width: 'calc(100% + 40px)', // Full width
+                maxWidth: 'none', // Override default constraints
+                height: 'calc(100vh - 80px)',
+                borderRadius: 0,
+                '& .MuiCardContent-root': { p: 0, height: '100%' }
+            }}
+        >
             {error ? (
                 <ErrorBoundary error={error} />
             ) : (
-                <Stack flexDirection='row' sx={{ height: 'calc(100vh - 180px)' }}>
+                <Stack flexDirection='row' sx={{ height: '100%' }}>
                     {/* Folder Sidebar */}
                     <FolderSidebar
                         selectedFolder={selectedFolder}
                         onFolderSelect={handleFolderSelect}
+                        onFoldersChange={setFolders}
                         onChatflowMoved={() => applyFilters(currentPage, pageLimit, selectedFolder)}
+                        refreshSignal={folderRefreshSignal}
                     />
 
                     {/* Main Content */}
@@ -242,6 +265,8 @@ const Chatflows = () => {
                                             setError={setError}
                                             currentPage={currentPage}
                                             pageLimit={pageLimit}
+                                            folders={folders}
+                                            onFlowUpdate={handleFlowUpdate}
                                         />
                                     )}
                                     {/* Pagination and Page Size Controls */}

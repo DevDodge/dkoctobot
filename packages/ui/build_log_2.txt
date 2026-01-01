@@ -1,0 +1,464 @@
+
+> flowise-ui@3.0.12 build F:\dk-training-octobot\packages\ui
+> vite build
+
+[33mThe CJS build of Vite's Node API is deprecated. See https://vitejs.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+[36mvite v5.1.6 [32mbuilding for production...[36m[39m
+transforming...
+[32m✓[39m 21145 modules transformed.
+rendering chunks...
+[1m[33m[plugin:vite:reporter][39m[22m [33m[plugin vite:reporter] 
+(!) F:/dk-training-octobot/packages/ui/src/views/account/index.jsx is dynamically imported by F:/dk-training-octobot/packages/ui/src/routes/MainRoutes.jsx but also statically imported by F:/dk-training-octobot/packages/ui/src/routes/DefaultRedirect.jsx, dynamic import will not move module into another chunk.
+[39m
+[1m[33m[plugin:vite:reporter][39m[22m [33m[plugin vite:reporter] 
+(!) F:/dk-training-octobot/packages/ui/src/views/agentexecutions/index.jsx is dynamically imported by F:/dk-training-octobot/packages/ui/src/routes/MainRoutes.jsx but also statically imported by F:/dk-training-octobot/packages/ui/src/routes/DefaultRedirect.jsx, dynamic import will not move module into another chunk.
+[39m
+[1m[33m[plugin:vite:reporter][39m[22m [33m[plugin vite:reporter] 
+(!) F:/dk-training-octobot/packages/ui/src/views/agentflows/index.jsx is dynamically imported by F:/dk-training-octobot/packages/ui/src/routes/MainRoutes.jsx but also statically imported by F:/dk-training-octobot/packages/ui/src/routes/DefaultRedirect.jsx, dynamic import will not move module into another chunk.
+[39m
+[1m[33m[plugin:vite:reporter][39m[22m [33m[plugin vite:reporter] 
+(!) F:/dk-training-octobot/packages/ui/src/views/apikey/index.jsx is dynamically imported by F:/dk-training-octobot/packages/ui/src/routes/MainRoutes.jsx but also statically imported by F:/dk-training-octobot/packages/ui/src/routes/DefaultRedirect.jsx, dynamic import will not move module into another chunk.
+[39m
+[1m[33m[plugin:vite:reporter][39m[22m [33m[plugin vite:reporter] 
+(!) F:/dk-training-octobot/packages/ui/src/views/assistants/index.jsx is dynamically imported by F:/dk-training-octobot/packages/ui/src/routes/MainRoutes.jsx but also statically imported by F:/dk-training-octobot/packages/ui/src/routes/DefaultRedirect.jsx, dynamic import will not move module into another chunk.
+[39m
+[1m[33m[plugin:vite:reporter][39m[22m [33m[plugin vite:reporter] 
+(!) F:/dk-training-octobot/packages/ui/src/views/auth/login.jsx is dynamically imported by F:/dk-training-octobot/packages/ui/src/routes/AuthRoutes.jsx but also statically imported by F:/dk-training-octobot/packages/ui/src/routes/DefaultRedirect.jsx, dynamic import will not move module into another chunk.
+[39m
+[1m[33m[plugin:vite:reporter][39m[22m [33m[plugin vite:reporter] 
+(!) F:/dk-training-octobot/packages/ui/src/views/auth/loginActivity.jsx is dynamically imported by F:/dk-training-octobot/packages/ui/src/routes/MainRoutes.jsx but also statically imported by F:/dk-training-octobot/packages/ui/src/routes/DefaultRedirect.jsx, dynamic import will not move module into another chunk.
+[39m
+[1m[33m[plugin:vite:reporter][39m[22m [33m[plugin vite:reporter] 
+(!) F:/dk-training-octobot/packages/ui/src/views/auth/ssoConfig.jsx is dynamically imported by F:/dk-training-octobot/packages/ui/src/routes/MainRoutes.jsx but also statically imported by F:/dk-training-octobot/packages/ui/src/routes/DefaultRedirect.jsx, dynamic import will not move module into another chunk.
+[39m
+[1m[33m[plugin:vite:reporter][39m[22m [33m[plugin vite:reporter] 
+(!) F:/dk-training-octobot/packages/ui/src/views/auth/unauthorized.jsx is dynamically imported by F:/dk-training-octobot/packages/ui/src/routes/AuthRoutes.jsx but also statically imported by F:/dk-training-octobot/packages/ui/src/routes/DefaultRedirect.jsx, dynamic import will not move module into another chunk.
+[39m
+[1m[33m[plugin:vite:reporter][39m[22m [33m[plugin vite:reporter] 
+(!) F:/dk-training-octobot/packages/ui/src/views/chatflows/index.jsx is dynamically imported by F:/dk-training-octobot/packages/ui/src/routes/MainRoutes.jsx but also statically imported by F:/dk-training-octobot/packages/ui/src/routes/DefaultRedirect.jsx, dynamic import will not move module into another chunk.
+[39m
+[1m[33m[plugin:vite:reporter][39m[22m [33m[plugin vite:reporter] 
+(!) F:/dk-training-octobot/packages/ui/src/views/credentials/index.jsx is dynamically imported by F:/dk-training-octobot/packages/ui/src/routes/MainRoutes.jsx but also statically imported by F:/dk-training-octobot/packages/ui/src/routes/DefaultRedirect.jsx, dynamic import will not move module into another chunk.
+[39m
+[1m[33m[plugin:vite:reporter][39m[22m [33m[plugin vite:reporter] 
+(!) F:/dk-training-octobot/packages/ui/src/views/datasets/index.jsx is dynamically imported by F:/dk-training-octobot/packages/ui/src/routes/MainRoutes.jsx but also statically imported by F:/dk-training-octobot/packages/ui/src/routes/DefaultRedirect.jsx, dynamic import will not move module into another chunk.
+[39m
+[1m[33m[plugin:vite:reporter][39m[22m [33m[plugin vite:reporter] 
+(!) F:/dk-training-octobot/packages/ui/src/views/docstore/index.jsx is dynamically imported by F:/dk-training-octobot/packages/ui/src/routes/MainRoutes.jsx but also statically imported by F:/dk-training-octobot/packages/ui/src/routes/DefaultRedirect.jsx, dynamic import will not move module into another chunk.
+[39m
+[1m[33m[plugin:vite:reporter][39m[22m [33m[plugin vite:reporter] 
+(!) F:/dk-training-octobot/packages/ui/src/views/evaluations/index.jsx is dynamically imported by F:/dk-training-octobot/packages/ui/src/routes/MainRoutes.jsx but also statically imported by F:/dk-training-octobot/packages/ui/src/routes/DefaultRedirect.jsx, dynamic import will not move module into another chunk.
+[39m
+[1m[33m[plugin:vite:reporter][39m[22m [33m[plugin vite:reporter] 
+(!) F:/dk-training-octobot/packages/ui/src/views/evaluators/index.jsx is dynamically imported by F:/dk-training-octobot/packages/ui/src/routes/MainRoutes.jsx but also statically imported by F:/dk-training-octobot/packages/ui/src/routes/DefaultRedirect.jsx, dynamic import will not move module into another chunk.
+[39m
+[1m[33m[plugin:vite:reporter][39m[22m [33m[plugin vite:reporter] 
+(!) F:/dk-training-octobot/packages/ui/src/views/marketplaces/index.jsx is dynamically imported by F:/dk-training-octobot/packages/ui/src/routes/MainRoutes.jsx but also statically imported by F:/dk-training-octobot/packages/ui/src/routes/DefaultRedirect.jsx, dynamic import will not move module into another chunk.
+[39m
+[1m[33m[plugin:vite:reporter][39m[22m [33m[plugin vite:reporter] 
+(!) F:/dk-training-octobot/packages/ui/src/views/roles/index.jsx is dynamically imported by F:/dk-training-octobot/packages/ui/src/routes/MainRoutes.jsx but also statically imported by F:/dk-training-octobot/packages/ui/src/routes/DefaultRedirect.jsx, dynamic import will not move module into another chunk.
+[39m
+[1m[33m[plugin:vite:reporter][39m[22m [33m[plugin vite:reporter] 
+(!) F:/dk-training-octobot/packages/ui/src/views/serverlogs/index.jsx is dynamically imported by F:/dk-training-octobot/packages/ui/src/routes/MainRoutes.jsx but also statically imported by F:/dk-training-octobot/packages/ui/src/routes/DefaultRedirect.jsx, dynamic import will not move module into another chunk.
+[39m
+[1m[33m[plugin:vite:reporter][39m[22m [33m[plugin vite:reporter] 
+(!) F:/dk-training-octobot/packages/ui/src/views/tools/index.jsx is dynamically imported by F:/dk-training-octobot/packages/ui/src/routes/MainRoutes.jsx but also statically imported by F:/dk-training-octobot/packages/ui/src/routes/DefaultRedirect.jsx, dynamic import will not move module into another chunk.
+[39m
+[1m[33m[plugin:vite:reporter][39m[22m [33m[plugin vite:reporter] 
+(!) F:/dk-training-octobot/packages/ui/src/views/users/index.jsx is dynamically imported by F:/dk-training-octobot/packages/ui/src/routes/MainRoutes.jsx but also statically imported by F:/dk-training-octobot/packages/ui/src/routes/DefaultRedirect.jsx, dynamic import will not move module into another chunk.
+[39m
+[1m[33m[plugin:vite:reporter][39m[22m [33m[plugin vite:reporter] 
+(!) F:/dk-training-octobot/packages/ui/src/views/variables/index.jsx is dynamically imported by F:/dk-training-octobot/packages/ui/src/routes/MainRoutes.jsx but also statically imported by F:/dk-training-octobot/packages/ui/src/routes/DefaultRedirect.jsx, dynamic import will not move module into another chunk.
+[39m
+[1m[33m[plugin:vite:reporter][39m[22m [33m[plugin vite:reporter] 
+(!) F:/dk-training-octobot/packages/ui/src/views/workspace/index.jsx is dynamically imported by F:/dk-training-octobot/packages/ui/src/routes/MainRoutes.jsx but also statically imported by F:/dk-training-octobot/packages/ui/src/routes/DefaultRedirect.jsx, dynamic import will not move module into another chunk.
+[39m
+computing gzip size...
+[2mbuild/[22m[32mindex.html                                          [39m[1m[2m    3.07 kB[22m[1m[22m[2m │ gzip:     1.04 kB[22m
+[2mbuild/[22m[32massets/agents_empty-CPmzgTXa.svg                    [39m[1m[2m    4.37 kB[22m[1m[22m[2m │ gzip:     1.25 kB[22m
+[2mbuild/[22m[32massets/upsert_history_empty-5Jk5WmmS.svg            [39m[1m[2m    5.14 kB[22m[1m[22m[2m │ gzip:     1.18 kB[22m
+[2mbuild/[22m[32massets/assistant_empty-CRwKWkBA.svg                 [39m[1m[2m    6.52 kB[22m[1m[22m[2m │ gzip:     1.96 kB[22m
+[2mbuild/[22m[32massets/empty_evals-ClL3epFs.svg                     [39m[1m[2m    6.78 kB[22m[1m[22m[2m │ gzip:     2.05 kB[22m
+[2mbuild/[22m[32massets/tools_empty-ini-pB8C.svg                     [39m[1m[2m    8.04 kB[22m[1m[22m[2m │ gzip:     2.51 kB[22m
+[2mbuild/[22m[32massets/api_empty-CBGH5wg8.svg                       [39m[1m[2m    8.49 kB[22m[1m[22m[2m │ gzip:     1.90 kB[22m
+[2mbuild/[22m[32massets/assemblyai-DgONwkn3.png                      [39m[1m[2m    8.68 kB[22m[1m[22m
+[2mbuild/[22m[32massets/floppy-disc-BFpYbhCA.png                     [39m[1m[2m    9.32 kB[22m[1m[22m
+[2mbuild/[22m[32massets/credential_empty-BUL4Jfyn.svg                [39m[1m[2m    9.37 kB[22m[1m[22m[2m │ gzip:     3.09 kB[22m
+[2mbuild/[22m[32massets/doc_store_details_empty-B8g8M--k.svg         [39m[1m[2m    9.62 kB[22m[1m[22m[2m │ gzip:     2.71 kB[22m
+[2mbuild/[22m[32massets/users_empty-GRLclS2m.svg                     [39m[1m[2m   10.40 kB[22m[1m[22m[2m │ gzip:     3.23 kB[22m
+[2mbuild/[22m[32massets/opik-DYZPxuPm.png                            [39m[1m[2m   10.43 kB[22m[1m[22m
+[2mbuild/[22m[32massets/validate_empty-BoEkQrnY.svg                  [39m[1m[2m   10.56 kB[22m[1m[22m[2m │ gzip:     3.88 kB[22m
+[2mbuild/[22m[32massets/logs_empty-BSF3_JNE.svg                      [39m[1m[2m   10.57 kB[22m[1m[22m[2m │ gzip:     1.89 kB[22m
+[2mbuild/[22m[32massets/workspaces_empty-Bc1rx9Ju.svg                [39m[1m[2m   11.33 kB[22m[1m[22m[2m │ gzip:     4.02 kB[22m
+[2mbuild/[22m[32massets/executions_empty-DFi9-LFe.svg                [39m[1m[2m   11.38 kB[22m[1m[22m[2m │ gzip:     4.08 kB[22m
+[2mbuild/[22m[32massets/empty_evaluators-Cz_ZUs52.svg                [39m[1m[2m   11.87 kB[22m[1m[22m[2m │ gzip:     3.78 kB[22m
+[2mbuild/[22m[32massets/chathistory-iygi9HAP.png                     [39m[1m[2m   12.07 kB[22m[1m[22m
+[2mbuild/[22m[32massets/message_empty-HEctTnHi.svg                   [39m[1m[2m   12.18 kB[22m[1m[22m[2m │ gzip:     3.23 kB[22m
+[2mbuild/[22m[32massets/variables_empty-BRQPFrO4.svg                 [39m[1m[2m   13.10 kB[22m[1m[22m[2m │ gzip:     1.89 kB[22m
+[2mbuild/[22m[32massets/workflow_empty-gAL4jnMx.svg                  [39m[1m[2m   13.62 kB[22m[1m[22m[2m │ gzip:     4.67 kB[22m
+[2mbuild/[22m[32massets/unauthorized-Ct4fbME0.svg                    [39m[1m[2m   13.75 kB[22m[1m[22m[2m │ gzip:     5.12 kB[22m
+[2mbuild/[22m[32massets/fileAttachment-z5hzHcu7.png                  [39m[1m[2m   14.88 kB[22m[1m[22m
+[2mbuild/[22m[32massets/roles_empty-C_7bj2dC.svg                     [39m[1m[2m   14.98 kB[22m[1m[22m[2m │ gzip:     4.87 kB[22m
+[2mbuild/[22m[32massets/robot-CdlpHV-J.png                           [39m[1m[2m   16.38 kB[22m[1m[22m
+[2mbuild/[22m[32massets/leads_empty-DV9pr4E0.svg                     [39m[1m[2m   16.64 kB[22m[1m[22m[2m │ gzip:     5.75 kB[22m
+[2mbuild/[22m[32massets/ollama-Dnul-kjt.svg                          [39m[1m[2m   17.07 kB[22m[1m[22m[2m │ gzip:    12.77 kB[22m
+[2mbuild/[22m[32massets/sharing-BpM8IeH_.png                         [39m[1m[2m   17.47 kB[22m[1m[22m
+[2mbuild/[22m[32massets/account-3i3qpYzs.png                         [39m[1m[2m   20.19 kB[22m[1m[22m
+[2mbuild/[22m[32massets/doc_store_empty-B0My5Ox8.svg                 [39m[1m[2m   20.77 kB[22m[1m[22m[2m │ gzip:     7.19 kB[22m
+[2mbuild/[22m[32massets/empty_datasets-D6xaDC_f.svg                  [39m[1m[2m   21.49 kB[22m[1m[22m[2m │ gzip:     7.39 kB[22m
+[2mbuild/[22m[32massets/multiagent_supervisor-DRplYk4M.png           [39m[1m[2m   23.61 kB[22m[1m[22m
+[2mbuild/[22m[32massets/utilNodes-9P4ffRXr.png                       [39m[1m[2m   27.22 kB[22m[1m[22m
+[2mbuild/[22m[32massets/multiagent_worker-BbAoALGS.png               [39m[1m[2m   27.54 kB[22m[1m[22m
+[2mbuild/[22m[32massets/llamaindex-BslAfh-5.png                      [39m[1m[2m   28.34 kB[22m[1m[22m
+[2mbuild/[22m[32massets/next-agent--RPptFkm.gif                      [39m[1m[2m   29.01 kB[22m[1m[22m
+[2mbuild/[22m[32massets/arize-OBA_Rgn_.png                           [39m[1m[2m   36.28 kB[22m[1m[22m
+[2mbuild/[22m[32massets/agentflow-generator-DGaU2pb2.gif             [39m[1m[2m   37.67 kB[22m[1m[22m
+[2mbuild/[22m[32massets/langchain-Dn03YjE7.png                       [39m[1m[2m   58.91 kB[22m[1m[22m
+[2mbuild/[22m[32massets/DK_OctoBot-CzqZVtdM.png                      [39m[1m[2m   86.73 kB[22m[1m[22m
+[2mbuild/[22m[32massets/gemini-skjjNaqi.png                          [39m[1m[2m  114.28 kB[22m[1m[22m
+[2mbuild/[22m[32massets/localai-Gr-WJuJK.png                         [39m[1m[2m  144.09 kB[22m[1m[22m
+[2mbuild/[22m[32massets/wave-sound-CdNNyn1h.jpg                      [39m[1m[2m  330.69 kB[22m[1m[22m
+[2mbuild/[22m[32massets/Exporting-B5jHKP3Z.gif                       [39m[1m[2m  817.75 kB[22m[1m[22m
+[2mbuild/[22m[35massets/index-DrgjEvWh.css                           [39m[1m[2m    1.59 kB[22m[1m[22m[2m │ gzip:     0.50 kB[22m
+[2mbuild/[22m[35massets/Canvas-CZvDgTBI.css                          [39m[1m[2m    1.69 kB[22m[1m[22m[2m │ gzip:     0.55 kB[22m
+[2mbuild/[22m[35massets/index-CVL8qD-V.css                           [39m[1m[2m    2.66 kB[22m[1m[22m[2m │ gzip:     0.88 kB[22m
+[2mbuild/[22m[35massets/usePrompt-Cymkdurf.css                       [39m[1m[2m    3.39 kB[22m[1m[22m[2m │ gzip:     0.78 kB[22m
+[2mbuild/[22m[35massets/style-DI6oCUg0.css                           [39m[1m[2m    7.26 kB[22m[1m[22m[2m │ gzip:     1.58 kB[22m
+[2mbuild/[22m[35massets/index-6CNmB-Gv.css                           [39m[1m[2m   32.34 kB[22m[1m[22m[2m │ gzip:     5.58 kB[22m
+[2mbuild/[22m[36massets/llamaindex-B_JSDULd.js                       [39m[1m[2m    0.06 kB[22m[1m[22m[2m │ gzip:     0.08 kB[22m
+[2mbuild/[22m[36massets/assistant_empty-BAOmXGQM.js                  [39m[1m[2m    0.06 kB[22m[1m[22m[2m │ gzip:     0.08 kB[22m
+[2mbuild/[22m[36massets/sso-CuqpbKbl.js                              [39m[1m[2m    0.10 kB[22m[1m[22m[2m │ gzip:     0.12 kB[22m
+[2mbuild/[22m[36massets/config-K7imy16i.js                           [39m[1m[2m    0.15 kB[22m[1m[22m[2m │ gzip:     0.15 kB[22m
+[2mbuild/[22m[36massets/ExpandMore-ERDDhMQt.js                       [39m[1m[2m    0.28 kB[22m[1m[22m[2m │ gzip:     0.24 kB[22m
+[2mbuild/[22m[36massets/DynamicFeed-KQChsysL.js                      [39m[1m[2m    0.43 kB[22m[1m[22m[2m │ gzip:     0.31 kB[22m
+[2mbuild/[22m[36massets/brightscript-DpTB6Lba.js                     [39m[1m[2m    0.46 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/d-mh0BjVaf.js                                [39m[1m[2m    0.46 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/dart-DBEqGRUl.js                             [39m[1m[2m    0.46 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/dataweave-BLmQ41Wg.js                        [39m[1m[2m    0.46 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/dax-Ck5DbvDe.js                              [39m[1m[2m    0.46 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/diff-Bo0BrdNo.js                             [39m[1m[2m    0.46 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/docker-Ckv1JHJv.js                           [39m[1m[2m    0.46 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/dot-4e526ER8.js                              [39m[1m[2m    0.46 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/markup-templating-C4Vn614V.js                [39m[1m[2m    0.46 kB[22m[1m[22m[2m │ gzip:     0.33 kB[22m
+[2mbuild/[22m[36massets/abap-DePsMZnc.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/abnf-Di5N4Io9.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/actionscript-DJtizhuI.js                     [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/ada-CGzoDfes.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/agda-CemoT2d_.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/al-DPsgWttV.js                               [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/antlr4-CZpNgYsn.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/apacheconf-BAbwmNQF.js                       [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/apex-DV78UfpQ.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/apl-2SGNzOVH.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/applescript-BcE59_Uz.js                      [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/aql-CXfBHWFH.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/arduino-GyDdXREz.js                          [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/arff-BH0omg5d.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/asciidoc-D8EY1cTL.js                         [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/asm6502-BnK5rU4R.js                          [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/asmatmel-Bc3nOFxq.js                         [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/aspnet-CMdorCRC.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/autohotkey-DR3ehgF2.js                       [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/autoit-j07UZP8-.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/avisynth-CP4IYOuN.js                         [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/avro-idl-LSo4mQOu.js                         [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/bash-cSbJSHv4.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/basic-hqSfqUES.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/batch-7Xjprja0.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/bbcode-Cv-ycdYK.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/bicep-qD2pi_R3.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/birb-CylWBmZN.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/bison-XJssyV2h.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/bnf-D832HUOu.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/brainfuck-2d2XQlfE.js                        [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/bro-DObS_j5n.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/bsl-C-wSeyhB.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/c-C1E1TnM_.js                                [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/cfscript-gPcT1MR9.js                         [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/chaiscript-BdzbSPZA.js                       [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/cil-BM_AQKpN.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/clojure-HCyIe5hs.js                          [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/cmake-BrYgscCC.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/cobol-B15hO3sb.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/coffeescript-CoqnqHD4.js                     [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/concurnas-Cy9OFKex.js                        [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/coq-HqIerACn.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/cpp-C3jNFk-x.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/crystal-DPuihUko.js                          [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/csharp-DGH-bsWy.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/cshtml-zi9O8Xrx.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/csp-DmxsSqgE.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/css-extras-BTKmiMRj.js                       [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/csv-UfE53QW_.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/cypher-Y7Fs6cnR.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/dhall-B4V4oPeM.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/django-B3Uu4Zeu.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/dns-zone-file-BBj1bVS3.js                    [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/ebnf-CW3O_PNF.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/editorconfig-DVmrPXFG.js                     [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/eiffel-Bnk4wY9m.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/ejs-nhkyCnQk.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/elixir-EMwJj0VR.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/elm-B2ouRTfM.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/erb-DaI4d9ky.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/erlang-C_7ErSvy.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/etlua-D1aNctW-.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/excel-formula-BjSVc7jf.js                    [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/factor-DfS2P69e.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/false-BwtcfAmo.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/firestore-security-rules-C9bj3JBS.js         [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/flow-BAJYNLUw.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/fortran-CvYdvQoy.js                          [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/fsharp-IijuGJyh.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/ftl-Bw7C3Kmu.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/gap-D8UDq58j.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/gcode-CRW1JsKB.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/gdscript-BFq0v05I.js                         [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/gedcom-CYJc5Kba.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/gherkin-CUBLeck4.js                          [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/git-9hj09XB1.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/glsl-Dn2HQZQk.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/gml-Hczlxhri.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/gn-BDaqZ2HN.js                               [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/go-module-BFNRphZI.js                        [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/go-DBUJZlZp.js                               [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/graphql-KK-GwaqJ.js                          [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/groovy-B95MPYFO.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/haml-Bt74D7hF.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/handlebars-F9OHsojr.js                       [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/haskell-Bq29HVmr.js                          [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/haxe-Cr2eTbpl.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/hcl-zfjXXvak.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/hlsl-DIH2JUN_.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/hoon-DXAp0Tdb.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/hpkp-BFuSh0Fn.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/hsts-Dbu2FwuW.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/http-DpioOBLE.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/ichigojam-D5Wu6rII.js                        [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/icon-CaE5VKlr.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/icu-message-format-DMajFBxE.js               [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/idris-CkONCj2Y.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/iecst-7joJNk8f.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/ignore-CdIQ8vMH.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/inform7-DsQsuISd.js                          [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/ini-Td3TokKG.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/io-CmB5HbWg.js                               [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/j-DtsyDZhD.js                                [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/java-C5sOnG40.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/javadoc-Kh8RhstQ.js                          [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/javadoclike-DkEpHhCE.js                      [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/javastacktrace-KY1cFI4O.js                   [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/jexl-BQPhbLOn.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/jolie-C9hON4dR.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/jq-DH_Bmc3o.js                               [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/js-extras-BA9EeTaP.js                        [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/js-templates-BeNl4jv2.js                     [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/jsdoc-KjsC_zMO.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/json-Ck9BfrFt.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/json5-BMdPRAt1.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/jsonp-CV5ZQnr_.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/jsstacktrace-D-qBTSRA.js                     [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/jsx-RZdqkT5X.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/julia-D9F5H9UA.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/keepalived-BTeHhA3T.js                       [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/keyman-CbpP1lIx.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/kotlin-B2me67jd.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/kumir-BUsQ5XIj.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/kusto-BqqC-nc0.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/latex-aHihs2kD.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.33 kB[22m
+[2mbuild/[22m[36massets/latte-BhdSBKkN.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.33 kB[22m
+[2mbuild/[22m[36massets/less-Bp86xYUj.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/lilypond-BzEvwwx2.js                         [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/liquid-D15TJrGw.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/lisp-D7tGy4_C.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/livescript-Bg6JSucl.js                       [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/llvm-YegmXvC8.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/log-D1umN1iy.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/lolcode-Edik1pqw.js                          [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/lua-CyfClqe5.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/magma-CSy3rcaX.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/makefile-ijlKVL5q.js                         [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/markdown-BBpEN0RB.js                         [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/matlab-BONWlegT.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/maxscript-gd5cgtQr.js                        [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/mel-G6m24zzc.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/mermaid-3VL7rvvK.js                          [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/mizar-BjNpiSL2.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/mongodb-D_WGJRbS.js                          [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/monkey-DryIhFxX.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/moonscript-DPURAT5g.js                       [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/n1ql-Bhq6R-JK.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/n4js-BcV_LWSg.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/nand2tetris-hdl-CzN4JXs3.js                  [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/naniscript-E8scdT8h.js                       [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/nasm-DnNw4JFk.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/neon-Z_mI7RHY.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/nevod-ByfDrdYm.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/nginx-YBmm_A_i.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/nim-CIutTdW7.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/nix-C0vXdCPV.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/nsis-D7GRWCdW.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/objectivec-oaR33CEa.js                       [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/ocaml-BF_7KfWb.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/opencl-DpDQZPDv.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/openqasm-CpBtdh-o.js                         [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/oz-DSZ7cXp7.js                               [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/parigp-fdGAUFMF.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/parser-C5Fexm6C.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/pascal-CwpVCp9W.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/pascaligo-CEMXbDNI.js                        [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/pcaxis-CE80C77l.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/peoplecode-Bjhv_Eg6.js                       [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/perl-DW-osMcB.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/php-extras-DDxv4ZkF.js                       [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/php-Cw6DlXSQ.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/phpdoc-DdRJOpFA.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/plsql-CRhMyx3F.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/powerquery-DW1WgZk6.js                       [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/powershell-DOfLwtIq.js                       [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/processing-CRUDsAiw.js                       [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/prolog-DkQA_feP.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/promql-Lt3LQ8FC.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/properties-BKKTmrZk.js                       [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/protobuf-rsZuqNtD.js                         [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/psl-qWNX_TJX.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/pug-BMvfaINd.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/puppet-CoD2KuZf.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/pure-Ds0txlY5.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/purebasic-DHi-OdIF.js                        [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/purescript-DiH3sJpI.js                       [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/python-CVdk9BQN.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/q-BnJYh8Uj.js                                [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/qml-CevBjpTK.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/qore-gTzQBjf3.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/qsharp-BmL6xHpq.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/r-CzTT-j8M.js                                [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/racket-C_R9rL15.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/reason-D3fwnvv6.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/regex-tKkHBxlX.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/rego-BGjkO1gj.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/renpy-DJIIBTE-.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/rest-BTkexxnh.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/rip-DDA3jYIq.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/roboconf-DT5t23Ig.js                         [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/robotframework-CNEEg5Vh.js                   [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/ruby-W5OX8E9d.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/rust-BG3D3KBv.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/sas-B2Xl_UfN.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/sass-C5JRma7h.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/scala-D24aE-Ty.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/scheme-De5BaO_7.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/scss-B2v_ItqN.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/shell-session-znryWlh3.js                    [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/smali-CBAViMmf.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/smalltalk-tYHdGfY7.js                        [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/smarty-C0UPHQSW.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/sml-DdqSgp4p.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/solidity-Dk2_NoCf.js                         [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/solution-file-CZvc1-Cn.js                    [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/soy-ow9EoQEX.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/sparql-DFH6Bn6_.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/splunk-spl-BSCARS43.js                       [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/sqf-BnQYl-Ry.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/sql-Bx2Vf2Nt.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/squirrel-DApfibwb.js                         [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/stan-PWbBNqUQ.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/stylus-C0kD1Oaa.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/swift-B-pcgWLL.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/systemd-B7ZQpwvh.js                          [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/t4-cs-D1kxiBMf.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/t4-templating-DkRqI8Y9.js                    [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/t4-vb-CFz7pANL.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/tap-CZTuflqt.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/tcl-D0d9TG89.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/textile-CsUZT7R9.js                          [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/toml-DogqO3VY.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/tremor-Wn3ieaZK.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/tsx-B0UZ6gMR.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/tt2-GghVDepF.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/turtle-BotvgIIe.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/twig-DRcgqGkd.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/typescript-CKkRpmo8.js                       [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/typoscript-CnKMT3M_.js                       [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/unrealscript-FL8Mf7Jh.js                     [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/uorazor-D7FSxtN6.js                          [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/uri-CaFjzZoM.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/v-CReEaoiZ.js                                [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/vala-BlaXDNOp.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/vbnet-CQR1k6TZ.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/velocity-DJ_XxaG4.js                         [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/verilog-Cz8bM45e.js                          [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/vhdl-BQSPAj8J.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/vim-N4hdXsto.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/visual-basic-CSUSzLQO.js                     [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/warpscript-ZoqFCpvy.js                       [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/wasm-DOnCl73G.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/web-idl-lf--uDpA.js                          [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/wiki-Dy4NH750.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/wolfram-Cg2WCXIJ.js                          [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/wren-DksZC_Xi.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/xeora-DyzLW-bY.js                            [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/xml-doc-5cIA5LyJ.js                          [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/xojo-BQg3ybxv.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/xquery-Bc4Zdmvd.js                           [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/yaml-7FkcMRbv.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/yang-DOxeT8R9.js                             [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/zig-Chp6MEzL.js                              [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.34 kB[22m
+[2mbuild/[22m[36massets/ssoSuccess-BEAdO7ap.js                       [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.32 kB[22m
+[2mbuild/[22m[36massets/vectorstore-CYGYHsaZ.js                      [39m[1m[2m    0.47 kB[22m[1m[22m[2m │ gzip:     0.31 kB[22m
+[2mbuild/[22m[36massets/IconDeviceFloppy-BzKYv2c8.js                 [39m[1m[2m    0.50 kB[22m[1m[22m[2m │ gzip:     0.33 kB[22m
+[2mbuild/[22m[36massets/IconDatabaseImport-BAKxMzQ1.js               [39m[1m[2m    0.66 kB[22m[1m[22m[2m │ gzip:     0.39 kB[22m
+[2mbuild/[22m[36massets/StatsCard-Sl18RZzA.js                        [39m[1m[2m    0.67 kB[22m[1m[22m[2m │ gzip:     0.42 kB[22m
+[2mbuild/[22m[36massets/v4-CtRu48qb.js                               [39m[1m[2m    0.81 kB[22m[1m[22m[2m │ gzip:     0.43 kB[22m
+[2mbuild/[22m[36massets/rateLimited-Cr-bmp84.js                      [39m[1m[2m    0.97 kB[22m[1m[22m[2m │ gzip:     0.56 kB[22m
+[2mbuild/[22m[36massets/MarketplaceCanvasHeader-BPmQ3Dgi.js          [39m[1m[2m    1.11 kB[22m[1m[22m[2m │ gzip:     0.59 kB[22m
+[2mbuild/[22m[36massets/verify-email-BRI8KpU2.js                     [39m[1m[2m    1.48 kB[22m[1m[22m[2m │ gzip:     0.63 kB[22m
+[2mbuild/[22m[36massets/PublicExecutionDetails-D34PsLoF.js           [39m[1m[2m    1.56 kB[22m[1m[22m[2m │ gzip:     0.78 kB[22m
+[2mbuild/[22m[36massets/Table-x5pYZVf1.js                            [39m[1m[2m    1.64 kB[22m[1m[22m[2m │ gzip:     0.91 kB[22m
+[2mbuild/[22m[36massets/Icon-DOjWexPg.js                             [39m[1m[2m    1.72 kB[22m[1m[22m[2m │ gzip:     0.83 kB[22m
+[2mbuild/[22m[36massets/index-D_TaSXIj.js                            [39m[1m[2m    1.83 kB[22m[1m[22m[2m │ gzip:     0.97 kB[22m
+[2mbuild/[22m[36massets/forgotPassword-CtztlooZ.js                   [39m[1m[2m    2.49 kB[22m[1m[22m[2m │ gzip:     1.18 kB[22m
+[2mbuild/[22m[36massets/MarketplaceCanvas-BDHUEevm.js                [39m[1m[2m    2.60 kB[22m[1m[22m[2m │ gzip:     1.35 kB[22m
+[2mbuild/[22m[36massets/UpsertResultDialog-B9TJarYc.js               [39m[1m[2m    2.81 kB[22m[1m[22m[2m │ gzip:     1.40 kB[22m
+[2mbuild/[22m[36massets/chunks_empty-fFmvGjOz.js                     [39m[1m[2m    2.90 kB[22m[1m[22m[2m │ gzip:     1.07 kB[22m
+[2mbuild/[22m[36massets/NodeInfoDialog-B5aMDyDs.js                   [39m[1m[2m    4.10 kB[22m[1m[22m[2m │ gzip:     1.61 kB[22m
+[2mbuild/[22m[36massets/expired-BXt3GQoZ.js                          [39m[1m[2m    4.17 kB[22m[1m[22m[2m │ gzip:     1.77 kB[22m
+[2mbuild/[22m[36massets/ExpandedChunkDialog-BgUEUtSQ.js              [39m[1m[2m    4.21 kB[22m[1m[22m[2m │ gzip:     1.71 kB[22m
+[2mbuild/[22m[36massets/resetPassword-BBpAJ9H7.js                    [39m[1m[2m    4.40 kB[22m[1m[22m[2m │ gzip:     1.68 kB[22m
+[2mbuild/[22m[36massets/CustomAssistantLayout-Dvuc83-u.js            [39m[1m[2m    4.46 kB[22m[1m[22m[2m │ gzip:     1.97 kB[22m
+[2mbuild/[22m[36massets/index-Yu2VbLKl.js                            [39m[1m[2m    4.47 kB[22m[1m[22m[2m │ gzip:     1.82 kB[22m
+[2mbuild/[22m[36massets/OpenAIAssistantLayout-B6wFa2uc.js            [39m[1m[2m    4.50 kB[22m[1m[22m[2m │ gzip:     1.88 kB[22m
+[2mbuild/[22m[36massets/MarketplaceCanvas-D46MVZu1.js                [39m[1m[2m    4.91 kB[22m[1m[22m[2m │ gzip:     2.12 kB[22m
+[2mbuild/[22m[36massets/IconExclamationCircle-C1J3Iyb2.js            [39m[1m[2m    4.95 kB[22m[1m[22m[2m │ gzip:     2.12 kB[22m
+[2mbuild/[22m[36massets/signIn-C8qY8XtC.js                           [39m[1m[2m    5.48 kB[22m[1m[22m[2m │ gzip:     1.97 kB[22m
+[2mbuild/[22m[36massets/ShowStoredChunks-BKvM1dxy.js                 [39m[1m[2m    6.43 kB[22m[1m[22m[2m │ gzip:     2.58 kB[22m
+[2mbuild/[22m[36massets/style-BSyfH4PB.js                            [39m[1m[2m    7.51 kB[22m[1m[22m[2m │ gzip:     2.67 kB[22m
+[2mbuild/[22m[36massets/StickyNote-C3kqRBsD.js                       [39m[1m[2m    7.55 kB[22m[1m[22m[2m │ gzip:     2.42 kB[22m
+[2mbuild/[22m[36massets/register-JeJwuP8g.js                         [39m[1m[2m    8.10 kB[22m[1m[22m[2m │ gzip:     2.69 kB[22m
+[2mbuild/[22m[36massets/VectorStoreQuery-B4rEg_MS.js                 [39m[1m[2m    8.15 kB[22m[1m[22m[2m │ gzip:     3.40 kB[22m
+[2mbuild/[22m[36massets/index-C3V3C_P1.js                            [39m[1m[2m    8.25 kB[22m[1m[22m[2m │ gzip:     2.68 kB[22m
+[2mbuild/[22m[36massets/string-BbYD24iH.js                           [39m[1m[2m    8.38 kB[22m[1m[22m[2m │ gzip:     3.58 kB[22m
+[2mbuild/[22m[36massets/LoaderConfigPreviewChunks-Bd1C7zJh.js        [39m[1m[2m   10.98 kB[22m[1m[22m[2m │ gzip:     4.04 kB[22m
+[2mbuild/[22m[36massets/WorkspaceUsers-CIT0wba8.js                   [39m[1m[2m   11.46 kB[22m[1m[22m[2m │ gzip:     4.18 kB[22m
+[2mbuild/[22m[36massets/DatasetItems-C1JRAcHG.js                     [39m[1m[2m   13.68 kB[22m[1m[22m[2m │ gzip:     4.22 kB[22m
+[2mbuild/[22m[36massets/TimelineSeparator-Dq2WRzjt.js                [39m[1m[2m   14.00 kB[22m[1m[22m[2m │ gzip:     4.76 kB[22m
+[2mbuild/[22m[36massets/_baseAssignValue-DwHn2wQA.js                 [39m[1m[2m   18.45 kB[22m[1m[22m[2m │ gzip:     7.56 kB[22m
+[2mbuild/[22m[36massets/VectorStoreConfigure-CAzYKkeP.js             [39m[1m[2m   22.05 kB[22m[1m[22m[2m │ gzip:     6.61 kB[22m
+[2mbuild/[22m[36massets/AssistantDialog-CEZ_9SYa.js                  [39m[1m[2m   24.94 kB[22m[1m[22m[2m │ gzip:     5.91 kB[22m
+[2mbuild/[22m[36massets/index-DtUPaipz.js                            [39m[1m[2m   25.98 kB[22m[1m[22m[2m │ gzip:     9.22 kB[22m
+[2mbuild/[22m[36massets/CustomAssistantConfigurePreview-GZUKadG6.js  [39m[1m[2m   27.53 kB[22m[1m[22m[2m │ gzip:     8.20 kB[22m
+[2mbuild/[22m[36massets/Canvas-C5RX5bVu.js                           [39m[1m[2m   30.13 kB[22m[1m[22m[2m │ gzip:    12.02 kB[22m
+[2mbuild/[22m[36massets/DocumentStoreDetail-CgNvw6ID.js              [39m[1m[2m   33.89 kB[22m[1m[22m[2m │ gzip:    10.08 kB[22m
+[2mbuild/[22m[36massets/EditNodeDialog-K9fKQBWr.js                   [39m[1m[2m   33.99 kB[22m[1m[22m[2m │ gzip:     9.70 kB[22m
+[2mbuild/[22m[36massets/usePrompt-DetjsDyp.js                        [39m[1m[2m  102.01 kB[22m[1m[22m[2m │ gzip:    31.37 kB[22m
+[2mbuild/[22m[36massets/index-DtDQF3i_.js                            [39m[1m[2m  366.85 kB[22m[1m[22m[2m │ gzip:   107.01 kB[22m
+[2mbuild/[22m[36massets/EvaluationResult-BYeE9sfa.js                 [39m[1m[2m  409.78 kB[22m[1m[22m[2m │ gzip:   106.01 kB[22m
+[2mbuild/[22m[36massets/DocStoreInputHandler-DqqUT9Lu.js             [39m[1m[33m  507.67 kB[39m[22m[2m │ gzip:   158.34 kB[22m
+[2mbuild/[22m[36massets/index-DftLLTxj.js                            [39m[1m[33m1,017.72 kB[39m[22m[2m │ gzip:   268.47 kB[22m
+[2mbuild/[22m[36massets/index-BxPKwKdL.js                            [39m[1m[33m5,678.83 kB[39m[22m[2m │ gzip: 1,829.03 kB[22m
+[33m
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[32m✓ built in 51.69s[39m

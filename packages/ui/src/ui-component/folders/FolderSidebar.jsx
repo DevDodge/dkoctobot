@@ -25,7 +25,7 @@ import FolderDialog from '@/ui-component/dialog/FolderDialog'
 import ConfirmDialog from '@/ui-component/dialog/ConfirmDialog'
 import useConfirm from '@/hooks/useConfirm'
 
-const FolderSidebar = ({ selectedFolder, onFolderSelect, onFoldersChange, onChatflowMoved }) => {
+const FolderSidebar = ({ selectedFolder, onFolderSelect, onFoldersChange, onChatflowMoved, refreshSignal }) => {
     const theme = useTheme()
     const customization = useSelector((state) => state.customization)
     const { confirm } = useConfirm()
@@ -57,6 +57,11 @@ const FolderSidebar = ({ selectedFolder, onFolderSelect, onFoldersChange, onChat
             if (onFoldersChange) onFoldersChange(getAllFoldersApi.data)
         }
     }, [getAllFoldersApi.data, onFoldersChange])
+
+    useEffect(() => {
+        loadFolderCounts()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [refreshSignal])
 
     // Load count of chatflows in each folder
     const loadFolderCounts = async () => {
@@ -247,13 +252,8 @@ const FolderSidebar = ({ selectedFolder, onFolderSelect, onFoldersChange, onChat
                     <ListItemIcon sx={{ minWidth: 28 }}>
                         <IconFolders size={18} />
                     </ListItemIcon>
-                    <ListItemText
-                        primary='All'
-                        primaryTypographyProps={{ variant: 'body2', noWrap: true }}
-                    />
-                    {folderCounts.all > 0 && (
-                        <Chip label={folderCounts.all} size='small' sx={{ height: 20, fontSize: '0.7rem' }} />
-                    )}
+                    <ListItemText primary='All' primaryTypographyProps={{ variant: 'body2', noWrap: true }} />
+                    {folderCounts.all > 0 && <Chip label={folderCounts.all} size='small' sx={{ height: 20, fontSize: '0.7rem' }} />}
                 </ListItemButton>
 
                 {/* Uncategorized - droppable */}
@@ -268,10 +268,7 @@ const FolderSidebar = ({ selectedFolder, onFolderSelect, onFoldersChange, onChat
                     <ListItemIcon sx={{ minWidth: 28 }}>
                         <IconInbox size={18} />
                     </ListItemIcon>
-                    <ListItemText
-                        primary='Uncategorized'
-                        primaryTypographyProps={{ variant: 'body2', noWrap: true }}
-                    />
+                    <ListItemText primary='Uncategorized' primaryTypographyProps={{ variant: 'body2', noWrap: true }} />
                     {folderCounts.uncategorized > 0 && (
                         <Chip label={folderCounts.uncategorized} size='small' sx={{ height: 20, fontSize: '0.7rem' }} />
                     )}
@@ -296,14 +293,24 @@ const FolderSidebar = ({ selectedFolder, onFolderSelect, onFoldersChange, onChat
                         </ListItemIcon>
                         <ListItemText
                             primary={folder.name}
-                            primaryTypographyProps={{ variant: 'body2', noWrap: true }}
+                            primaryTypographyProps={{
+                                variant: 'body2',
+                                style: {
+                                    whiteSpace: 'normal',
+                                    wordBreak: 'break-word',
+                                    lineHeight: 1.2
+                                }
+                            }}
                         />
                         {folderCounts[folder.id] > 0 && (
                             <Chip label={folderCounts[folder.id]} size='small' sx={{ height: 20, fontSize: '0.7rem', mr: 0.5 }} />
                         )}
                         <IconButton
                             size='small'
-                            onClick={(e) => { e.stopPropagation(); handleContextMenu(e, folder) }}
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                handleContextMenu(e, folder)
+                            }}
                             sx={{ opacity: 0.5, '&:hover': { opacity: 1 }, p: 0.25 }}
                         >
                             <IconDotsVertical size={14} />
@@ -347,7 +354,8 @@ FolderSidebar.propTypes = {
     selectedFolder: PropTypes.string,
     onFolderSelect: PropTypes.func.isRequired,
     onFoldersChange: PropTypes.func,
-    onChatflowMoved: PropTypes.func
+    onChatflowMoved: PropTypes.func,
+    refreshSignal: PropTypes.number
 }
 
 export default FolderSidebar

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import PropTypes from 'prop-types'
 
-import { styled, alpha } from '@mui/material/styles'
+import { styled, alpha, useTheme } from '@mui/material/styles'
 import Menu from '@mui/material/Menu'
 import { PermissionMenuItem } from '@/ui-component/button/RBACButtons'
 import EditIcon from '@mui/icons-material/Edit'
@@ -18,7 +18,7 @@ import MicNoneOutlinedIcon from '@mui/icons-material/MicNoneOutlined'
 import ExportTemplateOutlinedIcon from '@mui/icons-material/BookmarksOutlined'
 import Button from '@mui/material/Button'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-import { IconX } from '@tabler/icons-react'
+import { IconX, IconFolder, IconFolderOff } from '@tabler/icons-react'
 
 import chatflowsApi from '@/api/chatflows'
 
@@ -39,7 +39,6 @@ import SpeechToTextDialog from '../dialog/SpeechToTextDialog'
 import ExportAsTemplateDialog from '@/ui-component/dialog/ExportAsTemplateDialog'
 import MoveToFolderDialog from '@/ui-component/dialog/MoveToFolderDialog'
 import chatflowFoldersApi from '@/api/chatflowFolders'
-import FolderIcon from '@mui/icons-material/Folder'
 
 const StyledMenu = styled((props) => (
     <Menu
@@ -77,7 +76,17 @@ const StyledMenu = styled((props) => (
     }
 }))
 
-export default function FlowListMenu({ chatflow, isAgentCanvas, isAgentflowV2, setError, updateFlowsApi, currentPage, pageLimit }) {
+export default function FlowListMenu({
+    chatflow,
+    isAgentCanvas,
+    isAgentflowV2,
+    setError,
+    updateFlowsApi,
+    currentPage,
+    pageLimit,
+    onFlowUpdate
+}) {
+    const theme = useTheme()
     const { confirm } = useConfirm()
     const dispatch = useDispatch()
     const updateChatflowApi = useApi(chatflowsApi.updateChatflow)
@@ -189,10 +198,10 @@ export default function FlowListMenu({ chatflow, isAgentCanvas, isAgentflowV2, s
     const saveMoveToFolder = async (folderId) => {
         setMoveToFolderDialogOpen(false)
         try {
-            // folderId can be null for uncategorized
             const targetFolderId = folderId === 'uncategorized' ? null : folderId
             await chatflowFoldersApi.moveChatflowToFolder(chatflow.id, targetFolderId)
             await refreshFlows()
+            if (onFlowUpdate) onFlowUpdate()
             enqueueSnackbar({
                 message: 'Chatflow moved successfully',
                 options: {
@@ -203,7 +212,10 @@ export default function FlowListMenu({ chatflow, isAgentCanvas, isAgentflowV2, s
             })
         } catch (error) {
             enqueueSnackbar({
-                message: typeof error.response?.data === 'object' ? error.response.data.message : error.response?.data || 'Error moving chatflow',
+                message:
+                    typeof error.response?.data === 'object'
+                        ? error.response.data.message
+                        : error.response?.data || 'Error moving chatflow',
                 options: {
                     key: new Date().getTime() + Math.random(),
                     variant: 'error',
@@ -472,13 +484,15 @@ export default function FlowListMenu({ chatflow, isAgentCanvas, isAgentflowV2, s
                     Update Category
                 </PermissionMenuItem>
                 {!isAgentCanvas && (
-                    <PermissionMenuItem
-                        permissionId='chatflows:update'
-                        onClick={handleMoveToFolder}
-                        disableRipple
-                    >
-                        <FolderIcon />
+                    <PermissionMenuItem permissionId='chatflows:update' onClick={handleMoveToFolder} disableRipple>
+                        <IconFolder stroke={1.5} size='1.3rem' style={{ marginRight: '10px' }} />
                         Move to Folder
+                    </PermissionMenuItem>
+                )}
+                {!isAgentCanvas && chatflow.folderId && (
+                    <PermissionMenuItem permissionId='chatflows:update' onClick={() => saveMoveToFolder('uncategorized')} disableRipple>
+                        <IconFolderOff stroke={1.5} size='1.3rem' style={{ marginRight: '10px' }} />
+                        Remove from Folder
                     </PermissionMenuItem>
                 )}
                 <Divider sx={{ my: 0.5 }} />
@@ -555,5 +569,6 @@ FlowListMenu.propTypes = {
     setError: PropTypes.func,
     updateFlowsApi: PropTypes.object,
     currentPage: PropTypes.number,
-    pageLimit: PropTypes.number
+    pageLimit: PropTypes.number,
+    onFlowUpdate: PropTypes.func
 }

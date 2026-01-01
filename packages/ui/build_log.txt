@@ -1,0 +1,23 @@
+
+> flowise-ui@3.0.12 build F:\dk-training-octobot\packages\ui
+> vite build
+
+[33mThe CJS build of Vite's Node API is deprecated. See https://vitejs.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+[36mvite v5.1.6 [32mbuilding for production...[36m[39m
+transforming...
+[32m✓[39m 10318 modules transformed.
+[31mx[39m Build failed in 21.80s
+[31merror during build:
+Error: [31m[vite]: Rollup failed to resolve import "@mui/icons-material/FolderOff" from "F:/dk-training-octobot/packages/ui/src/ui-component/button/FlowListMenu.jsx".
+This is most likely unintended because it can break your application at runtime.
+If you do want to externalize this module explicitly add it to
+`build.rollupOptions.external`[31m
+    at viteWarn (file:///F:/dk-training-octobot/node_modules/.pnpm/vite@5.1.6_@types+node@22.16.3_sass@1.71.1_terser@5.29.1/node_modules/vite/dist/node/chunks/dep-jvB8WLp9.js:67190:27)
+    at onwarn (F:\dk-training-octobot\node_modules\.pnpm\@vitejs+plugin-react@4.2.1__03a784f9aff4d68112ce52acef0a9e90\node_modules\@vitejs\plugin-react\dist\index.cjs:258:9)
+    at onRollupWarning (file:///F:/dk-training-octobot/node_modules/.pnpm/vite@5.1.6_@types+node@22.16.3_sass@1.71.1_terser@5.29.1/node_modules/vite/dist/node/chunks/dep-jvB8WLp9.js:67215:9)
+    at onwarn (file:///F:/dk-training-octobot/node_modules/.pnpm/vite@5.1.6_@types+node@22.16.3_sass@1.71.1_terser@5.29.1/node_modules/vite/dist/node/chunks/dep-jvB8WLp9.js:66922:13)
+    at file:///F:/dk-training-octobot/node_modules/.pnpm/rollup@4.45.0/node_modules/rollup/dist/es/shared/node-entry.js:20820:13
+    at Object.logger [as onLog] (file:///F:/dk-training-octobot/node_modules/.pnpm/rollup@4.45.0/node_modules/rollup/dist/es/shared/node-entry.js:22686:9)
+    at ModuleLoader.handleInvalidResolvedId (file:///F:/dk-training-octobot/node_modules/.pnpm/rollup@4.45.0/node_modules/rollup/dist/es/shared/node-entry.js:21432:26)
+    at file:///F:/dk-training-octobot/node_modules/.pnpm/rollup@4.45.0/node_modules/rollup/dist/es/shared/node-entry.js:21390:26[39m
+ ELIFECYCLE  Command failed with exit code 1.

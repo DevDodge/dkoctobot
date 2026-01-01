@@ -160,7 +160,7 @@ const moveChatflowToFolder = async (chatflowId: string, folderId: string | null,
             }
         }
 
-        chatflow.folderId = folderId || undefined
+        chatflow.folderId = folderId as any
         const dbResponse = await appServer.AppDataSource.getRepository(ChatFlow).save(chatflow)
         return dbResponse
     } catch (error) {

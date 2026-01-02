@@ -467,14 +467,8 @@ const ShareChatbot = ({ isSessionMemory, isAgentCanvas }) => {
                 <Stack sx={{ mt: 1, mb: 2, alignItems: 'center' }} direction='row' spacing={2}>
                     <Typography variant='h4'>Title Settings</Typography>
                 </Stack>
-                {textField(title, 'title', 'Title', 'string', 'Flowise Assistant')}
-                {textField(
-                    titleAvatarSrc,
-                    'titleAvatarSrc',
-                    'Title Avatar Link',
-                    'string',
-                    `https://raw.githubusercontent.com/FlowiseAI/Flowise/main/assets/FloWiseAI_dark.png`
-                )}
+                {textField(title, 'title', 'Title', 'string', 'OctoBot Assistant')}
+                {textField(titleAvatarSrc, 'titleAvatarSrc', 'Title Avatar Link', 'string', `https://octobot.sirv.com/robot1.png`)}
                 {colorField(titleBackgroundColor, 'titleBackgroundColor', 'Title Background Color')}
                 {colorField(titleTextColor, 'titleTextColor', 'Title TextColor')}
             </Card>

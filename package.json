@@ -61,10 +61,7 @@
         "typescript": "^5.4.5"
     },
     "pnpm": {
-        "onlyBuiltDependencies": [
-            "faiss-node",
-            "sqlite3"
-        ],
+        "onlyBuiltDependencies": [],
         "overrides": {
             "axios": "1.12.0",
             "body-parser": "2.0.2",

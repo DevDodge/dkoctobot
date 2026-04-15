@@ -801,7 +801,240 @@ const importData = async (importData: ExportData, orgId: string, activeWorkspace
     }
 }
 
-// Export chatflow messages
+import { Response } from 'express'
+import { utilGetChatMessageBatch, utilCountChatMessages } from '../../utils/getChatMessage'
+
+const EXPORT_BATCH_SIZE = 2000
+
+// Count messages for export progress tracking
+const countChatflowMessages = async (
+    chatflowId: string,
+    chatType?: ChatType[] | string,
+    feedbackType?: ChatMessageRatingType[] | string,
+    startDate?: string,
+    endDate?: string,
+    workspaceId?: string
+): Promise<number> => {
+    try {
+        let parsedChatTypes: ChatType[] | undefined
+        if (chatType) {
+            if (typeof chatType === 'string') {
+                const parsed = parseJsonBody(chatType)
+                parsedChatTypes = Array.isArray(parsed) ? parsed : [chatType as ChatType]
+            } else if (Array.isArray(chatType)) {
+                parsedChatTypes = chatType
+            }
+        }
+
+        let parsedFeedbackTypes: ChatMessageRatingType[] | undefined
+        if (feedbackType) {
+            if (typeof feedbackType === 'string') {
+                const parsed = parseJsonBody(feedbackType)
+                parsedFeedbackTypes = Array.isArray(parsed) ? parsed : [feedbackType as ChatMessageRatingType]
+            } else if (Array.isArray(feedbackType)) {
+                parsedFeedbackTypes = feedbackType
+            }
+        }
+
+        return await utilCountChatMessages({
+            chatflowid: chatflowId,
+            chatTypes: parsedChatTypes,
+            feedbackTypes: parsedFeedbackTypes,
+            startDate,
+            endDate,
+            activeWorkspaceId: workspaceId
+        })
+    } catch (error) {
+        throw new InternalFlowiseError(
+            StatusCodes.INTERNAL_SERVER_ERROR,
+            `Error: exportImportService.countChatflowMessages - ${getErrorMessage(error)}`
+        )
+    }
+}
+
+// Process a batch of messages into the export object (mutates exportObj in-place)
+const processBatchIntoExportObj = (chatMessages: ChatMessage[], exportObj: { [key: string]: any }, storagePath: string) => {
+    for (const chatmsg of chatMessages) {
+        const chatPK = getChatPK(chatmsg)
+        const filePaths: string[] = []
+
+        // Handle file uploads
+        if (chatmsg.fileUploads) {
+            const uploads = parseJsonBody(chatmsg.fileUploads)
+            if (Array.isArray(uploads)) {
+                uploads.forEach((file: any) => {
+                    if (file.type === 'stored-file') {
+                        filePaths.push(path.join(storagePath, chatmsg.chatflowid, chatmsg.chatId, file.name))
+                    }
+                })
+            }
+        }
+
+        // Create message object
+        const msg: any = {
+            content: chatmsg.content,
+            role: chatmsg.role === 'apiMessage' ? 'bot' : 'user',
+            time: chatmsg.createdDate
+        }
+
+        // Add optional properties
+        if (filePaths.length) msg.filePaths = filePaths
+        if (chatmsg.sourceDocuments) msg.sourceDocuments = parseJsonBody(chatmsg.sourceDocuments)
+        if (chatmsg.usedTools) msg.usedTools = parseJsonBody(chatmsg.usedTools)
+        if (chatmsg.fileAnnotations) msg.fileAnnotations = parseJsonBody(chatmsg.fileAnnotations)
+        if ((chatmsg as any).feedback) msg.feedback = (chatmsg as any).feedback.content
+        if (chatmsg.agentReasoning) msg.agentReasoning = parseJsonBody(chatmsg.agentReasoning)
+
+        // Handle artifacts
+        if (chatmsg.artifacts) {
+            const artifacts = parseJsonBody(chatmsg.artifacts)
+            msg.artifacts = artifacts
+            if (Array.isArray(artifacts)) {
+                artifacts.forEach((artifact: any) => {
+                    if (artifact.type === 'png' || artifact.type === 'jpeg') {
+                        const baseURL = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`
+                        artifact.data = `${baseURL}/api/v1/get-upload-file?chatflowId=${chatmsg.chatflowid}&chatId=${
+                            chatmsg.chatId
+                        }&fileName=${artifact.data.replace('FILE-STORAGE::', '')}`
+                    }
+                })
+            }
+        }
+
+        // Group messages by chat session
+        if (!exportObj[chatPK]) {
+            exportObj[chatPK] = {
+                id: chatmsg.chatId,
+                source: getChatType(chatmsg.chatType as ChatType),
+                sessionId: chatmsg.sessionId ?? null,
+                memoryType: chatmsg.memoryType ?? null,
+                email: (chatmsg as any).leadEmail ?? null,
+                messages: [msg]
+            }
+        } else {
+            exportObj[chatPK].messages.push(msg)
+        }
+    }
+}
+
+// Streaming export: queries in batches and writes JSON array directly to the HTTP response
+const exportChatflowMessagesStream = async (
+    res: Response,
+    chatflowId: string,
+    chatType?: ChatType[] | string,
+    feedbackType?: ChatMessageRatingType[] | string,
+    startDate?: string,
+    endDate?: string,
+    workspaceId?: string
+) => {
+    try {
+        // Parse chatType
+        let parsedChatTypes: ChatType[] | undefined
+        if (chatType) {
+            if (typeof chatType === 'string') {
+                const parsed = parseJsonBody(chatType)
+                parsedChatTypes = Array.isArray(parsed) ? parsed : [chatType as ChatType]
+            } else if (Array.isArray(chatType)) {
+                parsedChatTypes = chatType
+            }
+        }
+
+        // Parse feedbackType
+        let parsedFeedbackTypes: ChatMessageRatingType[] | undefined
+        if (feedbackType) {
+            if (typeof feedbackType === 'string') {
+                const parsed = parseJsonBody(feedbackType)
+                parsedFeedbackTypes = Array.isArray(parsed) ? parsed : [feedbackType as ChatMessageRatingType]
+            } else if (Array.isArray(feedbackType)) {
+                parsedFeedbackTypes = feedbackType
+            }
+        }
+
+        const storagePath = getStoragePath()
+
+        // We accumulate conversations keyed by chatPK across all batches
+        // But we flush completed conversations periodically to avoid holding them all in memory.
+        // Strategy: load all batches into a single exportObj (keyed by chatPK),
+        // but since each batch is only 2k rows, peak memory is ~2k rows + accumulated conversation keys.
+        // For 33k messages with maybe ~1k conversations, this is manageable.
+        const exportObj: { [key: string]: any } = {}
+
+        let offset = 0
+        let hasMore = true
+        let totalProcessed = 0
+
+        while (hasMore) {
+            const batch = await utilGetChatMessageBatch({
+                chatflowid: chatflowId,
+                chatTypes: parsedChatTypes,
+                feedbackTypes: parsedFeedbackTypes,
+                startDate,
+                endDate,
+                activeWorkspaceId: workspaceId,
+                skip: offset,
+                take: EXPORT_BATCH_SIZE
+            })
+
+            if (batch.length === 0) {
+                hasMore = false
+                break
+            }
+
+            processBatchIntoExportObj(batch, exportObj, storagePath)
+            totalProcessed += batch.length
+            offset += EXPORT_BATCH_SIZE
+
+            if (batch.length < EXPORT_BATCH_SIZE) {
+                hasMore = false
+            }
+        }
+
+        // Now stream the conversations as a JSON array
+        // Set headers for streaming download
+        res.setHeader('Content-Type', 'application/json')
+        res.setHeader('Content-Disposition', `attachment; filename="${chatflowId}-Messages.json"`)
+        res.setHeader('X-Total-Messages', totalProcessed.toString())
+
+        // Write opening bracket
+        res.write('[')
+
+        const conversationKeys = Object.keys(exportObj)
+        for (let i = 0; i < conversationKeys.length; i++) {
+            const conversation = exportObj[conversationKeys[i]]
+            // Reverse message order within each conversation (DESC -> ASC for reading)
+            conversation.messages = conversation.messages.reverse()
+
+            // Write the conversation object
+            const json = JSON.stringify(conversation)
+            if (i > 0) {
+                res.write(',')
+            }
+            res.write(json)
+
+            // Allow event loop to breathe every 100 conversations
+            if (i % 100 === 0) {
+                await new Promise<void>((resolve) => setImmediate(resolve))
+            }
+        }
+
+        // Write closing bracket
+        res.write(']')
+        res.end()
+    } catch (error) {
+        // If headers haven't been sent yet, send error response
+        if (!res.headersSent) {
+            throw new InternalFlowiseError(
+                StatusCodes.INTERNAL_SERVER_ERROR,
+                `Error: exportImportService.exportChatflowMessagesStream - ${getErrorMessage(error)}`
+            )
+        } else {
+            // Headers already sent, just end the response
+            res.end()
+        }
+    }
+}
+
+// Export chatflow messages (legacy non-streaming for backward compatibility)
 const exportChatflowMessages = async (
     chatflowId: string,
     chatType?: ChatType[] | string,
@@ -952,9 +1185,85 @@ const getChatType = (chatType?: ChatType): string => {
     }
 }
 
+// Batch export: returns one page of processed messages for client-side assembly
+const exportChatflowMessagesBatch = async (
+    chatflowId: string,
+    page: number,
+    batchSize: number,
+    chatType?: ChatType[] | string,
+    feedbackType?: ChatMessageRatingType[] | string,
+    startDate?: string,
+    endDate?: string,
+    workspaceId?: string
+): Promise<{ conversations: any[]; page: number; batchSize: number; fetched: number; hasMore: boolean }> => {
+    try {
+        // Parse chatType
+        let parsedChatTypes: ChatType[] | undefined
+        if (chatType) {
+            if (typeof chatType === 'string') {
+                const parsed = parseJsonBody(chatType)
+                parsedChatTypes = Array.isArray(parsed) ? parsed : [chatType as ChatType]
+            } else if (Array.isArray(chatType)) {
+                parsedChatTypes = chatType
+            }
+        }
+
+        // Parse feedbackType
+        let parsedFeedbackTypes: ChatMessageRatingType[] | undefined
+        if (feedbackType) {
+            if (typeof feedbackType === 'string') {
+                const parsed = parseJsonBody(feedbackType)
+                parsedFeedbackTypes = Array.isArray(parsed) ? parsed : [feedbackType as ChatMessageRatingType]
+            } else if (Array.isArray(feedbackType)) {
+                parsedFeedbackTypes = feedbackType
+            }
+        }
+
+        const skip = (page - 1) * batchSize
+
+        const batch = await utilGetChatMessageBatch({
+            chatflowid: chatflowId,
+            chatTypes: parsedChatTypes,
+            feedbackTypes: parsedFeedbackTypes,
+            startDate,
+            endDate,
+            activeWorkspaceId: workspaceId,
+            skip,
+            take: batchSize
+        })
+
+        // Process this batch into conversation groups
+        const storagePath = getStoragePath()
+        const exportObj: { [key: string]: any } = {}
+        processBatchIntoExportObj(batch, exportObj, storagePath)
+
+        // Convert to array and reverse messages within each conversation
+        const conversations = Object.values(exportObj).map((conversation: any) => ({
+            ...conversation,
+            messages: conversation.messages.reverse()
+        }))
+
+        return {
+            conversations,
+            page,
+            batchSize,
+            fetched: batch.length,
+            hasMore: batch.length >= batchSize
+        }
+    } catch (error) {
+        throw new InternalFlowiseError(
+            StatusCodes.INTERNAL_SERVER_ERROR,
+            `Error: exportImportService.exportChatflowMessagesBatch - ${getErrorMessage(error)}`
+        )
+    }
+}
+
 export default {
     convertExportInput,
     exportData,
     importData,
-    exportChatflowMessages
+    exportChatflowMessages,
+    exportChatflowMessagesStream,
+    countChatflowMessages,
+    exportChatflowMessagesBatch
 }

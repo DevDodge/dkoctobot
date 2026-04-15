@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- AppCity RAG Search - Magnifying glass + database -->
+  <defs>
+    <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#9c27b0;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Magnifying glass circle -->
+  <circle cx="220" cy="210" r="120" stroke="url(#grad3)" stroke-width="28" fill="none"/>
+  <!-- Magnifying glass handle -->
+  <line x1="310" y1="300" x2="430" y2="420" stroke="url(#grad3)" stroke-width="36" stroke-linecap="round"/>
+  <!-- Database inside magnifying glass -->
+  <ellipse cx="220" cy="175" rx="55" ry="18" stroke="url(#grad3)" stroke-width="10" fill="none"/>
+  <path d="M165 175 L165 235 Q165 253 220 253 Q275 253 275 235 L275 175" stroke="url(#grad3)" stroke-width="10" fill="none"/>
+  <path d="M165 205 Q165 223 220 223 Q275 223 275 205" stroke="url(#grad3)" stroke-width="8" fill="none"/>
+  <!-- Search sparkles -->
+  <path d="M120 80 L128 100 L148 108 L128 116 L120 136 L112 116 L92 108 L112 100 Z" fill="url(#grad3)"/>
+  <path d="M380 120 L385 132 L397 137 L385 142 L380 154 L375 142 L363 137 L375 132 Z" fill="url(#grad3)" opacity="0.7"/>
+</svg>

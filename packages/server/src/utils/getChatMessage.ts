@@ -343,3 +343,104 @@ function filterMessagesWithFeedback(
     // Sort final result by creation date
     return result.sort((a, b) => new Date(a.createdDate).getTime() - new Date(b.createdDate).getTime())
 }
+
+/**
+ * Count total chat messages matching the given filters (used for export progress tracking).
+ */
+export const utilCountChatMessages = async ({
+    chatflowid,
+    chatTypes,
+    feedbackTypes,
+    startDate,
+    endDate,
+    activeWorkspaceId
+}: {
+    chatflowid: string
+    chatTypes?: ChatType[]
+    feedbackTypes?: ChatMessageRatingType[]
+    startDate?: string
+    endDate?: string
+    activeWorkspaceId?: string
+}): Promise<number> => {
+    const appServer = getRunningExpressApp()
+
+    // Verify workspace access
+    if (activeWorkspaceId) {
+        const chatflow = await appServer.AppDataSource.getRepository(ChatFlow).findOneBy({
+            id: chatflowid,
+            workspaceId: activeWorkspaceId
+        })
+        if (!chatflow) throw new Error('Unauthorized access')
+    } else {
+        throw new Error('Unauthorized access')
+    }
+
+    const query = appServer.AppDataSource.getRepository(ChatMessage)
+        .createQueryBuilder('chat_message')
+        .where('chat_message.chatflowid = :chatflowid', { chatflowid })
+
+    if (chatTypes && chatTypes.length > 0) {
+        query.andWhere('chat_message.chatType IN (:...chatTypes)', { chatTypes })
+    }
+    if (startDate && typeof startDate === 'string') {
+        query.andWhere('chat_message.createdDate >= :startDateTime', { startDateTime: new Date(startDate) })
+    }
+    if (endDate && typeof endDate === 'string') {
+        query.andWhere('chat_message.createdDate <= :endDateTime', { endDateTime: new Date(endDate) })
+    }
+    if (feedbackTypes && feedbackTypes.length > 0) {
+        query
+            .leftJoin(ChatMessageFeedback, 'feedback', 'feedback.messageId = chat_message.id')
+            .andWhere('feedback.rating IN (:...feedbackTypes)', { feedbackTypes })
+    }
+
+    return await query.getCount()
+}
+
+/**
+ * Get chat messages in batches for streaming export.
+ * Uses skip/take pagination with feedback JOINed.
+ */
+export const utilGetChatMessageBatch = async ({
+    chatflowid,
+    chatTypes,
+    feedbackTypes,
+    startDate,
+    endDate,
+    activeWorkspaceId,
+    skip,
+    take
+}: {
+    chatflowid: string
+    chatTypes?: ChatType[]
+    feedbackTypes?: ChatMessageRatingType[]
+    startDate?: string
+    endDate?: string
+    activeWorkspaceId?: string
+    skip: number
+    take: number
+}): Promise<ChatMessage[]> => {
+    const appServer = getRunningExpressApp()
+
+    const query = appServer.AppDataSource.getRepository(ChatMessage)
+        .createQueryBuilder('chat_message')
+        .leftJoinAndMapOne('chat_message.feedback', ChatMessageFeedback, 'feedback', 'feedback.messageId = chat_message.id')
+        .where('chat_message.chatflowid = :chatflowid', { chatflowid })
+
+    if (chatTypes && chatTypes.length > 0) {
+        query.andWhere('chat_message.chatType IN (:...chatTypes)', { chatTypes })
+    }
+    if (startDate && typeof startDate === 'string') {
+        query.andWhere('chat_message.createdDate >= :startDateTime', { startDateTime: new Date(startDate) })
+    }
+    if (endDate && typeof endDate === 'string') {
+        query.andWhere('chat_message.createdDate <= :endDateTime', { endDateTime: new Date(endDate) })
+    }
+    if (feedbackTypes && feedbackTypes.length > 0) {
+        query.andWhere('(feedback.rating IN (:...feedbackTypes) OR feedback.rating IS NULL)', { feedbackTypes })
+    }
+
+    query.orderBy('chat_message.createdDate', 'DESC').skip(skip).take(take)
+
+    return (await query.getMany()) as Array<ChatMessage & { feedback: ChatMessageFeedback }>
+}

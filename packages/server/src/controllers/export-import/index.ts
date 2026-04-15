@@ -49,6 +49,70 @@ const importData = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+// Count chatflow messages (for progress tracking in UI)
+const countChatflowMessages = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const workspaceId = req.user?.activeWorkspaceId
+        if (!workspaceId) {
+            throw new InternalFlowiseError(
+                StatusCodes.NOT_FOUND,
+                `Error: exportImportController.countChatflowMessages - workspace ${workspaceId} not found!`
+            )
+        }
+
+        const { chatflowId, chatType, feedbackType, startDate, endDate } = req.body
+        if (!chatflowId) {
+            throw new InternalFlowiseError(
+                StatusCodes.BAD_REQUEST,
+                'Error: exportImportController.countChatflowMessages - chatflowId is required!'
+            )
+        }
+
+        const count = await exportImportService.countChatflowMessages(chatflowId, chatType, feedbackType, startDate, endDate, workspaceId)
+
+        return res.json({ count })
+    } catch (error) {
+        next(error)
+    }
+}
+
+// Batch export: returns one page of processed messages
+const exportChatflowMessagesBatch = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const workspaceId = req.user?.activeWorkspaceId
+        if (!workspaceId) {
+            throw new InternalFlowiseError(
+                StatusCodes.NOT_FOUND,
+                `Error: exportImportController.exportChatflowMessagesBatch - workspace ${workspaceId} not found!`
+            )
+        }
+
+        const { chatflowId, chatType, feedbackType, startDate, endDate, page = 1, batchSize = 1000 } = req.body
+        if (!chatflowId) {
+            throw new InternalFlowiseError(
+                StatusCodes.BAD_REQUEST,
+                'Error: exportImportController.exportChatflowMessagesBatch - chatflowId is required!'
+            )
+        }
+
+        const apiResponse = await exportImportService.exportChatflowMessagesBatch(
+            chatflowId,
+            page,
+            batchSize,
+            chatType,
+            feedbackType,
+            startDate,
+            endDate,
+            workspaceId
+        )
+
+        return res.json(apiResponse)
+    } catch (error) {
+        next(error)
+    }
+}
+
+// Streaming export of chatflow messages (handles large datasets without OOM)
 const exportChatflowMessages = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const workspaceId = req.user?.activeWorkspaceId
@@ -67,20 +131,8 @@ const exportChatflowMessages = async (req: Request, res: Response, next: NextFun
             )
         }
 
-        const apiResponse = await exportImportService.exportChatflowMessages(
-            chatflowId,
-            chatType,
-            feedbackType,
-            startDate,
-            endDate,
-            workspaceId
-        )
-
-        // Set headers for file download
-        res.setHeader('Content-Type', 'application/json')
-        res.setHeader('Content-Disposition', `attachment; filename="${chatflowId}-Message.json"`)
-
-        return res.json(apiResponse)
+        // Use streaming export to handle large datasets
+        await exportImportService.exportChatflowMessagesStream(res, chatflowId, chatType, feedbackType, startDate, endDate, workspaceId)
     } catch (error) {
         next(error)
     }
@@ -89,5 +141,7 @@ const exportChatflowMessages = async (req: Request, res: Response, next: NextFun
 export default {
     exportData,
     importData,
-    exportChatflowMessages
+    exportChatflowMessages,
+    countChatflowMessages,
+    exportChatflowMessagesBatch
 }

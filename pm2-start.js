@@ -1,7 +1,5 @@
-// PM2 entry point for DK-Platform
-// This file allows PM2 to properly start the Flowise server
-
+#!/usr/bin/env node
+// PM2 startup script for Flowise/Octobot server
+process.chdir(__dirname + '/packages/server/bin')
 const oclif = require('@oclif/core')
-
-// Run the start command
 oclif.run(['start']).then(require('@oclif/core/flush')).catch(require('@oclif/core/handle'))

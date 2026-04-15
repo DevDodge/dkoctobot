@@ -29,7 +29,8 @@ import {
     Typography,
     Menu,
     MenuItem,
-    IconButton
+    IconButton,
+    LinearProgress
 } from '@mui/material'
 import { useTheme, styled, alpha } from '@mui/material/styles'
 import DatePicker from 'react-datepicker'
@@ -202,6 +203,31 @@ const ViewMessagesDialog = ({ show, dialogProps, onCancel }) => {
     const [anchorEl, setAnchorEl] = useState(null)
     const open = Boolean(anchorEl)
 
+    // Export progress modal state
+    const [exportModalOpen, setExportModalOpen] = useState(false)
+    const [exportProgress, setExportProgress] = useState({
+        phase: 'idle', // idle | counting | fetching | assembling | done | error
+        percent: 0,
+        totalMessages: 0,
+        fetchedMessages: 0,
+        currentBatch: 0,
+        totalBatches: 0,
+        statusText: '',
+        errorText: ''
+    })
+
+    // Delete progress modal state
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+    const [deleteProgress, setDeleteProgress] = useState({
+        phase: 'idle', // idle | counting | deleting | done | error
+        percent: 0,
+        totalMessages: 0,
+        deletedMessages: 0,
+        currentBatch: 0,
+        statusText: '',
+        errorText: ''
+    })
+
     const getChatmessageApi = useApi(chatmessageApi.getAllChatmessageFromChatflow)
     const getChatmessageFromPKApi = useApi(chatmessageApi.getChatmessageFromPK)
     const getStatsApi = useApi(feedbackApi.getStatsFromChatflow)
@@ -283,61 +309,123 @@ const ViewMessagesDialog = ({ show, dialogProps, onCancel }) => {
         setHardDeleteDialogOpen(true)
     }
 
+    const DELETE_BATCH_SIZE = 1000
+
     const deleteMessages = async (hardDelete) => {
         setHardDeleteDialogOpen(false)
         const chatflowid = dialogProps.chatflow.id
+
+        // Open delete progress modal
+        setDeleteModalOpen(true)
+        setDeleteProgress({
+            phase: 'counting',
+            percent: 0,
+            totalMessages: 0,
+            deletedMessages: 0,
+            currentBatch: 0,
+            statusText: 'Counting messages...',
+            errorText: ''
+        })
+
         try {
-            const obj = { chatflowid, isClearFromViewMessageDialog: true }
+            // Step 1: Count messages to delete
+            const countResponse = await exportImportApi.countChatflowMessages({
+                chatflowId: chatflowid,
+                chatType: chatTypeFilter.length ? chatTypeFilter : undefined,
+                feedbackType: feedbackTypeFilter.length ? feedbackTypeFilter : undefined,
+                startDate: startDate,
+                endDate: endDate
+            })
+            const totalMessages = countResponse.data?.count || 0
+
+            if (totalMessages === 0) {
+                setDeleteProgress((prev) => ({
+                    ...prev,
+                    phase: 'done',
+                    percent: 100,
+                    statusText: 'No messages to delete.'
+                }))
+                setTimeout(() => {
+                    setDeleteModalOpen(false)
+                    setDeleteProgress((prev) => ({ ...prev, phase: 'idle' }))
+                }, 2000)
+                return
+            }
+
+            setDeleteProgress((prev) => ({
+                ...prev,
+                phase: 'deleting',
+                totalMessages,
+                statusText: `Deleting messages... 0 / ${totalMessages.toLocaleString()}`,
+                percent: 0
+            }))
+
+            // Step 2: Delete in batches
+            // Build query params for the batch delete endpoint
+            const params = { batchSize: DELETE_BATCH_SIZE }
 
             let _chatTypeFilter = chatTypeFilter
             if (typeof chatTypeFilter === 'string' && chatTypeFilter.startsWith('[') && chatTypeFilter.endsWith(']')) {
                 _chatTypeFilter = JSON.parse(chatTypeFilter)
             }
             if (_chatTypeFilter.length === 1) {
-                obj.chatType = _chatTypeFilter[0]
+                params.chatType = _chatTypeFilter[0]
+            } else if (_chatTypeFilter.length > 1) {
+                params.chatType = JSON.stringify(_chatTypeFilter)
             }
 
-            let _feedbackTypeFilter = feedbackTypeFilter
-            if (typeof feedbackTypeFilter === 'string' && feedbackTypeFilter.startsWith('[') && feedbackTypeFilter.endsWith(']')) {
-                _feedbackTypeFilter = JSON.parse(feedbackTypeFilter)
-            }
-            if (_feedbackTypeFilter.length === 1) {
-                obj.feedbackType = _feedbackTypeFilter[0]
+            if (startDate) params.startDate = startDate
+            if (endDate) params.endDate = endDate
+            if (hardDelete) params.hardDelete = true
+
+            let deletedMessages = 0
+            let batchNum = 0
+            let hasMore = true
+
+            while (hasMore) {
+                batchNum++
+                const response = await chatmessageApi.deleteMessagesBatch(chatflowid, params)
+                const batchResult = response.data
+
+                deletedMessages += batchResult.deleted || 0
+                hasMore = batchResult.hasMore
+
+                const percent = Math.min(Math.round((deletedMessages / totalMessages) * 100), hasMore ? 99 : 100)
+
+                setDeleteProgress((prev) => ({
+                    ...prev,
+                    phase: 'deleting',
+                    deletedMessages,
+                    currentBatch: batchNum,
+                    percent,
+                    statusText: hasMore
+                        ? `Deleting messages... ${deletedMessages.toLocaleString()} / ${totalMessages.toLocaleString()}`
+                        : `Finalizing...`
+                }))
             }
 
-            if (startDate) obj.startDate = startDate
-            if (endDate) obj.endDate = endDate
-            if (hardDelete) obj.hardDelete = true
+            setDeleteProgress((prev) => ({
+                ...prev,
+                phase: 'done',
+                percent: 100,
+                deletedMessages,
+                statusText: `Successfully deleted ${deletedMessages.toLocaleString()} messages!`
+            }))
 
-            await chatmessageApi.deleteChatmessage(chatflowid, obj)
-            enqueueSnackbar({
-                message: 'Succesfully deleted messages',
-                options: {
-                    key: new Date().getTime() + Math.random(),
-                    variant: 'success',
-                    action: (key) => (
-                        <Button style={{ color: 'white' }} onClick={() => closeSnackbar(key)}>
-                            <IconX />
-                        </Button>
-                    )
-                }
-            })
-            refresh(1, pageLimit, startDate, endDate, chatTypeFilter, feedbackTypeFilter)
+            // Auto-close after 2 seconds and refresh
+            setTimeout(() => {
+                setDeleteModalOpen(false)
+                setDeleteProgress((prev) => ({ ...prev, phase: 'idle' }))
+                refresh(1, pageLimit, startDate, endDate, chatTypeFilter, feedbackTypeFilter)
+            }, 2000)
         } catch (error) {
-            console.error(error)
-            enqueueSnackbar({
-                message: typeof error.response.data === 'object' ? error.response.data.message : error.response.data,
-                options: {
-                    key: new Date().getTime() + Math.random(),
-                    variant: 'error',
-                    persist: true,
-                    action: (key) => (
-                        <Button style={{ color: 'white' }} onClick={() => closeSnackbar(key)}>
-                            <IconX />
-                        </Button>
-                    )
-                }
-            })
+            console.error('Error deleting messages:', error)
+            setDeleteProgress((prev) => ({
+                ...prev,
+                phase: 'error',
+                statusText: 'Delete failed',
+                errorText: error?.response?.data?.message || error?.message || 'An unexpected error occurred during deletion.'
+            }))
         }
     }
 
@@ -350,55 +438,167 @@ const ViewMessagesDialog = ({ show, dialogProps, onCancel }) => {
         return 'API/Embed'
     }
 
+    const BATCH_SIZE = 1000
+
+    const formatBytes = (bytes) => {
+        if (bytes === 0) return '0 B'
+        const k = 1024
+        const sizes = ['B', 'KB', 'MB', 'GB']
+        const i = Math.floor(Math.log(bytes) / Math.log(k))
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
+    }
+
     const exportMessages = async () => {
+        // Open modal and start
+        setExportModalOpen(true)
+        setExportProgress({
+            phase: 'counting',
+            percent: 0,
+            totalMessages: 0,
+            fetchedMessages: 0,
+            currentBatch: 0,
+            totalBatches: 0,
+            statusText: 'Counting messages...',
+            errorText: ''
+        })
+
         try {
-            const response = await exportImportApi.exportChatflowMessages({
+            // Step 1: Count messages
+            const countResponse = await exportImportApi.countChatflowMessages({
                 chatflowId: dialogProps.chatflow.id,
                 chatType: chatTypeFilter.length ? chatTypeFilter : undefined,
                 feedbackType: feedbackTypeFilter.length ? feedbackTypeFilter : undefined,
                 startDate: startDate,
                 endDate: endDate
             })
+            const totalMessages = countResponse.data?.count || 0
+            const totalBatches = Math.ceil(totalMessages / BATCH_SIZE)
 
-            const exportMessages = response.data
-            const dataStr = JSON.stringify(exportMessages, null, 2)
+            if (totalMessages === 0) {
+                setExportProgress((prev) => ({
+                    ...prev,
+                    phase: 'done',
+                    percent: 100,
+                    statusText: 'No messages to export.'
+                }))
+                return
+            }
+
+            setExportProgress((prev) => ({
+                ...prev,
+                phase: 'fetching',
+                totalMessages,
+                totalBatches,
+                statusText: `Fetching batch 1/${totalBatches}...`,
+                percent: 0
+            }))
+
+            // Step 2: Fetch batches one by one
+            // We accumulate all conversations, merging across batches
+            const allConversations = {} // keyed by conversation id
+            let currentPage = 1
+            let hasMore = true
+            let fetchedMessages = 0
+
+            while (hasMore) {
+                const batchResponse = await exportImportApi.exportChatflowMessagesBatch({
+                    chatflowId: dialogProps.chatflow.id,
+                    chatType: chatTypeFilter.length ? chatTypeFilter : undefined,
+                    feedbackType: feedbackTypeFilter.length ? feedbackTypeFilter : undefined,
+                    startDate: startDate,
+                    endDate: endDate,
+                    page: currentPage,
+                    batchSize: BATCH_SIZE
+                })
+
+                const batchData = batchResponse.data
+
+                // Merge conversations from this batch
+                if (batchData.conversations && batchData.conversations.length > 0) {
+                    batchData.conversations.forEach((conv) => {
+                        const key = `${conv.id}_${conv.sessionId || ''}_${conv.memoryType || ''}`
+                        if (allConversations[key]) {
+                            // Merge messages into existing conversation
+                            allConversations[key].messages = [...allConversations[key].messages, ...conv.messages]
+                        } else {
+                            allConversations[key] = { ...conv }
+                        }
+                    })
+                }
+
+                fetchedMessages += batchData.fetched || 0
+                hasMore = batchData.hasMore
+                currentPage++
+
+                const percent = Math.min(Math.round((fetchedMessages / totalMessages) * 100), 99)
+
+                setExportProgress((prev) => ({
+                    ...prev,
+                    phase: 'fetching',
+                    currentBatch: currentPage - 1,
+                    fetchedMessages,
+                    percent,
+                    statusText: hasMore ? `Fetching batch ${currentPage}/${totalBatches}...` : `All batches fetched! Preparing file...`
+                }))
+            }
+
+            // Step 3: Assemble final file
+            setExportProgress((prev) => ({
+                ...prev,
+                phase: 'assembling',
+                percent: 99,
+                fetchedMessages,
+                statusText: 'Assembling export file...'
+            }))
+
+            const exportArray = Object.values(allConversations)
+            const dataStr = JSON.stringify(exportArray, null, 2)
             const blob = new Blob([dataStr], { type: 'application/json' })
             const dataUri = URL.createObjectURL(blob)
 
-            const exportFileDefaultName = `${dialogProps.chatflow.id}-Message.json`
+            // Build filename: WorkflowName_YYYY-MM-DD_HH-mm-ss.json
+            const workflowName = (dialogProps.chatflow.name || 'Export')
+                .replace(/[^a-zA-Z0-9\u0600-\u06FF\s_-]/g, '')
+                .trim()
+                .replace(/\s+/g, '_')
+            const now = new Date()
+            const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(
+                2,
+                '0'
+            )}_${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(
+                2,
+                '0'
+            )}`
+            const exportFileName = `${workflowName}_${timestamp}.json`
 
-            let linkElement = document.createElement('a')
+            const linkElement = document.createElement('a')
             linkElement.setAttribute('href', dataUri)
-            linkElement.setAttribute('download', exportFileDefaultName)
+            linkElement.setAttribute('download', exportFileName)
             linkElement.click()
+            URL.revokeObjectURL(dataUri)
 
-            enqueueSnackbar({
-                message: 'Messages exported successfully',
-                options: {
-                    key: new Date().getTime() + Math.random(),
-                    variant: 'success',
-                    action: (key) => (
-                        <Button style={{ color: 'white' }} onClick={() => closeSnackbar(key)}>
-                            <IconX />
-                        </Button>
-                    )
-                }
-            })
+            setExportProgress((prev) => ({
+                ...prev,
+                phase: 'done',
+                percent: 100,
+                statusText: `Export complete! ${fetchedMessages.toLocaleString()} messages in ${exportArray.length.toLocaleString()} conversations (${formatBytes(
+                    blob.size
+                )})`
+            }))
+
+            // Auto-close after 3 seconds
+            setTimeout(() => {
+                setExportModalOpen(false)
+                setExportProgress((prev) => ({ ...prev, phase: 'idle' }))
+            }, 3000)
         } catch (error) {
             console.error('Error exporting messages:', error)
-            enqueueSnackbar({
-                message: 'Failed to export messages',
-                options: {
-                    key: new Date().getTime() + Math.random(),
-                    variant: 'error',
-                    persist: true,
-                    action: (key) => (
-                        <Button style={{ color: 'white' }} onClick={() => closeSnackbar(key)}>
-                            <IconX />
-                        </Button>
-                    )
-                }
-            })
+            setExportProgress((prev) => ({
+                ...prev,
+                phase: 'error',
+                statusText: 'Export failed',
+                errorText: error?.response?.data?.message || error?.message || 'An unexpected error occurred during export.'
+            }))
         }
     }
 
@@ -1597,6 +1797,282 @@ const ViewMessagesDialog = ({ show, dialogProps, onCancel }) => {
                         onCancel={() => setHardDeleteDialogOpen(false)}
                         onConfirm={(hardDelete) => deleteMessages(hardDelete)}
                     />
+                    {/* Delete Progress Modal */}
+                    <Dialog
+                        open={deleteModalOpen}
+                        maxWidth='sm'
+                        fullWidth
+                        PaperProps={{
+                            sx: {
+                                borderRadius: '16px',
+                                background: customization.isDarkMode
+                                    ? 'linear-gradient(135deg, rgba(30,25,45,0.98) 0%, rgba(40,30,60,0.98) 100%)'
+                                    : 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(245,240,255,0.98) 100%)',
+                                backdropFilter: 'blur(20px)',
+                                border: '1px solid rgba(156,39,176,0.15)',
+                                boxShadow: '0 8px 32px rgba(156,39,176,0.15)'
+                            }
+                        }}
+                    >
+                        <DialogTitle
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 1.5,
+                                pb: 1,
+                                fontWeight: 600,
+                                background: 'linear-gradient(90deg, #f44336, #e91e63)',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent'
+                            }}
+                        >
+                            <IconEraser
+                                size={24}
+                                style={{
+                                    color: '#f44336',
+                                    animation: deleteProgress.phase === 'deleting' ? 'pulse 1.5s ease-in-out infinite' : 'none'
+                                }}
+                            />
+                            Deleting Messages
+                        </DialogTitle>
+                        <DialogContent sx={{ pt: 2 }}>
+                            <Box sx={{ mb: 2 }}>
+                                <Typography
+                                    variant='body2'
+                                    sx={{
+                                        mb: 1.5,
+                                        color: deleteProgress.phase === 'error' ? '#f44336' : 'text.secondary',
+                                        fontWeight: deleteProgress.phase === 'done' ? 500 : 400
+                                    }}
+                                >
+                                    {deleteProgress.statusText}
+                                </Typography>
+
+                                {deleteProgress.phase !== 'error' && deleteProgress.phase !== 'idle' && (
+                                    <LinearProgress
+                                        variant={deleteProgress.phase === 'counting' ? 'indeterminate' : 'determinate'}
+                                        value={deleteProgress.percent}
+                                        sx={{
+                                            height: 8,
+                                            borderRadius: 4,
+                                            backgroundColor: customization.isDarkMode ? 'rgba(244,67,54,0.15)' : 'rgba(244,67,54,0.1)',
+                                            '& .MuiLinearProgress-bar': {
+                                                borderRadius: 4,
+                                                background:
+                                                    deleteProgress.phase === 'done'
+                                                        ? 'linear-gradient(90deg, #4caf50, #66bb6a)'
+                                                        : 'linear-gradient(90deg, #f44336, #e91e63)',
+                                                transition: 'transform 0.3s ease'
+                                            }
+                                        }}
+                                    />
+                                )}
+
+                                {deleteProgress.totalMessages > 0 && deleteProgress.phase !== 'error' && (
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            mt: 1,
+                                            opacity: 0.7
+                                        }}
+                                    >
+                                        <Typography variant='caption'>
+                                            {deleteProgress.deletedMessages > 0
+                                                ? `${deleteProgress.deletedMessages.toLocaleString()} / ${deleteProgress.totalMessages.toLocaleString()} messages`
+                                                : `${deleteProgress.totalMessages.toLocaleString()} messages`}
+                                        </Typography>
+                                        {deleteProgress.currentBatch > 0 && deleteProgress.phase === 'deleting' && (
+                                            <Typography variant='caption'>Batch {deleteProgress.currentBatch}</Typography>
+                                        )}
+                                    </Box>
+                                )}
+
+                                {deleteProgress.phase === 'error' && deleteProgress.errorText && (
+                                    <Typography
+                                        variant='caption'
+                                        sx={{
+                                            display: 'block',
+                                            mt: 1,
+                                            p: 1.5,
+                                            borderRadius: '8px',
+                                            backgroundColor: 'rgba(244,67,54,0.08)',
+                                            color: '#f44336',
+                                            fontFamily: 'monospace',
+                                            wordBreak: 'break-word'
+                                        }}
+                                    >
+                                        {deleteProgress.errorText}
+                                    </Typography>
+                                )}
+                            </Box>
+                        </DialogContent>
+                        {(deleteProgress.phase === 'done' || deleteProgress.phase === 'error') && (
+                            <DialogActions sx={{ px: 3, pb: 2 }}>
+                                <Button
+                                    onClick={() => {
+                                        setDeleteModalOpen(false)
+                                        setDeleteProgress((prev) => ({ ...prev, phase: 'idle' }))
+                                        if (deleteProgress.phase === 'done') {
+                                            refresh(1, pageLimit, startDate, endDate, chatTypeFilter, feedbackTypeFilter)
+                                        }
+                                    }}
+                                    sx={{
+                                        borderRadius: '20px',
+                                        px: 3,
+                                        textTransform: 'none',
+                                        color: deleteProgress.phase === 'done' ? '#4caf50' : '#f44336'
+                                    }}
+                                >
+                                    {deleteProgress.phase === 'done' ? 'Done' : 'Close'}
+                                </Button>
+                            </DialogActions>
+                        )}
+                    </Dialog>
+                    {/* Export Progress Modal */}
+                    <Dialog
+                        open={exportModalOpen}
+                        maxWidth='sm'
+                        fullWidth
+                        PaperProps={{
+                            sx: {
+                                borderRadius: '16px',
+                                background: customization.isDarkMode
+                                    ? 'linear-gradient(135deg, rgba(30,25,45,0.98) 0%, rgba(40,30,60,0.98) 100%)'
+                                    : 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(245,240,255,0.98) 100%)',
+                                backdropFilter: 'blur(20px)',
+                                border: '1px solid rgba(156,39,176,0.15)',
+                                boxShadow: '0 8px 32px rgba(156,39,176,0.15)'
+                            }
+                        }}
+                    >
+                        <DialogTitle
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 1.5,
+                                pb: 1,
+                                fontWeight: 600,
+                                background: 'linear-gradient(90deg, #9c27b0, #673ab7)',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent'
+                            }}
+                        >
+                            <IconDownload
+                                size={24}
+                                style={{
+                                    color: '#9c27b0',
+                                    animation: exportProgress.phase === 'fetching' ? 'pulse 1.5s ease-in-out infinite' : 'none'
+                                }}
+                            />
+                            Export Messages
+                        </DialogTitle>
+                        <DialogContent sx={{ pt: 2 }}>
+                            <Box sx={{ mb: 2 }}>
+                                <Typography
+                                    variant='body2'
+                                    sx={{
+                                        mb: 1.5,
+                                        color: exportProgress.phase === 'error' ? '#f44336' : 'text.secondary',
+                                        fontWeight: exportProgress.phase === 'done' ? 500 : 400
+                                    }}
+                                >
+                                    {exportProgress.statusText}
+                                </Typography>
+
+                                {exportProgress.phase !== 'error' && exportProgress.phase !== 'idle' && (
+                                    <LinearProgress
+                                        variant={exportProgress.phase === 'counting' ? 'indeterminate' : 'determinate'}
+                                        value={exportProgress.percent}
+                                        sx={{
+                                            height: 8,
+                                            borderRadius: 4,
+                                            backgroundColor: customization.isDarkMode ? 'rgba(156,39,176,0.15)' : 'rgba(156,39,176,0.1)',
+                                            '& .MuiLinearProgress-bar': {
+                                                borderRadius: 4,
+                                                background:
+                                                    exportProgress.phase === 'done'
+                                                        ? 'linear-gradient(90deg, #4caf50, #66bb6a)'
+                                                        : 'linear-gradient(90deg, #9c27b0, #673ab7)',
+                                                transition: 'transform 0.3s ease'
+                                            }
+                                        }}
+                                    />
+                                )}
+
+                                {exportProgress.totalMessages > 0 && exportProgress.phase !== 'error' && (
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            mt: 1,
+                                            opacity: 0.7
+                                        }}
+                                    >
+                                        <Typography variant='caption'>
+                                            {exportProgress.fetchedMessages > 0
+                                                ? `${exportProgress.fetchedMessages.toLocaleString()} / ${exportProgress.totalMessages.toLocaleString()} messages`
+                                                : `${exportProgress.totalMessages.toLocaleString()} messages`}
+                                        </Typography>
+                                        {exportProgress.totalBatches > 0 && exportProgress.phase === 'fetching' && (
+                                            <Typography variant='caption'>
+                                                Batch {exportProgress.currentBatch}/{exportProgress.totalBatches}
+                                            </Typography>
+                                        )}
+                                    </Box>
+                                )}
+
+                                {exportProgress.phase === 'error' && exportProgress.errorText && (
+                                    <Typography
+                                        variant='caption'
+                                        sx={{
+                                            display: 'block',
+                                            mt: 1,
+                                            p: 1.5,
+                                            borderRadius: '8px',
+                                            backgroundColor: 'rgba(244,67,54,0.08)',
+                                            color: '#f44336',
+                                            fontFamily: 'monospace',
+                                            wordBreak: 'break-word'
+                                        }}
+                                    >
+                                        {exportProgress.errorText}
+                                    </Typography>
+                                )}
+                            </Box>
+                        </DialogContent>
+                        {(exportProgress.phase === 'done' || exportProgress.phase === 'error') && (
+                            <DialogActions sx={{ px: 3, pb: 2 }}>
+                                <Button
+                                    onClick={() => {
+                                        setExportModalOpen(false)
+                                        setExportProgress((prev) => ({ ...prev, phase: 'idle' }))
+                                    }}
+                                    sx={{
+                                        borderRadius: '20px',
+                                        px: 3,
+                                        textTransform: 'none',
+                                        color: exportProgress.phase === 'done' ? '#4caf50' : '#9c27b0'
+                                    }}
+                                >
+                                    {exportProgress.phase === 'done' ? 'Done' : 'Close'}
+                                </Button>
+                                {exportProgress.phase === 'error' && (
+                                    <StyledButton
+                                        variant='contained'
+                                        onClick={() => {
+                                            setExportModalOpen(false)
+                                            setExportProgress((prev) => ({ ...prev, phase: 'idle' }))
+                                            exportMessages()
+                                        }}
+                                        sx={{ borderRadius: '20px', px: 3, textTransform: 'none' }}
+                                    >
+                                        Retry
+                                    </StyledButton>
+                                )}
+                            </DialogActions>
+                        )}
+                    </Dialog>
                 </>
             </DialogContent>
         </Dialog>

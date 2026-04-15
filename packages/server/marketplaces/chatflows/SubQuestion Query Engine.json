@@ -597,7 +597,7 @@
             "id": "openAIEmbedding_LlamaIndex_1",
             "position": {
                 "x": -37.812177549447284,
-                "y": 577.9112529482311
+                "y": 577.9130449482311
             },
             "type": "customNode",
             "data": {
@@ -664,7 +664,7 @@
             "dragging": false,
             "positionAbsolute": {
                 "x": -37.812177549447284,
-                "y": 577.9112529482311
+                "y": 577.9130449482311
             }
         },
         {

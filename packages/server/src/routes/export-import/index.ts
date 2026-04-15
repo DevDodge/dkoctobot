@@ -7,6 +7,10 @@ router.post('/export', checkPermission('workspace:export'), exportImportControll
 
 router.post('/chatflow-messages', checkPermission('workspace:export'), exportImportController.exportChatflowMessages)
 
+router.post('/chatflow-messages/count', checkPermission('workspace:export'), exportImportController.countChatflowMessages)
+
+router.post('/chatflow-messages/batch', checkPermission('workspace:export'), exportImportController.exportChatflowMessagesBatch)
+
 router.post('/import', checkPermission('workspace:import'), exportImportController.importData)
 
 export default router

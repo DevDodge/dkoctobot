@@ -218,6 +218,73 @@ async function getMessagesFeedbackByChatflowIds(chatflowIds: string[]): Promise<
     return await appServer.AppDataSource.getRepository(ChatMessageFeedback).find({ where: { chatflowid: In(chatflowIds) } })
 }
 
+// Batch delete: fetches N message IDs, deletes them + feedback + files, returns count + hasMore
+const removeMessagesBatch = async (
+    chatflowid: string,
+    batchSize: number,
+    deleteOptions: FindOptionsWhere<ChatMessage>,
+    orgId: string,
+    workspaceId: string,
+    usageCacheManager: UsageCacheManager
+): Promise<{ deleted: number; hasMore: boolean }> => {
+    try {
+        const appServer = getRunningExpressApp()
+        const repo = appServer.AppDataSource.getRepository(ChatMessage)
+
+        // Fetch a batch of message IDs matching the criteria
+        const messages = await repo.find({
+            where: deleteOptions,
+            select: ['id', 'chatId'],
+            take: batchSize,
+            order: { createdDate: 'ASC' }
+        })
+
+        if (messages.length === 0) {
+            return { deleted: 0, hasMore: false }
+        }
+
+        const messageIds = messages.map((m) => m.id)
+
+        // Get unique chatIds for feedback + file cleanup
+        const uniqueChatIds = [...new Set(messages.map((m) => m.chatId))]
+
+        // Delete feedback for these chatIds
+        for (const chatId of uniqueChatIds) {
+            try {
+                await appServer.AppDataSource.getRepository(ChatMessageFeedback).delete({ chatId })
+            } catch (e) {
+                // Don't fail if feedback delete fails
+            }
+        }
+
+        // Delete uploaded files for these chatIds
+        for (const chatId of uniqueChatIds) {
+            try {
+                const { totalSize } = await removeFilesFromStorage(orgId, chatflowid, chatId)
+                await updateStorageUsage(orgId, workspaceId, totalSize, usageCacheManager)
+            } catch (e) {
+                // Don't fail if file cleanup fails
+            }
+        }
+
+        // Delete the messages
+        await repo.delete(messageIds)
+
+        // Check if more messages remain
+        const remainingCount = await repo.count({ where: deleteOptions })
+
+        return {
+            deleted: messages.length,
+            hasMore: remainingCount > 0
+        }
+    } catch (error) {
+        throw new InternalFlowiseError(
+            StatusCodes.INTERNAL_SERVER_ERROR,
+            `Error: chatMessagesService.removeMessagesBatch - ${getErrorMessage(error)}`
+        )
+    }
+}
+
 export default {
     createChatMessage,
     getAllChatMessages,
@@ -226,5 +293,6 @@ export default {
     removeChatMessagesByMessageIds,
     abortChatMessage,
     getMessagesByChatflowIds,
-    getMessagesFeedbackByChatflowIds
+    getMessagesFeedbackByChatflowIds,
+    removeMessagesBatch
 }

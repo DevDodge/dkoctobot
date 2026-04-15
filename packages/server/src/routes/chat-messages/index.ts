@@ -15,4 +15,7 @@ router.put(['/abort/', '/abort/:chatflowid/:chatid'], chatMessageController.abor
 // DELETE
 router.delete(['/', '/:id'], chatMessageController.removeAllChatMessages)
 
+// DELETE BATCH (for large datasets - deletes N messages at a time)
+router.delete('/:id/batch', chatMessageController.removeMessagesBatch)
+
 export default router

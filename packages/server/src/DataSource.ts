@@ -76,7 +76,12 @@ export const init = async (): Promise<void> => {
                 entities: Object.values(entities),
                 migrations: postgresMigrations,
                 extra: {
-                    idleTimeoutMillis: 120000
+                    max: parseInt(process.env.DATABASE_POOL_MAX || '20'),
+                    min: parseInt(process.env.DATABASE_POOL_MIN || '2'),
+                    idleTimeoutMillis: parseInt(process.env.DATABASE_IDLE_TIMEOUT || '30000'),
+                    connectionTimeoutMillis: parseInt(process.env.DATABASE_CONNECTION_TIMEOUT || '30000'),
+                    statement_timeout: 60000,
+                    query_timeout: 60000
                 },
                 logging: ['error', 'warn', 'info', 'log'],
                 logger: 'advanced-console',
@@ -84,7 +89,7 @@ export const init = async (): Promise<void> => {
                 poolErrorHandler: (err) => {
                     logger.error(`Database pool error: ${JSON.stringify(err)}`)
                 },
-                applicationName: 'Flowise'
+                applicationName: 'Octobot'
             })
             break
         default:

@@ -382,11 +382,17 @@ export async function start(): Promise<void> {
     const port = parseInt(process.env.PORT || '', 10) || 3000
     const server = http.createServer(serverApp.app)
 
+    // Prevent connection pile-up that causes server freezes
+    server.keepAliveTimeout = 65000 // 65s (> typical proxy timeout of 60s)
+    server.headersTimeout = 70000 // Must be > keepAliveTimeout
+    server.timeout = 300000 // 5 min max request time (for long AI chains)
+    server.maxConnections = 200 // Hard cap on concurrent connections
+
     await serverApp.initDatabase()
     await serverApp.config()
 
     server.listen(port, host, () => {
-        logger.info(`⚡️ [server]: Flowise Server is listening at ${host ? 'http://' + host : ''}:${port}`)
+        logger.info(`⚡️ [server]: Octobot Server is listening at ${host ? 'http://' + host : ''}:${port}`)
     })
 }
 

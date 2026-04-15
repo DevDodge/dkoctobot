@@ -359,10 +359,84 @@ const parseAPIResponse = (apiResponse: ChatMessage | ChatMessage[]): ChatMessage
     }
 }
 
+const removeMessagesBatch = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const appServer = getRunningExpressApp()
+        if (typeof req.params === 'undefined' || !req.params.id) {
+            throw new InternalFlowiseError(
+                StatusCodes.PRECONDITION_FAILED,
+                'Error: chatMessagesController.removeMessagesBatch - id not provided!'
+            )
+        }
+        const orgId = req.user?.activeOrganizationId
+        if (!orgId) {
+            throw new InternalFlowiseError(
+                StatusCodes.NOT_FOUND,
+                `Error: chatMessagesController.removeMessagesBatch - organization not found!`
+            )
+        }
+        const workspaceId = req.user?.activeWorkspaceId
+        if (!workspaceId) {
+            throw new InternalFlowiseError(
+                StatusCodes.NOT_FOUND,
+                `Error: chatMessagesController.removeMessagesBatch - workspace not found!`
+            )
+        }
+
+        const chatflowid = req.params.id
+        const batchSize = parseInt(req.query?.batchSize as string) || 1000
+
+        // Build delete options from query params
+        const deleteOptions: FindOptionsWhere<ChatMessage> = { chatflowid }
+
+        const _chatTypes = req.query?.chatType as string | undefined
+        if (_chatTypes) {
+            try {
+                let chatTypes: ChatType[]
+                if (Array.isArray(_chatTypes)) {
+                    chatTypes = _chatTypes
+                } else {
+                    chatTypes = JSON.parse(_chatTypes)
+                }
+                if (chatTypes.length > 0) {
+                    deleteOptions.chatType = In(chatTypes)
+                }
+            } catch (e) {
+                deleteOptions.chatType = _chatTypes as ChatType
+            }
+        }
+
+        const startDate = req.query?.startDate as string | undefined
+        const endDate = req.query?.endDate as string | undefined
+        if (startDate && endDate) {
+            deleteOptions.createdDate = Between(new Date(startDate), new Date(endDate))
+        }
+
+        let feedbackTypeFilters = req.query?.feedbackType as ChatMessageRatingType[] | undefined
+        if (feedbackTypeFilters) {
+            feedbackTypeFilters = getFeedbackTypeFilters(feedbackTypeFilters)
+        }
+
+        const apiResponse = await chatMessagesService.removeMessagesBatch(
+            chatflowid,
+            batchSize,
+            deleteOptions,
+            orgId,
+            workspaceId,
+            appServer.usageCacheManager
+        )
+
+        return res.json(apiResponse)
+    } catch (error) {
+        next(error)
+    }
+}
+
 export default {
     createChatMessage,
     getAllChatMessages,
     getAllInternalChatMessages,
     removeAllChatMessages,
-    abortChatMessage
+    abortChatMessage,
+    removeMessagesBatch
 }

@@ -10,10 +10,38 @@ import { v4 as uuidv4 } from 'uuid'
 import { getErrorMessage } from '../../errors/utils'
 import { MODE } from '../../Interface'
 
+// Per-chatflow concurrency tracking to prevent server freeze under burst traffic
+const activePredictions = new Map<string, number>()
+const MAX_CONCURRENT_PER_CHATFLOW = parseInt(process.env.MAX_CONCURRENT_PER_CHATFLOW || '5')
+const MAX_TOTAL_CONCURRENT = parseInt(process.env.MAX_TOTAL_CONCURRENT || '30')
+let totalActive = 0
+
+function acquireSlot(chatflowId: string): boolean {
+    const currentForFlow = activePredictions.get(chatflowId) || 0
+    if (currentForFlow >= MAX_CONCURRENT_PER_CHATFLOW || totalActive >= MAX_TOTAL_CONCURRENT) {
+        logger.warn(
+            `[server]: Concurrency limit hit for chatflow ${chatflowId} (flow: ${currentForFlow}/${MAX_CONCURRENT_PER_CHATFLOW}, total: ${totalActive}/${MAX_TOTAL_CONCURRENT})`
+        )
+        return false
+    }
+    activePredictions.set(chatflowId, currentForFlow + 1)
+    totalActive++
+    return true
+}
+
+function releaseSlot(chatflowId: string): void {
+    const updated = (activePredictions.get(chatflowId) || 1) - 1
+    if (updated <= 0) activePredictions.delete(chatflowId)
+    else activePredictions.set(chatflowId, updated)
+    totalActive--
+}
+
 // Send input message and get prediction result (External)
 const createPrediction = async (req: Request, res: Response, next: NextFunction) => {
+    const chatflowId = req.params?.id
+    let slotAcquired = false
     try {
-        if (typeof req.params === 'undefined' || !req.params.id) {
+        if (typeof req.params === 'undefined' || !chatflowId) {
             throw new InternalFlowiseError(
                 StatusCodes.PRECONDITION_FAILED,
                 `Error: predictionsController.createPrediction - id not provided!`
@@ -25,11 +53,20 @@ const createPrediction = async (req: Request, res: Response, next: NextFunction)
                 `Error: predictionsController.createPrediction - body not provided!`
             )
         }
+
+        // Check concurrency limits before doing any heavy work
+        if (!acquireSlot(chatflowId)) {
+            return res.status(429).json({
+                error: 'Server busy processing other requests for this chatflow, please retry shortly'
+            })
+        }
+        slotAcquired = true
+
         const workspaceId = req.user?.activeWorkspaceId
 
-        const chatflow = await chatflowsService.getChatflowById(req.params.id, workspaceId)
+        const chatflow = await chatflowsService.getChatflowById(chatflowId, workspaceId)
         if (!chatflow) {
-            throw new InternalFlowiseError(StatusCodes.NOT_FOUND, `Chatflow ${req.params.id} not found`)
+            throw new InternalFlowiseError(StatusCodes.NOT_FOUND, `Chatflow ${chatflowId} not found`)
         }
         let isDomainAllowed = true
         let unauthorizedOriginError = 'This site is not allowed to access this chatbot'
@@ -54,7 +91,7 @@ const createPrediction = async (req: Request, res: Response, next: NextFunction)
             }
         }
         if (isDomainAllowed) {
-            const streamable = await chatflowsService.checkIfChatflowIsValidForStreaming(req.params.id)
+            const streamable = await chatflowsService.checkIfChatflowIsValidForStreaming(chatflowId)
             const isStreamingRequested = req.body.streaming === 'true' || req.body.streaming === true
             if (streamable?.isStreaming && isStreamingRequested) {
                 const sseStreamer = getRunningExpressApp().sseStreamer
@@ -99,6 +136,10 @@ const createPrediction = async (req: Request, res: Response, next: NextFunction)
         }
     } catch (error) {
         next(error)
+    } finally {
+        if (slotAcquired && chatflowId) {
+            releaseSlot(chatflowId)
+        }
     }
 }
 

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="144px" height="144px">
+  <defs>
+    <linearGradient id="orderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9c27b0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#673ab7;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <circle cx="24" cy="24" r="22" fill="url(#orderGrad)" opacity="0.9"/>
+  <!-- Shopping cart icon -->
+  <g transform="translate(10, 10) scale(1.15)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="9" cy="21" r="1.5" fill="#fff"/>
+    <circle cx="20" cy="21" r="1.5" fill="#fff"/>
+    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+  </g>
+</svg>

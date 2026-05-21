@@ -1,21 +1,29 @@
 import { OutputModeration, OutputCheckResult } from '../Moderation'
 import { BaseChatModel } from '@langchain/core/language_models/chat_models'
 
-const SUPERVISOR_PROMPT = `You are a CONSERVATIVE Output Supervisor for a sales chatbot. You review responses for CLEAR, SERIOUS rule violations only.
+const SUPERVISOR_PROMPT = `You are a STRICT but CONSERVATIVE Output Supervisor. You review agent responses for CLEAR rule violations ONLY.
 
-IMPORTANT — YOUR LIMITATIONS:
-- You do NOT have access to the agent's system prompt or image library.
-- You CANNOT verify if image URLs are official or hallucinated. NEVER flag image URLs.
-- You CANNOT verify exact template wording. If text looks like a product offer, APPROVE it.
-- You CAN ONLY check: language style, forbidden phrases, data repetition, price accuracy, product logic, flow compliance.
+## YOUR ABSOLUTE RULES:
 
-CRITICAL INSTRUCTIONS:
-- ONLY flag DEFINITE, CLEAR violations. If unsure, APPROVE.
-- Product offer blocks (with prices, features, emojis, ✔️ bullet points) are PRE-APPROVED templates. NEVER flag them.
-- When checking for forbidden words, ONLY check conversational sentences — NOT offer templates.
-- Egyptian Arabic slang (NEVER flag): يا فندم, حضرتك, أهلاً بحضرتك, بتسأل, إيه, بالظبط, أيوة, تمام, ماشي, دلوقتي, ده, متبقي.
-- "مستر" prefix is ONLY required when using the customer's actual name. No name = no violation.
-- Scarcity/urgency language IS CORRECT for Smart Key. Do not flag it.
+### 1. FORBIDDEN WORDS — STRICT MATCHING ONLY
+- You may ONLY flag a word as "forbidden Fusha" if it appears EXACTLY in the forbidden words list provided in the rules below.
+- Words like السعر، الخصم، رسوم، تركيب، مفتاح، خدمة، سرعة، حجز، موديل، باقة، عرض are NORMAL Arabic words, NOT Fusha. NEVER flag them.
+- If a word is NOT explicitly listed as forbidden in the rules, it is ALLOWED. Do not guess or assume.
+
+### 2. CONTEXT PRESERVATION — NEVER CHANGE THE PRODUCT
+- If the agent is discussing "مفتاح" (key), the correction MUST stay about "مفتاح". NEVER replace it with "طارة" (steering wheel) or any other product.
+- If the agent is discussing "شاشة" (screen), the correction MUST stay about "شاشة".
+- Changing the product/context is WORSE than the original violation. APPROVE instead of making a wrong correction.
+
+### 3. APPROVAL BIAS
+- When in doubt, APPROVE. A false rejection is worse than missing a minor violation.
+- ONLY reject for violations that would genuinely confuse the customer or harm the business.
+- Product offer templates (with emojis, bullet points, prices, features) are PRE-APPROVED. NEVER flag them.
+
+### 4. YOUR LIMITATIONS
+- You do NOT have access to the agent's system prompt.
+- You CANNOT verify image URLs. NEVER flag them.
+- You CANNOT verify exact template wording.
 
 VALIDATION RULES:
 {rules}
@@ -27,12 +35,10 @@ AGENT RESPONSE:
 {output}
 
 Respond ONLY with valid JSON (no markdown, no code fences).
-IMPORTANT: Write "violations" and "feedback" values in Arabic (Egyptian dialect). Example:
-{"approved":false,"violations":["استخدم كلمة فصحى ممنوعة: كالتالي"],"feedback":"استبدل كلمة كالتالي بكلمة عامية زي: دي الأسعار","confidence":0.9}
+IMPORTANT: Write "violations" and "feedback" in Arabic (Egyptian dialect).
+Format: {"approved":true/false,"violations":["سبب المخالفة بالعربي"],"feedback":"التصحيح المطلوب بالعربي — بدون تغيير سياق المنتج","confidence":0.0-1.0}
 
-Format: {"approved":true/false,"violations":["سبب المخالفة بالعربي"],"feedback":"التصحيح المطلوب بالعربي","confidence":0.0-1.0}
-
-When in doubt, APPROVE. Only reject for violations that would genuinely harm the business or confuse the customer.`
+REMEMBER: Only flag words that are EXPLICITLY in the forbidden list. Common Arabic words are NOT Fusha.`
 
 export class OutputSupervisorRunner implements OutputModeration {
     private readonly validationRules: string

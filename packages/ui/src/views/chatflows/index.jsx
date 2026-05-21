@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 // material-ui
@@ -43,6 +43,7 @@ const Chatflows = () => {
     const [search, setSearch] = useState('')
     const { error, setError } = useError()
     const [selectedFolder, setSelectedFolder] = useState(null)
+    const searchDebounceRef = useRef(null)
 
     // State to hold folders list from Sidebar
     const [folders, setFolders] = useState([])
@@ -60,17 +61,20 @@ const Chatflows = () => {
     const onChange = (page, pageLimit) => {
         setCurrentPage(page)
         setPageLimit(pageLimit)
-        applyFilters(page, pageLimit, selectedFolder)
+        applyFilters(page, pageLimit, selectedFolder, search)
     }
 
     const applyFilters = useCallback(
-        (page, limit, folderId) => {
+        (page, limit, folderId, searchTerm) => {
             const params = {
                 page: page || currentPage,
                 limit: limit || pageLimit
             }
             if (folderId) {
                 params.folderId = folderId
+            }
+            if (searchTerm && searchTerm.trim()) {
+                params.search = searchTerm.trim()
             }
             getAllChatflowsApi.request(params)
         },
@@ -80,7 +84,7 @@ const Chatflows = () => {
     const handleFolderSelect = (folderId) => {
         setSelectedFolder(folderId)
         setCurrentPage(1) // Reset to first page when changing folder
-        applyFilters(1, pageLimit, folderId)
+        applyFilters(1, pageLimit, folderId, search)
     }
 
     const handleChange = (event, nextView) => {
@@ -90,15 +94,16 @@ const Chatflows = () => {
     }
 
     const onSearchChange = (event) => {
-        setSearch(event.target.value)
-    }
-
-    function filterFlows(data) {
-        return (
-            data?.name.toLowerCase().indexOf(search.toLowerCase()) > -1 ||
-            (data.category && data.category.toLowerCase().indexOf(search.toLowerCase()) > -1) ||
-            data?.id.toLowerCase().indexOf(search.toLowerCase()) > -1
-        )
+        const value = event.target.value
+        setSearch(value)
+        // Debounce server-side search
+        if (searchDebounceRef.current) {
+            clearTimeout(searchDebounceRef.current)
+        }
+        searchDebounceRef.current = setTimeout(() => {
+            setCurrentPage(1)
+            applyFilters(1, pageLimit, selectedFolder, value)
+        }, 400)
     }
 
     const addNew = () => {
@@ -110,9 +115,18 @@ const Chatflows = () => {
     }
 
     useEffect(() => {
-        applyFilters(currentPage, pageLimit, selectedFolder)
+        applyFilters(currentPage, pageLimit, selectedFolder, search)
         // FolderSidebar will fetch folders on mount and call onFoldersChange
         // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    // Cleanup debounce timer on unmount
+    useEffect(() => {
+        return () => {
+            if (searchDebounceRef.current) {
+                clearTimeout(searchDebounceRef.current)
+            }
+        }
     }, [])
 
     useEffect(() => {
@@ -176,7 +190,7 @@ const Chatflows = () => {
                         selectedFolder={selectedFolder}
                         onFolderSelect={handleFolderSelect}
                         onFoldersChange={setFolders}
-                        onChatflowMoved={() => applyFilters(currentPage, pageLimit, selectedFolder)}
+                        onChatflowMoved={() => applyFilters(currentPage, pageLimit, selectedFolder, search)}
                         refreshSignal={folderRefreshSignal}
                     />
 
@@ -245,7 +259,7 @@ const Chatflows = () => {
                                 <>
                                     {!view || view === 'card' ? (
                                         <Box display='grid' gridTemplateColumns='repeat(3, 1fr)' gap={gridSpacing}>
-                                            {getAllChatflowsApi.data?.data?.filter(filterFlows).map((data, index) => (
+                                            {getAllChatflowsApi.data?.data?.map((data, index) => (
                                                 <ItemCard
                                                     key={index}
                                                     onClick={() => goToCanvas(data)}
@@ -260,7 +274,6 @@ const Chatflows = () => {
                                             data={getAllChatflowsApi.data?.data}
                                             images={images}
                                             isLoading={isLoading}
-                                            filterFunction={filterFlows}
                                             updateFlowsApi={getAllChatflowsApi}
                                             setError={setError}
                                             currentPage={currentPage}
@@ -282,7 +295,7 @@ const Chatflows = () => {
                                             alt='WorkflowEmptySVG'
                                         />
                                     </Box>
-                                    <div>No Chatflows Yet</div>
+                                    <div>{search ? 'No Chatflows Found' : 'No Chatflows Yet'}</div>
                                 </Stack>
                             )}
                         </Stack>

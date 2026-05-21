@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- CRM Order Tool - Shopping cart + API connection -->
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="46" fill="url(#bg)" opacity="0.15"/>
+  <circle cx="50" cy="50" r="46" fill="none" stroke="url(#bg)" stroke-width="2"/>
+  <!-- Shopping cart -->
+  <path d="M28 32 L34 32 L42 58 L68 58 L74 38 L38 38" fill="none" stroke="#6366f1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="46" cy="66" r="3" fill="#6366f1"/>
+  <circle cx="64" cy="66" r="3" fill="#6366f1"/>
+  <!-- API/Key icon overlay -->
+  <circle cx="70" cy="28" r="12" fill="#06b6d4" opacity="0.9"/>
+  <path d="M66 28 L74 28 M70 24 L70 32" stroke="white" stroke-width="2" stroke-linecap="round"/>
+</svg>

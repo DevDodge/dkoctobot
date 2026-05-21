@@ -142,7 +142,14 @@ const deleteChatflow = async (chatflowId: string, orgId: string, workspaceId: st
     }
 }
 
-const getAllChatflows = async (type?: ChatflowType, workspaceId?: string, page: number = -1, limit: number = -1, folderId?: string | null) => {
+const getAllChatflows = async (
+    type?: ChatflowType,
+    workspaceId?: string,
+    page: number = -1,
+    limit: number = -1,
+    folderId?: string | null,
+    search?: string
+) => {
     try {
         const appServer = getRunningExpressApp()
 
@@ -150,10 +157,6 @@ const getAllChatflows = async (type?: ChatflowType, workspaceId?: string, page: 
             .createQueryBuilder('chat_flow')
             .orderBy('chat_flow.updatedDate', 'DESC')
 
-        if (page > 0 && limit > 0) {
-            queryBuilder.skip((page - 1) * limit)
-            queryBuilder.take(limit)
-        }
         if (type === 'MULTIAGENT') {
             queryBuilder.andWhere('chat_flow.type = :type', { type: 'MULTIAGENT' })
         } else if (type === 'AGENTFLOW') {
@@ -175,6 +178,20 @@ const getAllChatflows = async (type?: ChatflowType, workspaceId?: string, page: 
             queryBuilder.andWhere('chat_flow.folderId = :folderId', { folderId })
         }
         // If folderId is not provided, show all chatflows (default behavior)
+
+        // Server-side search across name, category, and id
+        if (search && search.trim()) {
+            const searchTerm = `%${search.trim()}%`
+            queryBuilder.andWhere(
+                '(chat_flow.name ILIKE :search OR chat_flow.category ILIKE :search OR CAST(chat_flow.id AS TEXT) ILIKE :search)',
+                { search: searchTerm }
+            )
+        }
+
+        if (page > 0 && limit > 0) {
+            queryBuilder.skip((page - 1) * limit)
+            queryBuilder.take(limit)
+        }
 
         const [data, total] = await queryBuilder.getManyAndCount()
 

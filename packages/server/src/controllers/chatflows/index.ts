@@ -73,13 +73,15 @@ const getAllChatflows = async (req: Request, res: Response, next: NextFunction) 
     try {
         const { page, limit } = getPageAndLimitParams(req)
         const folderId = req.query?.folderId as string | undefined
+        const search = req.query?.search as string | undefined
 
         const apiResponse = await chatflowsService.getAllChatflows(
             req.query?.type as ChatflowType,
             req.user?.activeWorkspaceId,
             page,
             limit,
-            folderId
+            folderId,
+            search
         )
         return res.json(apiResponse)
     } catch (error) {

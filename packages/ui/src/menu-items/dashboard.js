@@ -23,7 +23,8 @@ import {
     IconLockCheck,
     IconFileDatabase,
     IconShieldLock,
-    IconListCheck
+    IconListCheck,
+    IconEyeCheck
 } from '@tabler/icons-react'
 
 // constant
@@ -51,7 +52,8 @@ const icons = {
     IconLockCheck,
     IconFileDatabase,
     IconShieldLock,
-    IconListCheck
+    IconListCheck,
+    IconEyeCheck
 }
 
 // ==============================|| DASHBOARD MENU ITEMS ||============================== //
@@ -92,6 +94,14 @@ const dashboard = {
                     icon: icons.IconListCheck,
                     breadcrumbs: true,
                     permission: 'executions:view'
+                },
+                {
+                    id: 'supervisor-monitor',
+                    title: 'Supervisor Monitor',
+                    type: 'item',
+                    url: '/supervisor-monitor',
+                    icon: icons.IconEyeCheck,
+                    breadcrumbs: true
                 },
                 {
                     id: 'assistants',

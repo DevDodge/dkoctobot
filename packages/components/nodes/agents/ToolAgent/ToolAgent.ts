@@ -26,7 +26,7 @@ import {
 } from '../../../src/Interface'
 import { ConsoleCallbackHandler, CustomChainHandler, CustomStreamingHandler, additionalCallbacks } from '../../../src/handler'
 import { AgentExecutor, ToolCallingAgentOutputParser } from '../../../src/agents'
-import { Moderation, checkInputs, streamResponse } from '../../moderation/Moderation'
+import { Moderation, OutputModeration, OutputCheckResult, checkInputs, checkOutputs, streamResponse } from '../../moderation/Moderation'
 import { formatResponse } from '../../outputparsers/OutputParserHelpers'
 import { addImagesToMessages, llmSupportsVision } from '../../../src/multiModalUtils'
 
@@ -96,6 +96,15 @@ class ToolAgent_Agents implements INode {
                 list: true
             },
             {
+                label: 'Output Supervisor',
+                description:
+                    'Review agent output against validation rules before sending to user. Acts as a quality gate to prevent hallucinations.',
+                name: 'outputModeration',
+                type: 'OutputModeration',
+                optional: true,
+                list: true
+            },
+            {
                 label: 'Max Iterations',
                 name: 'maxIterations',
                 type: 'number',
@@ -122,6 +131,7 @@ class ToolAgent_Agents implements INode {
     async run(nodeData: INodeData, input: string, options: ICommonObject): Promise<string | ICommonObject> {
         const memory = nodeData.inputs?.memory as FlowiseMemory
         const moderations = nodeData.inputs?.inputModeration as Moderation[]
+        const outputModerations = nodeData.inputs?.outputModeration as OutputModeration[]
         const enableDetailedStreaming = nodeData.inputs?.enableDetailedStreaming as boolean
 
         const shouldStreamResponse = options.shouldStreamResponse
@@ -158,7 +168,23 @@ class ToolAgent_Agents implements INode {
         let usedTools: IUsedTool[] = []
         let artifacts = []
 
-        if (shouldStreamResponse) {
+        // Determine if we need to buffer output for supervisor review
+        const hasSupervisor = outputModerations && outputModerations.length > 0
+        const useBufferedMode = hasSupervisor && shouldStreamResponse
+
+        if (useBufferedMode) {
+            // === BUFFERED MODE: Run agent WITHOUT streaming, supervisor checks first ===
+            const allCallbacks = [loggerHandler, ...callbacks]
+            if (enableDetailedStreaming && customStreamingHandler) {
+                // Don't add streaming handler — we buffer the output
+            }
+
+            res = await executor.invoke({ input }, { callbacks: allCallbacks })
+            if (res.sourceDocuments) sourceDocuments = res.sourceDocuments
+            if (res.usedTools) usedTools = res.usedTools
+            if (res.artifacts) artifacts = res.artifacts
+        } else if (shouldStreamResponse) {
+            // === NORMAL STREAMING: No supervisor, stream directly ===
             const handler = new CustomChainHandler(sseStreamer, chatId)
             const allCallbacks = [loggerHandler, handler, ...callbacks]
 
@@ -198,6 +224,7 @@ class ToolAgent_Agents implements INode {
                 }
             }
         } else {
+            // === NON-STREAMING MODE ===
             const allCallbacks = [loggerHandler, ...callbacks]
 
             // Add detailed streaming handler if enabled
@@ -228,6 +255,128 @@ class ToolAgent_Agents implements INode {
         if (matches) {
             for (const match of matches) {
                 output = output.replace(match, '')
+            }
+        }
+
+        // Output Supervisor: validate response before sending
+        let supervisorResults: IUsedTool[] = []
+        if (hasSupervisor) {
+            const maxRetries = (outputModerations[0] as any).maxRetries || 1
+            const onFailureAction = (outputModerations[0] as any).onFailureAction || 'returnOriginal'
+            const errorMessage = (outputModerations[0] as any).errorMessage || 'عذراً، حدث خطأ في معالجة ردك.'
+            let retryCount = 0
+            let lastResult: OutputCheckResult | null = null
+
+            while (retryCount <= maxRetries) {
+                const result = await checkOutputs(outputModerations, output, input)
+                lastResult = result
+
+                const supervisorEntry: IUsedTool = {
+                    tool: '🛡️ Output Supervisor',
+                    toolInput: { output_reviewed: output.substring(0, 200) + (output.length > 200 ? '...' : ''), rules_checked: true },
+                    toolOutput: JSON.stringify({
+                        approved: result.approved,
+                        violations: result.violations,
+                        feedback: result.feedback,
+                        confidence: result.confidence,
+                        attempt: retryCount + 1
+                    })
+                }
+
+                if (result.approved) {
+                    supervisorResults.push(supervisorEntry)
+                    break
+                }
+
+                supervisorResults.push({ ...supervisorEntry, error: result.violations.join('; ') })
+
+                if (retryCount < maxRetries) {
+                    // Re-generate with correction feedback
+                    const correctionInput = `${input}\n\n[SUPERVISOR CORRECTION - Attempt ${
+                        retryCount + 1
+                    }]: The previous response violated these rules: ${result.violations.join(', ')}. ${
+                        result.feedback
+                    }. Please regenerate a corrected response.`
+
+                    const retryExecutor = await prepareAgent(nodeData, options, {
+                        sessionId: this.sessionId,
+                        chatId: options.chatId,
+                        input: correctionInput
+                    })
+                    const retryRes = await retryExecutor.invoke(
+                        { input: correctionInput },
+                        {
+                            callbacks: [
+                                new ConsoleCallbackHandler(options.logger, options?.orgId),
+                                ...(await additionalCallbacks(nodeData, options))
+                            ]
+                        }
+                    )
+                    output = extractOutputFromArray(retryRes?.output)
+                    output = removeInvalidImageMarkdown(output)
+                }
+                retryCount++
+            }
+
+            // Handle final failure
+            if (lastResult && !lastResult.approved && onFailureAction === 'returnError') {
+                output = errorMessage
+            }
+
+            // NOW stream the final approved/corrected output to the client
+            if (useBufferedMode && sseStreamer) {
+                // Send start event first (client needs this to begin rendering)
+                sseStreamer.streamStartEvent(chatId, '')
+
+                // Stream the final output (after supervisor approval)
+                sseStreamer.streamTokenEvent(chatId, output)
+
+                // Stream source documents, used tools, artifacts
+                if (sourceDocuments.length) {
+                    sseStreamer.streamSourceDocumentsEvent(chatId, flatten(sourceDocuments))
+                }
+                if (artifacts.length) {
+                    sseStreamer.streamArtifactsEvent(chatId, flatten(artifacts))
+                }
+            }
+
+            // Stream supervisor results as used tools
+            if (supervisorResults.length > 0) {
+                usedTools = [...usedTools, ...supervisorResults]
+                if (shouldStreamResponse && sseStreamer) {
+                    sseStreamer.streamUsedToolsEvent(chatId, supervisorResults)
+                }
+
+                // Save violations to database for Supervisor Monitor
+                try {
+                    const appDataSource = options.appDataSource
+                    const chatflowid = options.chatflowid
+                    if (appDataSource && chatflowid) {
+                        const violationEntries = supervisorResults.filter((s: IUsedTool) => s.error)
+                        for (const entry of violationEntries) {
+                            const parsed = JSON.parse(entry.toolOutput as string)
+                            const logData = {
+                                chatflowid,
+                                chatId: options.chatId || '',
+                                sessionId: this.sessionId || '',
+                                userInput: input.substring(0, 2000),
+                                originalOutput: (entry.toolInput as any)?.output_reviewed || '',
+                                correctedOutput: lastResult?.approved ? output.substring(0, 2000) : '',
+                                violations: JSON.stringify(parsed.violations || []),
+                                feedback: parsed.feedback || '',
+                                attempt: parsed.attempt || 1,
+                                approved: lastResult?.approved || false,
+                                confidence: parsed.confidence || 0
+                            }
+                            // Use direct repository access to save the log
+                            const repo = appDataSource.getRepository('SupervisorLog')
+                            const newLog = repo.create(logData)
+                            await repo.save(newLog)
+                        }
+                    }
+                } catch (dbError) {
+                    console.error('Failed to save supervisor log:', dbError)
+                }
             }
         }
 

@@ -53,6 +53,7 @@ import versionRouter from './versions'
 import pricingRouter from './pricing'
 import nvidiaNimRouter from './nvidia-nim'
 import executionsRouter from './executions'
+import supervisorLogsRouter from './supervisor-logs'
 import validationRouter from './validation'
 import agentflowv2GeneratorRouter from './agentflowv2-generator'
 import textToSpeechRouter from './text-to-speech'
@@ -123,6 +124,7 @@ router.use('/settings', settingsRouter)
 router.use('/pricing', pricingRouter)
 router.use('/nvidia-nim', nvidiaNimRouter)
 router.use('/executions', executionsRouter)
+router.use('/supervisor-logs', supervisorLogsRouter)
 router.use('/validation', validationRouter)
 router.use('/agentflowv2-generator', agentflowv2GeneratorRouter)
 router.use('/text-to-speech', textToSpeechRouter)

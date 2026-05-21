@@ -2445,6 +2445,7 @@ const ChatMessage = ({ open, chatflowid, isAgentCanvas, isDialog, previews, setP
                                         <img src={userPNG} alt='Me' width='30' height='30' className='usericon' />
                                     )}
                                     <div
+                                        dir='auto'
                                         style={{
                                             display: 'flex',
                                             flexDirection: 'column',
@@ -2583,7 +2584,7 @@ const ChatMessage = ({ open, chatflowid, isAgentCanvas, isDialog, previews, setP
                                                 })}
                                             </div>
                                         )}
-                                        <div className='markdownanswer'>
+                                        <div className='markdownanswer' dir='auto'>
                                             {message.type === 'leadCaptureMessage' &&
                                             !getLocalStorageChatflow(chatflowid)?.lead &&
                                             leadsConfig.status ? (

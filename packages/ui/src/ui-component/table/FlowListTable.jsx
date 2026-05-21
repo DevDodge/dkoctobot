@@ -293,8 +293,16 @@ export const FlowListTable = ({
                             </>
                         ) : (
                             <>
-                                {sortedData.filter(filterFunction).map((row, index) => (
-                                    <StyledTableRow key={index}>
+                                {sortedData.filter(filterFunction || (() => true)).map((row, index) => (
+                                    <StyledTableRow
+                                        key={index}
+                                        draggable
+                                        onDragStart={(e) => {
+                                            e.dataTransfer.setData('application/chatflow-id', row.id)
+                                            e.dataTransfer.effectAllowed = 'move'
+                                        }}
+                                        sx={{ cursor: 'grab', '&:active': { cursor: 'grabbing' } }}
+                                    >
                                         <StyledTableCell key='0'>
                                             <Tooltip title={row.templateName || row.name}>
                                                 <Typography

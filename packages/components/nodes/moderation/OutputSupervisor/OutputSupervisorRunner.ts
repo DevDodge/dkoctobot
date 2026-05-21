@@ -26,8 +26,11 @@ USER INPUT:
 AGENT RESPONSE:
 {output}
 
-Respond ONLY with valid JSON (no markdown, no code fences):
-{"approved":true/false,"violations":["ONLY serious clear violations"],"feedback":"specific correction if rejected","confidence":0.0-1.0}
+Respond ONLY with valid JSON (no markdown, no code fences).
+IMPORTANT: Write "violations" and "feedback" values in Arabic (Egyptian dialect). Example:
+{"approved":false,"violations":["استخدم كلمة فصحى ممنوعة: كالتالي"],"feedback":"استبدل كلمة كالتالي بكلمة عامية زي: دي الأسعار","confidence":0.9}
+
+Format: {"approved":true/false,"violations":["سبب المخالفة بالعربي"],"feedback":"التصحيح المطلوب بالعربي","confidence":0.0-1.0}
 
 When in doubt, APPROVE. Only reject for violations that would genuinely harm the business or confuse the customer.`
 

@@ -270,10 +270,11 @@ class ToolAgent_Agents implements INode {
             while (retryCount <= maxRetries) {
                 const result = await checkOutputs(outputModerations, output, input)
                 lastResult = result
+                const currentOutput = output // Capture full output for this attempt
 
                 const supervisorEntry: IUsedTool = {
                     tool: '🛡️ Output Supervisor',
-                    toolInput: { output_reviewed: output.substring(0, 200) + (output.length > 200 ? '...' : ''), rules_checked: true },
+                    toolInput: { output_reviewed: currentOutput, rules_checked: true },
                     toolOutput: JSON.stringify({
                         approved: result.approved,
                         violations: result.violations,
@@ -361,7 +362,7 @@ class ToolAgent_Agents implements INode {
                                 sessionId: this.sessionId || '',
                                 userInput: input.substring(0, 2000),
                                 originalOutput: (entry.toolInput as any)?.output_reviewed || '',
-                                correctedOutput: lastResult?.approved ? output.substring(0, 2000) : '',
+                                correctedOutput: lastResult?.approved ? output : '',
                                 violations: JSON.stringify(parsed.violations || []),
                                 feedback: parsed.feedback || '',
                                 attempt: parsed.attempt || 1,

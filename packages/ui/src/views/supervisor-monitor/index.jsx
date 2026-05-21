@@ -113,7 +113,7 @@ const SupervisorMonitor = () => {
 
     const formatDate = (dateStr) => {
         const d = new Date(dateStr)
-        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+        return d.toLocaleDateString('ar-EG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
     }
 
     const parseViolations = (violationsStr) => {
@@ -131,8 +131,8 @@ const SupervisorMonitor = () => {
             ) : (
                 <Stack flexDirection='column' sx={{ gap: 3 }}>
                     <ViewHeader
-                        title='🛡️ Supervisor Monitor'
-                        description='Track and monitor all Output Supervisor violations across your chatflows'
+                        title='🛡️ مراقب الـ Supervisor'
+                        description='تتبع ومراقبة كل مخالفات الـ Output Supervisor في الـ Chatflows'
                     />
 
                     {/* Stats Cards */}
@@ -146,7 +146,7 @@ const SupervisorMonitor = () => {
                             >
                                 <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
                                     <Typography variant='caption' color='text.secondary'>
-                                        Total Violations
+                                        إجمالي المخالفات
                                     </Typography>
                                     <Typography variant='h3' sx={{ color: theme.palette.error.main }}>
                                         {isLoading ? <Skeleton width={40} /> : stats.totalViolations}
@@ -163,7 +163,7 @@ const SupervisorMonitor = () => {
                             >
                                 <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
                                     <Typography variant='caption' color='text.secondary'>
-                                        Corrected
+                                        تم التصحيح
                                     </Typography>
                                     <Typography variant='h3' sx={{ color: theme.palette.success.main }}>
                                         {isLoading ? <Skeleton width={40} /> : stats.totalCorrected}
@@ -180,7 +180,7 @@ const SupervisorMonitor = () => {
                             >
                                 <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
                                     <Typography variant='caption' color='text.secondary'>
-                                        Failed
+                                        فشل التصحيح
                                     </Typography>
                                     <Typography variant='h3' sx={{ color: theme.palette.warning.main }}>
                                         {isLoading ? <Skeleton width={40} /> : stats.totalFailed}
@@ -197,7 +197,7 @@ const SupervisorMonitor = () => {
                             >
                                 <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
                                     <Typography variant='caption' color='text.secondary'>
-                                        Correction Rate
+                                        نسبة التصحيح
                                     </Typography>
                                     <Typography variant='h3' sx={{ color: theme.palette.primary.main }}>
                                         {isLoading ? <Skeleton width={40} /> : `${stats.correctionRate}%`}
@@ -220,7 +220,7 @@ const SupervisorMonitor = () => {
                                     size='small'
                                     SelectProps={{ native: true }}
                                 >
-                                    <option value=''>All Chatflows</option>
+                                    <option value=''>كل الـ Chatflows</option>
                                     {chatflows.map((cf) => (
                                         <option key={cf.id} value={cf.id}>
                                             {cf.name}
@@ -231,7 +231,7 @@ const SupervisorMonitor = () => {
                             <Grid item xs={12} md={2}>
                                 <TextField
                                     fullWidth
-                                    label='Start Date'
+                                    label='من تاريخ'
                                     type='date'
                                     value={filters.startDate}
                                     onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
@@ -242,7 +242,7 @@ const SupervisorMonitor = () => {
                             <Grid item xs={12} md={2}>
                                 <TextField
                                     fullWidth
-                                    label='End Date'
+                                    label='إلى تاريخ'
                                     type='date'
                                     value={filters.endDate}
                                     onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
@@ -253,7 +253,7 @@ const SupervisorMonitor = () => {
                             <Grid item xs={12} md={3}>
                                 <Stack direction='row' spacing={1}>
                                     <Button variant='contained' onClick={fetchData} size='small' startIcon={<IconRefresh size={16} />}>
-                                        Apply
+                                        تطبيق
                                     </Button>
                                     <Button
                                         variant='outlined'
@@ -263,7 +263,7 @@ const SupervisorMonitor = () => {
                                         }}
                                         size='small'
                                     >
-                                        Reset
+                                        إعادة تعيين
                                     </Button>
                                 </Stack>
                             </Grid>
@@ -282,13 +282,13 @@ const SupervisorMonitor = () => {
                             <Table size='small'>
                                 <TableHead>
                                     <TableRow sx={{ backgroundColor: theme.palette.grey[100] }}>
-                                        <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
+                                        <TableCell sx={{ fontWeight: 600 }}>التاريخ</TableCell>
                                         <TableCell sx={{ fontWeight: 600 }}>Chatflow</TableCell>
-                                        <TableCell sx={{ fontWeight: 600 }}>Violations</TableCell>
-                                        <TableCell sx={{ fontWeight: 600 }}>Attempt</TableCell>
-                                        <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+                                        <TableCell sx={{ fontWeight: 600 }}>المخالفات</TableCell>
+                                        <TableCell sx={{ fontWeight: 600 }}>المحاولة</TableCell>
+                                        <TableCell sx={{ fontWeight: 600 }}>الحالة</TableCell>
                                         <TableCell sx={{ fontWeight: 600 }} align='center'>
-                                            Details
+                                            التفاصيل
                                         </TableCell>
                                     </TableRow>
                                 </TableHead>
@@ -323,13 +323,13 @@ const SupervisorMonitor = () => {
                                                                 key={i}
                                                                 label={
                                                                     typeof v === 'string'
-                                                                        ? v.substring(0, 40) + (v.length > 40 ? '...' : '')
+                                                                        ? v.substring(0, 50) + (v.length > 50 ? '...' : '')
                                                                         : String(v)
                                                                 }
                                                                 size='small'
                                                                 color='error'
                                                                 variant='outlined'
-                                                                sx={{ fontSize: '0.7rem' }}
+                                                                sx={{ fontSize: '0.7rem', direction: 'rtl' }}
                                                             />
                                                         ))}
                                                         {violations.length > 2 && (
@@ -344,7 +344,7 @@ const SupervisorMonitor = () => {
                                                     {log.approved ? (
                                                         <Chip
                                                             icon={<IconShieldCheck size={14} />}
-                                                            label='Corrected'
+                                                            label='تم التصحيح'
                                                             size='small'
                                                             color='success'
                                                             variant='filled'
@@ -352,7 +352,7 @@ const SupervisorMonitor = () => {
                                                     ) : (
                                                         <Chip
                                                             icon={<IconAlertTriangle size={14} />}
-                                                            label='Failed'
+                                                            label='فشل'
                                                             size='small'
                                                             color='error'
                                                             variant='filled'
@@ -381,10 +381,10 @@ const SupervisorMonitor = () => {
                         <Stack sx={{ alignItems: 'center', justifyContent: 'center', py: 8 }} flexDirection='column'>
                             <IconShieldCheck size={64} color={theme.palette.success.main} />
                             <Typography variant='h4' sx={{ mt: 2, color: theme.palette.text.secondary }}>
-                                No Violations Found
+                                مفيش مخالفات
                             </Typography>
                             <Typography variant='body2' color='text.secondary'>
-                                The Output Supervisor hasn&apos;t detected any violations yet
+                                الـ Output Supervisor لسه ملقطش أي مخالفات
                             </Typography>
                         </Stack>
                     )}
@@ -402,7 +402,7 @@ const SupervisorMonitor = () => {
                                 <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <Stack direction='row' spacing={1} alignItems='center'>
                                         <IconShieldCheck size={24} />
-                                        <Typography variant='h4'>Violation Details</Typography>
+                                        <Typography variant='h4'>تفاصيل المخالفة</Typography>
                                     </Stack>
                                     <IconButton onClick={() => setOpenDialog(false)} size='small'>
                                         <IconX size={18} />
@@ -430,7 +430,7 @@ const SupervisorMonitor = () => {
                                             </Grid>
                                             <Grid item xs={6} md={3}>
                                                 <Typography variant='caption' color='text.secondary'>
-                                                    Attempt
+                                                    المحاولة
                                                 </Typography>
                                                 <Typography variant='body2' fontWeight={600}>
                                                     #{selectedLog.attempt}
@@ -438,20 +438,20 @@ const SupervisorMonitor = () => {
                                             </Grid>
                                             <Grid item xs={6} md={3}>
                                                 <Typography variant='caption' color='text.secondary'>
-                                                    Status
+                                                    الحالة
                                                 </Typography>
                                                 <Box>
                                                     {selectedLog.approved ? (
                                                         <Chip
                                                             icon={<IconShieldCheck size={14} />}
-                                                            label='Corrected'
+                                                            label='تم التصحيح'
                                                             size='small'
                                                             color='success'
                                                         />
                                                     ) : (
                                                         <Chip
                                                             icon={<IconAlertTriangle size={14} />}
-                                                            label='Failed'
+                                                            label='فشل'
                                                             size='small'
                                                             color='error'
                                                         />
@@ -463,10 +463,10 @@ const SupervisorMonitor = () => {
                                         {/* User Input */}
                                         <Box>
                                             <Typography variant='subtitle2' color='text.secondary' gutterBottom>
-                                                💬 User Input
+                                                💬 رسالة المستخدم
                                             </Typography>
                                             <Paper sx={{ p: 2, backgroundColor: theme.palette.grey[50], borderRadius: 2 }}>
-                                                <Typography variant='body2' sx={{ whiteSpace: 'pre-wrap', direction: 'rtl' }}>
+                                                <Typography variant='body2' dir='auto' sx={{ whiteSpace: 'pre-wrap' }}>
                                                     {selectedLog.userInput || 'N/A'}
                                                 </Typography>
                                             </Paper>
@@ -475,17 +475,19 @@ const SupervisorMonitor = () => {
                                         {/* Original Output (Rejected) */}
                                         <Box>
                                             <Typography variant='subtitle2' color='error.main' gutterBottom>
-                                                ❌ Original Response (Rejected)
+                                                ❌ الرد الأصلي (مرفوض)
                                             </Typography>
                                             <Paper
                                                 sx={{
                                                     p: 2,
                                                     backgroundColor: theme.palette.error.main + '08',
                                                     border: `1px solid ${theme.palette.error.main}33`,
-                                                    borderRadius: 2
+                                                    borderRadius: 2,
+                                                    maxHeight: 400,
+                                                    overflowY: 'auto'
                                                 }}
                                             >
-                                                <Typography variant='body2' sx={{ whiteSpace: 'pre-wrap', direction: 'rtl' }}>
+                                                <Typography variant='body2' dir='auto' sx={{ whiteSpace: 'pre-wrap' }}>
                                                     {selectedLog.originalOutput || 'N/A'}
                                                 </Typography>
                                             </Paper>
@@ -494,22 +496,30 @@ const SupervisorMonitor = () => {
                                         {/* Violations */}
                                         <Box>
                                             <Typography variant='subtitle2' color='text.secondary' gutterBottom>
-                                                ⚠️ Violations
+                                                ⚠️ أسباب المخالفة
                                             </Typography>
                                             <Stack spacing={1}>
                                                 {parseViolations(selectedLog.violations).map((v, i) => (
-                                                    <Chip
+                                                    <Paper
                                                         key={i}
-                                                        label={v}
-                                                        color='error'
-                                                        variant='outlined'
                                                         sx={{
-                                                            justifyContent: 'flex-start',
-                                                            height: 'auto',
-                                                            py: 0.5,
-                                                            '& .MuiChip-label': { whiteSpace: 'normal' }
+                                                            p: 1.5,
+                                                            backgroundColor: theme.palette.error.main + '0A',
+                                                            border: `1px solid ${theme.palette.error.main}33`,
+                                                            borderRadius: 2
                                                         }}
-                                                    />
+                                                    >
+                                                        <Typography
+                                                            variant='body2'
+                                                            dir='auto'
+                                                            sx={{
+                                                                color: theme.palette.error.main,
+                                                                fontWeight: 500
+                                                            }}
+                                                        >
+                                                            {v}
+                                                        </Typography>
+                                                    </Paper>
                                                 ))}
                                             </Stack>
                                         </Box>
@@ -517,7 +527,7 @@ const SupervisorMonitor = () => {
                                         {/* Feedback */}
                                         <Box>
                                             <Typography variant='subtitle2' color='text.secondary' gutterBottom>
-                                                📝 Supervisor Feedback
+                                                📝 ملاحظات الـ Supervisor
                                             </Typography>
                                             <Paper
                                                 sx={{
@@ -527,7 +537,7 @@ const SupervisorMonitor = () => {
                                                     borderRadius: 2
                                                 }}
                                             >
-                                                <Typography variant='body2' sx={{ whiteSpace: 'pre-wrap', direction: 'rtl' }}>
+                                                <Typography variant='body2' dir='auto' sx={{ whiteSpace: 'pre-wrap' }}>
                                                     {selectedLog.feedback || 'N/A'}
                                                 </Typography>
                                             </Paper>
@@ -537,17 +547,19 @@ const SupervisorMonitor = () => {
                                         {selectedLog.correctedOutput && (
                                             <Box>
                                                 <Typography variant='subtitle2' color='success.main' gutterBottom>
-                                                    ✅ Corrected Response
+                                                    ✅ الرد المصحح
                                                 </Typography>
                                                 <Paper
                                                     sx={{
                                                         p: 2,
                                                         backgroundColor: theme.palette.success.main + '08',
                                                         border: `1px solid ${theme.palette.success.main}33`,
-                                                        borderRadius: 2
+                                                        borderRadius: 2,
+                                                        maxHeight: 400,
+                                                        overflowY: 'auto'
                                                     }}
                                                 >
-                                                    <Typography variant='body2' sx={{ whiteSpace: 'pre-wrap', direction: 'rtl' }}>
+                                                    <Typography variant='body2' dir='auto' sx={{ whiteSpace: 'pre-wrap' }}>
                                                         {selectedLog.correctedOutput}
                                                     </Typography>
                                                 </Paper>
@@ -557,14 +569,14 @@ const SupervisorMonitor = () => {
                                         {/* Confidence */}
                                         <Box>
                                             <Typography variant='caption' color='text.secondary'>
-                                                Confidence: {(selectedLog.confidence * 100).toFixed(0)}% | Date:{' '}
+                                                الثقة: {(selectedLog.confidence * 100).toFixed(0)}% | التاريخ:{' '}
                                                 {formatDate(selectedLog.createdDate)}
                                             </Typography>
                                         </Box>
                                     </Stack>
                                 </DialogContent>
                                 <DialogActions>
-                                    <Button onClick={() => setOpenDialog(false)}>Close</Button>
+                                    <Button onClick={() => setOpenDialog(false)}>إغلاق</Button>
                                 </DialogActions>
                             </>
                         )}

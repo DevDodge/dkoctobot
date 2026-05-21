@@ -119,3 +119,7 @@ extensions/
 # Only allow apps/oss-app, ignore all other apps
 apps/*/
 !apps/oss-app/
+
+# Local config overrides
+package.json
+pnpm-workspace.yaml

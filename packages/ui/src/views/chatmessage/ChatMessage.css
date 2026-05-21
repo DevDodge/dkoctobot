@@ -67,6 +67,15 @@
 
 .markdownanswer {
     line-height: 1.75;
+    unicode-bidi: plaintext;
+}
+
+.markdownanswer p,
+.markdownanswer li,
+.markdownanswer span,
+.markdownanswer div {
+    unicode-bidi: plaintext;
+    direction: inherit;
 }
 
 .markdownanswer a:hover {
@@ -97,6 +106,13 @@
     margin-top: 1rem;
     margin-right: 1rem;
     border-radius: 1rem;
+}
+
+/* RTL: when dir=rtl, flip icon margins */
+[dir='rtl'] .boticon,
+[dir='rtl'] .usericon {
+    margin-right: 0;
+    margin-left: 1rem;
 }
 
 .markdownanswer h1,

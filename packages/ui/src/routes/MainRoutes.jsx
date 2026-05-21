@@ -61,6 +61,9 @@ const Logs = Loadable(lazy(() => import('@/views/serverlogs')))
 // executions routing
 const Executions = Loadable(lazy(() => import('@/views/agentexecutions')))
 
+// supervisor monitor routing
+const SupervisorMonitor = Loadable(lazy(() => import('@/views/supervisor-monitor')))
+
 // enterprise features
 const UsersPage = Loadable(lazy(() => import('@/views/users')))
 const RolesPage = Loadable(lazy(() => import('@/views/roles')))
@@ -103,6 +106,10 @@ const MainRoutes = {
                     <Executions />
                 </RequireAuth>
             )
+        },
+        {
+            path: '/supervisor-monitor',
+            element: <SupervisorMonitor />
         },
         {
             path: '/marketplaces',

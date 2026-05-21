@@ -14,9 +14,21 @@ import {
     Typography,
     Divider,
     Tooltip,
-    Chip
+    Chip,
+    TextField,
+    InputAdornment
 } from '@mui/material'
-import { IconFolder, IconFolderPlus, IconFolders, IconInbox, IconDotsVertical, IconTrash, IconPencil } from '@tabler/icons-react'
+import {
+    IconFolder,
+    IconFolderPlus,
+    IconFolders,
+    IconInbox,
+    IconDotsVertical,
+    IconTrash,
+    IconPencil,
+    IconSearch,
+    IconX
+} from '@tabler/icons-react'
 
 import chatflowFoldersApi from '@/api/chatflowFolders'
 import chatflowsApi from '@/api/chatflows'
@@ -35,6 +47,7 @@ const FolderSidebar = ({ selectedFolder, onFolderSelect, onFoldersChange, onChat
     const [contextMenu, setContextMenu] = useState(null)
     const [selectedContextFolder, setSelectedContextFolder] = useState(null)
     const [dragOverFolder, setDragOverFolder] = useState(null)
+    const [searchQuery, setSearchQuery] = useState('')
 
     // Dialog states
     const [showFolderDialog, setShowFolderDialog] = useState(false)
@@ -242,6 +255,36 @@ const FolderSidebar = ({ selectedFolder, onFolderSelect, onFoldersChange, onChat
                 </Tooltip>
             </Box>
             <Divider />
+            <Box sx={{ px: 1, py: 1 }}>
+                <TextField
+                    size='small'
+                    fullWidth
+                    placeholder='Search folders...'
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position='start'>
+                                <IconSearch size={16} stroke={1.5} color={theme.palette.text.secondary} />
+                            </InputAdornment>
+                        ),
+                        endAdornment: searchQuery ? (
+                            <InputAdornment position='end'>
+                                <IconButton size='small' onClick={() => setSearchQuery('')} sx={{ p: 0.25 }}>
+                                    <IconX size={14} />
+                                </IconButton>
+                            </InputAdornment>
+                        ) : null
+                    }}
+                    sx={{
+                        '& .MuiOutlinedInput-root': {
+                            height: 32,
+                            fontSize: '0.8rem',
+                            borderRadius: 1.5
+                        }
+                    }}
+                />
+            </Box>
             <List sx={{ flex: 1, overflow: 'auto', py: 1 }}>
                 {/* All Chatflows */}
                 <ListItemButton
@@ -277,46 +320,48 @@ const FolderSidebar = ({ selectedFolder, onFolderSelect, onFoldersChange, onChat
                 {folders.length > 0 && <Divider sx={{ my: 1 }} />}
 
                 {/* User folders - droppable */}
-                {folders.map((folder) => (
-                    <ListItemButton
-                        key={folder.id}
-                        selected={selectedFolder === folder.id}
-                        onClick={() => onFolderSelect(folder.id)}
-                        onContextMenu={(e) => handleContextMenu(e, folder)}
-                        onDragOver={(e) => handleDragOver(e, folder.id)}
-                        onDragLeave={handleDragLeave}
-                        onDrop={(e) => handleDrop(e, folder.id)}
-                        sx={getDropStyles(folder.id)}
-                    >
-                        <ListItemIcon sx={{ minWidth: 28 }}>
-                            <IconFolder size={18} />
-                        </ListItemIcon>
-                        <ListItemText
-                            primary={folder.name}
-                            primaryTypographyProps={{
-                                variant: 'body2',
-                                style: {
-                                    whiteSpace: 'normal',
-                                    wordBreak: 'break-word',
-                                    lineHeight: 1.2
-                                }
-                            }}
-                        />
-                        {folderCounts[folder.id] > 0 && (
-                            <Chip label={folderCounts[folder.id]} size='small' sx={{ height: 20, fontSize: '0.7rem', mr: 0.5 }} />
-                        )}
-                        <IconButton
-                            size='small'
-                            onClick={(e) => {
-                                e.stopPropagation()
-                                handleContextMenu(e, folder)
-                            }}
-                            sx={{ opacity: 0.5, '&:hover': { opacity: 1 }, p: 0.25 }}
+                {folders
+                    .filter((folder) => !searchQuery || folder.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                    .map((folder) => (
+                        <ListItemButton
+                            key={folder.id}
+                            selected={selectedFolder === folder.id}
+                            onClick={() => onFolderSelect(folder.id)}
+                            onContextMenu={(e) => handleContextMenu(e, folder)}
+                            onDragOver={(e) => handleDragOver(e, folder.id)}
+                            onDragLeave={handleDragLeave}
+                            onDrop={(e) => handleDrop(e, folder.id)}
+                            sx={getDropStyles(folder.id)}
                         >
-                            <IconDotsVertical size={14} />
-                        </IconButton>
-                    </ListItemButton>
-                ))}
+                            <ListItemIcon sx={{ minWidth: 28 }}>
+                                <IconFolder size={18} />
+                            </ListItemIcon>
+                            <ListItemText
+                                primary={folder.name}
+                                primaryTypographyProps={{
+                                    variant: 'body2',
+                                    style: {
+                                        whiteSpace: 'normal',
+                                        wordBreak: 'break-word',
+                                        lineHeight: 1.2
+                                    }
+                                }}
+                            />
+                            {folderCounts[folder.id] > 0 && (
+                                <Chip label={folderCounts[folder.id]} size='small' sx={{ height: 20, fontSize: '0.7rem', mr: 0.5 }} />
+                            )}
+                            <IconButton
+                                size='small'
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleContextMenu(e, folder)
+                                }}
+                                sx={{ opacity: 0.5, '&:hover': { opacity: 1 }, p: 0.25 }}
+                            >
+                                <IconDotsVertical size={14} />
+                            </IconButton>
+                        </ListItemButton>
+                    ))}
             </List>
 
             {/* Context Menu */}

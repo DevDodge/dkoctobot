@@ -247,7 +247,9 @@ class AppCityRAG_Tools implements INode {
                 sheets[0].sheetName
             }", "query": "dentist"}\n\nAvailable sheets:\n${sheets
                 .map((s) => `- ${s.sheetName}`)
-                .join('\n')}\n\nAlways specify which sheet to search. If unsure, ask the user which category they need.`
+                .join(
+                    '\n'
+                )}\n- AllSheets (searches ALL sheets at once)\n\nAlways specify which sheet to search. If unsure which sheet, use "AllSheets" to search all sheets at once.`
         }
 
         return new AppCityRAGTool({
@@ -317,6 +319,16 @@ class AppCityRAGTool extends Tool {
                 sheetName = ''
             }
 
+            // ═══════════════════════════════════════════════
+            // Check for "All" sheets mode
+            // ═══════════════════════════════════════════════
+            const ALL_KEYWORDS = ['allsheets', 'all sheets', 'all', 'الكل', 'كلهم', 'جميع', 'كل الشيتات']
+            const isAllSheets = sheetName && ALL_KEYWORDS.includes(sheetName.toLowerCase().trim())
+
+            if (isAllSheets && query) {
+                return await this.searchAllSheets(query, startTime)
+            }
+
             // Resolve which sheet to search
             let targetSheet: SheetConfig | undefined
 
@@ -338,7 +350,7 @@ class AppCityRAGTool extends Tool {
 
             if (!targetSheet) {
                 const available = this.sheets.map((s) => `"${s.sheetName}"`).join(', ')
-                return `Please specify which sheet to search. Available sheets: ${available}.\n\nUse format: {"sheet": "sheet name", "query": "your search"}`
+                return `Please specify which sheet to search. Available sheets: ${available}, or use "AllSheets" to search all sheets.\n\nUse format: {"sheet": "sheet name", "query": "your search"}`
             }
 
             if (!query) {
@@ -348,12 +360,37 @@ class AppCityRAGTool extends Tool {
             // ═══════════════════════════════════════════════
             // Call ERP DIRECTLY for speed
             // ═══════════════════════════════════════════════
+            const result = await this.searchSingleSheet(targetSheet, query)
+            const searchTimeMs = Date.now() - startTime
+
+            if (result.error) {
+                return result.error
+            }
+
+            // Log to CRM ASYNCHRONOUSLY (fire-and-forget)
+            if (this.apiKey) {
+                this.logSearchToCRM(query, targetSheet, result.data, searchTimeMs).catch(() => {
+                    /* silent */
+                })
+            }
+
+            return this.formatResults(result.data, query, targetSheet.sheetName)
+        } catch (error: any) {
+            return `Failed to search: ${error.message}`
+        }
+    }
+
+    /**
+     * Search a single sheet via ERP API
+     */
+    private async searchSingleSheet(sheet: SheetConfig, query: string): Promise<{ data?: any; error?: string }> {
+        try {
             const url = `${this.erpBaseUrl}/api/rag/search`
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    collectionId: targetSheet.collectionId,
+                    collectionId: sheet.collectionId,
                     query: query.trim(),
                     mode: this.searchMode
                 })
@@ -361,29 +398,95 @@ class AppCityRAGTool extends Tool {
 
             if (!response.ok) {
                 const errorText = await response.text()
-                return `Error searching "${targetSheet.sheetName}": ${response.status} ${response.statusText}. ${errorText}`
+                return { error: `Error searching "${sheet.sheetName}": ${response.status} ${response.statusText}. ${errorText}` }
             }
 
             const result = (await response.json()) as any
-            const searchTimeMs = Date.now() - startTime
-
             if (result.status !== 'ok') {
-                return `Search error in "${targetSheet.sheetName}": ${result.message || 'Unknown error'}`
+                return { error: `Search error in "${sheet.sheetName}": ${result.message || 'Unknown error'}` }
             }
 
-            // ═══════════════════════════════════════════════
-            // Log to CRM ASYNCHRONOUSLY (fire-and-forget)
-            // ═══════════════════════════════════════════════
-            if (this.apiKey) {
-                this.logSearchToCRM(query, targetSheet, result, searchTimeMs).catch(() => {
-                    /* silent */
+            return { data: result }
+        } catch (err: any) {
+            return { error: `Failed to search "${sheet.sheetName}": ${err.message}` }
+        }
+    }
+
+    /**
+     * Search ALL configured sheets in parallel, merge & rank results
+     */
+    private async searchAllSheets(query: string, startTime: number): Promise<string> {
+        // Fire all searches in parallel
+        const searchPromises = this.sheets.map(async (sheet) => {
+            const result = await this.searchSingleSheet(sheet, query)
+            return { sheet, result }
+        })
+
+        const results = await Promise.all(searchPromises)
+        const totalTimeMs = Date.now() - startTime
+
+        // Collect all products with their sheet origin
+        const allProducts: Array<{ sheetName: string; product: any; score: number }> = []
+        const sheetSummaries: string[] = []
+        let totalMatched = 0
+
+        for (const { sheet, result } of results) {
+            if (result.error || !result.data) {
+                sheetSummaries.push(`❌ ${sheet.sheetName}: error`)
+                continue
+            }
+
+            const products = (result.data.products as any[]) || []
+            const matchedCount = products.length || result.data.matchedItemIds?.length || 0
+            totalMatched += matchedCount
+
+            if (matchedCount > 0) {
+                sheetSummaries.push(`✅ ${sheet.sheetName}: ${matchedCount} results`)
+            } else {
+                sheetSummaries.push(`⚪ ${sheet.sheetName}: 0 results`)
+            }
+
+            for (const p of products) {
+                allProducts.push({
+                    sheetName: sheet.sheetName,
+                    product: p,
+                    score: p.score || 0.5
                 })
             }
 
-            return this.formatResults(result, query, targetSheet.sheetName)
-        } catch (error: any) {
-            return `Failed to search: ${error.message}`
+            // Log each sheet search to CRM
+            if (this.apiKey) {
+                this.logSearchToCRM(query, sheet, result.data, totalTimeMs).catch(() => {})
+            }
         }
+
+        // Sort all products by relevance score (highest first)
+        allProducts.sort((a, b) => b.score - a.score)
+
+        // Build combined response
+        let response = `🔍 Search across ALL sheets (${this.sheets.length} sheets):\n`
+        response += sheetSummaries.join('\n') + '\n'
+        response += `\n📊 Total: ${totalMatched} results found\n`
+
+        if (allProducts.length > 0) {
+            const productList = allProducts
+                .map((item, idx) => {
+                    const itemData = item.product.data || item.product
+                    const fields = Object.entries(itemData)
+                        .filter(([key]) => !['id', 'embedding', 'searchText', 'collectionId'].includes(key))
+                        .filter(([, value]) => value !== null && value !== undefined && String(value).trim().length > 0)
+                        .map(([key, value]) => `  ${key}: ${value}`)
+                        .join('\n')
+                    const scoreStr = item.score ? ` (match: ${(item.score * 100).toFixed(0)}%)` : ''
+                    return `[${idx + 1}] 📋 ${item.sheetName}${scoreStr}\n${fields}`
+                })
+                .join('\n\n')
+            response += `\n${productList}`
+        }
+
+        response += `\n\n[Source: ALL_SHEETS | ${totalMatched} results | ${totalTimeMs}ms]`
+
+        return response
     }
 
     private async logSearchToCRM(query: string, sheet: SheetConfig, result: any, searchTimeMs: number): Promise<void> {

@@ -121,5 +121,4 @@ apps/*/
 !apps/oss-app/
 
 # Local config overrides
-package.json
-pnpm-workspace.yaml
+# (package.json and pnpm-workspace.yaml must be tracked)

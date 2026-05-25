@@ -535,6 +535,17 @@ class CRMOrderToolImpl extends Tool {
           flowConfig?.sessionId || (this as any).flowObj?.sessionId;
       }
 
+      if (sessionIdVal) {
+        const sessionIdx = attributes.findIndex(
+          (a: any) => a.key === "sessionId"
+        );
+        if (sessionIdx > -1) {
+          attributes[sessionIdx].value = sessionIdVal;
+        } else {
+          attributes.push({ key: "sessionId", value: sessionIdVal });
+        }
+      }
+
       // Construct payload
       const payload: any = {
         action: this.action,

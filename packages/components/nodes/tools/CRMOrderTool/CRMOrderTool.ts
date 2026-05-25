@@ -326,6 +326,11 @@ ${fieldList}
     );
     const useFlowSessionId = selectedVars.includes("sessionId");
 
+    // Resolve sessionId at init time from options (passed by the framework)
+    const resolvedSessionId = useFlowSessionId
+      ? (_options.sessionId as string) || (_options.chatId as string) || ""
+      : "";
+
     let actions = convertMultiOptionsToStringArray(
       nodeData.inputs?.ordersActions
     );
@@ -365,6 +370,7 @@ ${fieldList}
           toolDescription,
           action: "create",
           useFlowSessionId,
+          resolvedSessionId,
         })
       );
     }
@@ -396,6 +402,7 @@ ${fieldList}
           toolDescription,
           action: "update",
           useFlowSessionId,
+          resolvedSessionId,
         })
       );
     }
@@ -474,6 +481,7 @@ interface CRMOrderToolConfig {
   toolDescription: string;
   action: "create" | "update";
   useFlowSessionId: boolean;
+  resolvedSessionId: string;
 }
 
 // @ts-ignore
@@ -484,6 +492,7 @@ class CRMOrderToolImpl extends Tool {
   private apiKey: string;
   private action: "create" | "update";
   private useFlowSessionId: boolean;
+  private resolvedSessionId: string;
 
   constructor(config: CRMOrderToolConfig) {
     super();
@@ -493,18 +502,14 @@ class CRMOrderToolImpl extends Tool {
     this.apiKey = config.apiKey;
     this.action = config.action;
     this.useFlowSessionId = config.useFlowSessionId;
+    this.resolvedSessionId = config.resolvedSessionId;
   }
 
   // @ts-ignore
   async _call(
     input: string,
     _runManager?: any,
-    flowConfig?: {
-      sessionId?: string;
-      chatId?: string;
-      input?: string;
-      state?: ICommonObject;
-    }
+    _config?: any
   ): Promise<string> {
     try {
       let parsedInput: any;
@@ -528,12 +533,14 @@ class CRMOrderToolImpl extends Tool {
         return `ERROR: The "attributes" array is required and must contain at least one item with "key" and "value" fields.`;
       }
 
-      // Resolve sessionId from flowConfig if enabled
-      let sessionIdVal: string | undefined = undefined;
-      if (this.useFlowSessionId) {
-        sessionIdVal =
-          flowConfig?.sessionId || (this as any).flowObj?.sessionId;
-      }
+      // Resolve sessionId: use the value captured at init time (from options.sessionId)
+      // This is the reliable approach because LangChain's Tool.call() does NOT
+      // forward the 4th flowConfig argument to _call (it only passes 3 args:
+      // parsed input, runManager, and RunnableConfig).
+      const sessionIdVal =
+        this.useFlowSessionId && this.resolvedSessionId
+          ? this.resolvedSessionId
+          : undefined;
 
       if (sessionIdVal) {
         const sessionIdx = attributes.findIndex(
@@ -555,6 +562,12 @@ class CRMOrderToolImpl extends Tool {
       if (sessionIdVal) {
         payload.sessionId = sessionIdVal;
       }
+
+      console.info(
+        `[CRMOrderTool] action=${this.action} sessionId=${
+          sessionIdVal || "(none)"
+        } attrs=${attributes.length}`
+      );
 
       // Send to CRM
       const url = `${this.crmBaseUrl}/api/integration/orders`;

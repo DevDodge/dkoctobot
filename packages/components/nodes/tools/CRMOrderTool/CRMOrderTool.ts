@@ -43,7 +43,7 @@ class CRMOrderTool_Tools implements INode {
         label: "CRM Base URL",
         name: "crmBaseUrl",
         type: "string",
-        default: "http://localhost:5000",
+        default: "https://crm.octobot.it.com",
         description: "Base URL of the CRM backend server",
       },
       {
@@ -132,7 +132,8 @@ class CRMOrderTool_Tools implements INode {
     ): Promise<INodeOptionsValue[]> => {
       try {
         const crmBaseUrl = (
-          (nodeData.inputs?.crmBaseUrl as string) || "http://localhost:5000"
+          (nodeData.inputs?.crmBaseUrl as string) ||
+          "https://crm.octobot.it.com"
         ).replace(/\/+$/, "");
         const apiKey = nodeData.inputs?.apiKey as string;
 
@@ -316,7 +317,7 @@ ${fieldList}
     _options: ICommonObject
   ): Promise<any> {
     const crmBaseUrl = (
-      (nodeData.inputs?.crmBaseUrl as string) || "http://localhost:5000"
+      (nodeData.inputs?.crmBaseUrl as string) || "https://crm.octobot.it.com"
     ).replace(/\/+$/, "");
     const apiKey = nodeData.inputs?.apiKey as string;
 
@@ -355,8 +356,8 @@ ${fieldList}
         );
       }
 
-      // @ts-ignore
       tools.push(
+        // @ts-ignore
         new CRMOrderToolImpl({
           crmBaseUrl,
           apiKey,
@@ -386,8 +387,8 @@ ${fieldList}
         "update"
       );
 
-      // @ts-ignore
       tools.push(
+        // @ts-ignore
         new CRMOrderToolImpl({
           crmBaseUrl,
           apiKey,

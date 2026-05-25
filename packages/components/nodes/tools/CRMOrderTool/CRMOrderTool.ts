@@ -10,6 +10,7 @@ import {
   getBaseClasses,
   convertMultiOptionsToStringArray,
 } from "../../../src/utils";
+import { TOOL_ARGS_PREFIX } from "../../../src/agents";
 
 // Placeholder that indicates "not yet generated"
 const TOOL_DESC_PLACEHOLDER = `⚠️ Click refresh on "Get Key Mapping" above, then copy the generated prompt here.
@@ -569,6 +570,10 @@ class CRMOrderToolImpl extends Tool {
         } attrs=${attributes.length}`
       );
 
+      // Build the actual input representation to show in Used Tools UI
+      const actualToolInput = { input: JSON.stringify({ attributes }) };
+      const toolArgsSuffix = TOOL_ARGS_PREFIX + JSON.stringify(actualToolInput);
+
       // Send to CRM
       const url = `${this.crmBaseUrl}/api/integration/orders`;
       const response = await fetch(url, {
@@ -587,16 +592,16 @@ class CRMOrderToolImpl extends Tool {
           response.status
         }. Message: ${
           result.message || "Unknown error"
-        }. Please inform the customer that there was a technical issue and try again.`;
+        }. Please inform the customer that there was a technical issue and try again.${toolArgsSuffix}`;
       }
 
       if (result.success) {
         const actionStr = this.action === "update" ? "updated" : "created";
-        return `SUCCESS: Order ${actionStr} successfully!\nOrder ID: #${result.order_id}\nClient: ${result.client}\nBrand: ${result.brand}\n\nPlease confirm to the customer that their order has been ${actionStr} with order number #${result.order_id}.`;
+        return `SUCCESS: Order ${actionStr} successfully!\nOrder ID: #${result.order_id}\nClient: ${result.client}\nBrand: ${result.brand}\n\nPlease confirm to the customer that their order has been ${actionStr} with order number #${result.order_id}.${toolArgsSuffix}`;
       } else {
         return `ERROR: ${
           result.message || `Failed to ${this.action} order`
-        }. Please inform the customer about this issue.`;
+        }. Please inform the customer about this issue.${toolArgsSuffix}`;
       }
     } catch (error: any) {
       return `ERROR: Failed to connect to CRM at ${this.crmBaseUrl}: ${error.message}. Please inform the customer that there is a temporary connection issue.`;

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Monitoring Prompt Template - Prompt Sheet + Sparkle / Analysis Key -->
+  <defs>
+    <linearGradient id="promptGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Background circle with border -->
+  <circle cx="50" cy="50" r="46" fill="url(#promptGrad)" opacity="0.12"/>
+  <circle cx="50" cy="50" r="46" fill="none" stroke="url(#promptGrad)" stroke-width="2"/>
+  
+  <!-- Prompt Document Sheet -->
+  <rect x="32" y="26" width="36" height="48" rx="4" fill="none" stroke="#8b5cf6" stroke-width="3" stroke-linecap="round"/>
+  <!-- Sheet Lines representing instructions/keys -->
+  <line x1="38" y1="36" x2="62" y2="36" stroke="#8b5cf6" stroke-width="3" stroke-linecap="round"/>
+  <line x1="38" y1="46" x2="54" y2="46" stroke="#8b5cf6" stroke-width="3" stroke-linecap="round"/>
+  <line x1="38" y1="56" x2="50" y2="56" stroke="#8b5cf6" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- Analysis key / Sparkle Overlay -->
+  <g transform="translate(64, 58)">
+    <circle cx="0" cy="0" r="14" fill="#ec4899" opacity="0.95"/>
+    <!-- Sparkle / Star of intelligence -->
+    <path d="M0 -7 L2 -2 L7 0 L2 2 L0 7 L-2 2 L-7 0 L-2 -2 Z" fill="white"/>
+  </g>
+</svg>

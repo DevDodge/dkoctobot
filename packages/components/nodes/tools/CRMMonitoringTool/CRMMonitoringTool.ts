@@ -191,7 +191,7 @@ Return a clean, raw JSON output without any markdown fence or text formatting.
 
 Output structure:
 {
-  "note": "Concise professional English note summarizing only the new information",
+  "note": "Concise professional note summarizing only the new information, adhering strictly to the language specified in the system message",
   "keys": {
      // only populate keys that were explicitly discovered/updated in this message
   },

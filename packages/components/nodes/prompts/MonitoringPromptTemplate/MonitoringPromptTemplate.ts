@@ -94,7 +94,7 @@ class MonitoringPromptTemplate_Prompts implements INode {
         default: `You are an expert conversation data analyst and precise customer information extractor.
 From the customer's current message and conversation context:
 1. Fill the required variable values with absolute accuracy and without any assumptions or guesses.
-2. Write a concise note in English summarizing only the new information in a professional and expert manner.
+2. Write a concise note in Arabic (باللغة العربية) summarizing only the new information in a professional and expert manner.
 3. Focus on extracting the customer's core desires, budget, specific requirements, or any objections or obstacles that may affect completing the sale.`,
         description:
           "Industry-agnostic prompt instructions that direct the AI model on how to extract parameters for any business.",

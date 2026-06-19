@@ -26,9 +26,9 @@ if not exist "F:\DK-Platform\.dk-running.lock" (
     goto :eof
 )
 
-:: Check if server is listening on port 1255
+:: Check if server is listening on port 1252
 set "RUNNING=0"
-for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":1255 " ^| findstr "LISTENING" 2^>nul') do (
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":1252 " ^| findstr "LISTENING" 2^>nul') do (
     set "RUNNING=1"
 )
 

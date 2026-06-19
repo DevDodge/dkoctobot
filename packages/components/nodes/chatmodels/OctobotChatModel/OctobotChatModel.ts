@@ -227,6 +227,7 @@ class OctobotChatModel_ChatModels implements INode {
 
     const obj: ChatOpenAIFields = {
       temperature: temperature ? parseFloat(temperature) : 0.7,
+      model: modelName,
       modelName,
       openAIApiKey: apiKey,
       apiKey,

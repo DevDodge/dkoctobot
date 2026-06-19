@@ -1,0 +1,2394 @@
+{
+  "nodes": [
+    {
+      "id": "googleSheetsTool_0",
+      "position": {
+        "x": -42.294678618753466,
+        "y": 303.91951376504227
+      },
+      "type": "customNode",
+      "data": {
+        "label": "Google Sheets",
+        "name": "googleSheetsTool",
+        "version": 1,
+        "type": "GoogleSheets",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/tools/GoogleSheets/google-sheets.svg",
+        "category": "Tools",
+        "description": "Perform Google Sheets operations such as managing spreadsheets, reading and writing values",
+        "baseClasses": ["Tool"],
+        "credential": "e76ea43e-5781-4bf9-be30-be819d2cdca4",
+        "inputs": {
+          "sheetsType": "values",
+          "spreadsheetActions": "",
+          "valuesActions": "[\"getValues\"]",
+          "spreadsheetId": "1NJzWJkk-VgLFNR1kx8qx3PWSEh9fnRvtNQV7qFeIWME",
+          "title": "",
+          "sheetCount": 1,
+          "range": "A:V",
+          "ranges": "",
+          "values": "",
+          "valueInputOption": "USER_ENTERED",
+          "valueRenderOption": "FORMATTED_VALUE",
+          "dateTimeRenderOption": "FORMATTED_STRING",
+          "insertDataOption": "OVERWRITE",
+          "includeGridData": "",
+          "majorDimension": "ROWS"
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\tools\\GoogleSheets\\GoogleSheets.js",
+        "inputAnchors": [],
+        "inputParams": [
+          {
+            "label": "Connect Credential",
+            "name": "credential",
+            "type": "credential",
+            "credentialNames": ["googleSheetsOAuth2"],
+            "id": "googleSheetsTool_0-input-credential-credential",
+            "display": true
+          },
+          {
+            "label": "Type",
+            "name": "sheetsType",
+            "type": "options",
+            "description": "Type of Google Sheets operation",
+            "options": [
+              {
+                "label": "Spreadsheet",
+                "name": "spreadsheet"
+              },
+              {
+                "label": "Values",
+                "name": "values"
+              }
+            ],
+            "id": "googleSheetsTool_0-input-sheetsType-options",
+            "display": true
+          },
+          {
+            "label": "Spreadsheet Actions",
+            "name": "spreadsheetActions",
+            "type": "multiOptions",
+            "description": "Actions to perform on spreadsheets",
+            "options": [
+              {
+                "label": "Create Spreadsheet",
+                "name": "createSpreadsheet"
+              },
+              {
+                "label": "Get Spreadsheet",
+                "name": "getSpreadsheet"
+              },
+              {
+                "label": "Update Spreadsheet",
+                "name": "updateSpreadsheet"
+              }
+            ],
+            "show": {
+              "sheetsType": ["spreadsheet"]
+            },
+            "id": "googleSheetsTool_0-input-spreadsheetActions-multiOptions",
+            "display": false
+          },
+          {
+            "label": "Values Actions",
+            "name": "valuesActions",
+            "type": "multiOptions",
+            "description": "Actions to perform on sheet values",
+            "options": [
+              {
+                "label": "Get Values",
+                "name": "getValues"
+              },
+              {
+                "label": "Update Values",
+                "name": "updateValues"
+              },
+              {
+                "label": "Append Values",
+                "name": "appendValues"
+              },
+              {
+                "label": "Clear Values",
+                "name": "clearValues"
+              },
+              {
+                "label": "Batch Get Values",
+                "name": "batchGetValues"
+              },
+              {
+                "label": "Batch Update Values",
+                "name": "batchUpdateValues"
+              },
+              {
+                "label": "Batch Clear Values",
+                "name": "batchClearValues"
+              }
+            ],
+            "show": {
+              "sheetsType": ["values"]
+            },
+            "id": "googleSheetsTool_0-input-valuesActions-multiOptions",
+            "display": true
+          },
+          {
+            "label": "Spreadsheet ID",
+            "name": "spreadsheetId",
+            "type": "string",
+            "description": "The ID of the spreadsheet",
+            "show": {
+              "sheetsType": ["spreadsheet", "values"]
+            },
+            "additionalParams": true,
+            "optional": true,
+            "id": "googleSheetsTool_0-input-spreadsheetId-string",
+            "display": true
+          },
+          {
+            "label": "Title",
+            "name": "title",
+            "type": "string",
+            "description": "The title of the spreadsheet",
+            "show": {
+              "spreadsheetActions": ["createSpreadsheet", "updateSpreadsheet"]
+            },
+            "additionalParams": true,
+            "optional": true,
+            "id": "googleSheetsTool_0-input-title-string",
+            "display": false
+          },
+          {
+            "label": "Sheet Count",
+            "name": "sheetCount",
+            "type": "number",
+            "description": "Number of sheets to create",
+            "default": 1,
+            "show": {
+              "spreadsheetActions": ["createSpreadsheet"]
+            },
+            "additionalParams": true,
+            "optional": true,
+            "id": "googleSheetsTool_0-input-sheetCount-number",
+            "display": false
+          },
+          {
+            "label": "Range",
+            "name": "range",
+            "type": "string",
+            "description": "The range to read/write (e.g., A1:B2, Sheet1!A1:C10)",
+            "show": {
+              "valuesActions": ["getValues", "updateValues", "clearValues"]
+            },
+            "additionalParams": true,
+            "optional": true,
+            "id": "googleSheetsTool_0-input-range-string",
+            "display": true
+          },
+          {
+            "label": "Ranges",
+            "name": "ranges",
+            "type": "string",
+            "description": "Comma-separated list of ranges for batch operations",
+            "show": {
+              "valuesActions": ["batchGetValues", "batchClearValues"]
+            },
+            "additionalParams": true,
+            "optional": true,
+            "id": "googleSheetsTool_0-input-ranges-string",
+            "display": false
+          },
+          {
+            "label": "Values",
+            "name": "values",
+            "type": "string",
+            "description": "JSON array of values to write (e.g., [[\"A1\", \"B1\"], [\"A2\", \"B2\"]])",
+            "show": {
+              "valuesActions": [
+                "updateValues",
+                "appendValues",
+                "batchUpdateValues"
+              ]
+            },
+            "additionalParams": true,
+            "optional": true,
+            "id": "googleSheetsTool_0-input-values-string",
+            "display": false
+          },
+          {
+            "label": "Value Input Option",
+            "name": "valueInputOption",
+            "type": "options",
+            "description": "How input data should be interpreted",
+            "options": [
+              {
+                "label": "Raw",
+                "name": "RAW"
+              },
+              {
+                "label": "User Entered",
+                "name": "USER_ENTERED"
+              }
+            ],
+            "default": "USER_ENTERED",
+            "show": {
+              "valuesActions": [
+                "updateValues",
+                "appendValues",
+                "batchUpdateValues"
+              ]
+            },
+            "additionalParams": true,
+            "optional": true,
+            "id": "googleSheetsTool_0-input-valueInputOption-options",
+            "display": false
+          },
+          {
+            "label": "Value Render Option",
+            "name": "valueRenderOption",
+            "type": "options",
+            "description": "How values should be represented in the output",
+            "options": [
+              {
+                "label": "Formatted Value",
+                "name": "FORMATTED_VALUE"
+              },
+              {
+                "label": "Unformatted Value",
+                "name": "UNFORMATTED_VALUE"
+              },
+              {
+                "label": "Formula",
+                "name": "FORMULA"
+              }
+            ],
+            "default": "FORMATTED_VALUE",
+            "show": {
+              "valuesActions": ["getValues", "batchGetValues"]
+            },
+            "additionalParams": true,
+            "optional": true,
+            "id": "googleSheetsTool_0-input-valueRenderOption-options",
+            "display": true
+          },
+          {
+            "label": "Date Time Render Option",
+            "name": "dateTimeRenderOption",
+            "type": "options",
+            "description": "How dates, times, and durations should be represented",
+            "options": [
+              {
+                "label": "Serial Number",
+                "name": "SERIAL_NUMBER"
+              },
+              {
+                "label": "Formatted String",
+                "name": "FORMATTED_STRING"
+              }
+            ],
+            "default": "FORMATTED_STRING",
+            "show": {
+              "valuesActions": ["getValues", "batchGetValues"]
+            },
+            "additionalParams": true,
+            "optional": true,
+            "id": "googleSheetsTool_0-input-dateTimeRenderOption-options",
+            "display": true
+          },
+          {
+            "label": "Insert Data Option",
+            "name": "insertDataOption",
+            "type": "options",
+            "description": "How data should be inserted",
+            "options": [
+              {
+                "label": "Overwrite",
+                "name": "OVERWRITE"
+              },
+              {
+                "label": "Insert Rows",
+                "name": "INSERT_ROWS"
+              }
+            ],
+            "default": "OVERWRITE",
+            "show": {
+              "valuesActions": ["appendValues"]
+            },
+            "additionalParams": true,
+            "optional": true,
+            "id": "googleSheetsTool_0-input-insertDataOption-options",
+            "display": false
+          },
+          {
+            "label": "Include Grid Data",
+            "name": "includeGridData",
+            "type": "boolean",
+            "description": "True if grid data should be returned",
+            "default": false,
+            "show": {
+              "spreadsheetActions": ["getSpreadsheet"]
+            },
+            "additionalParams": true,
+            "optional": true,
+            "id": "googleSheetsTool_0-input-includeGridData-boolean",
+            "display": false
+          },
+          {
+            "label": "Major Dimension",
+            "name": "majorDimension",
+            "type": "options",
+            "description": "The major dimension that results should use",
+            "options": [
+              {
+                "label": "Rows",
+                "name": "ROWS"
+              },
+              {
+                "label": "Columns",
+                "name": "COLUMNS"
+              }
+            ],
+            "default": "ROWS",
+            "show": {
+              "valuesActions": [
+                "getValues",
+                "updateValues",
+                "appendValues",
+                "batchGetValues",
+                "batchUpdateValues"
+              ]
+            },
+            "additionalParams": true,
+            "optional": true,
+            "id": "googleSheetsTool_0-input-majorDimension-options",
+            "display": true
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "googleSheetsTool_0-output-googleSheetsTool-Tool",
+            "name": "googleSheetsTool",
+            "label": "GoogleSheets",
+            "description": "Perform Google Sheets operations such as managing spreadsheets, reading and writing values",
+            "type": "Tool"
+          }
+        ],
+        "id": "googleSheetsTool_0",
+        "selected": false
+      },
+      "width": 300,
+      "height": 524,
+      "selected": false,
+      "positionAbsolute": {
+        "x": -42.294678618753466,
+        "y": 303.91951376504227
+      },
+      "dragging": false
+    },
+    {
+      "id": "toolAgent_0",
+      "position": {
+        "x": 915.7652364273202,
+        "y": 558.9471366024517
+      },
+      "type": "customNode",
+      "data": {
+        "label": "Tool Agent",
+        "name": "toolAgent",
+        "version": 2,
+        "type": "AgentExecutor",
+        "category": "Agents",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/agents/ToolAgent/toolAgent.png",
+        "description": "Agent that uses Function Calling to pick the tools and args to call",
+        "baseClasses": ["AgentExecutor", "BaseChain", "Runnable"],
+        "inputs": {
+          "tools": [
+            "{{googleSheetsTool_0.data.instance}}",
+            "{{customTool_0.data.instance}}",
+            "{{OctobotWapp_0.data.instance}}"
+          ],
+          "memory": "{{bufferMemory_0.data.instance}}",
+          "model": "{{octobotChatModel_0.data.instance}}",
+          "chatPromptTemplate": "{{chatPromptTemplate_0.data.instance}}",
+          "systemMessage": "You are a helpful AI assistant.",
+          "inputModeration": "",
+          "maxIterations": "",
+          "enableDetailedStreaming": ""
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\agents\\ToolAgent\\ToolAgent.js",
+        "inputAnchors": [
+          {
+            "label": "Tools",
+            "name": "tools",
+            "type": "Tool",
+            "list": true,
+            "id": "toolAgent_0-input-tools-Tool",
+            "display": true
+          },
+          {
+            "label": "Memory",
+            "name": "memory",
+            "type": "BaseChatMemory",
+            "id": "toolAgent_0-input-memory-BaseChatMemory",
+            "display": true
+          },
+          {
+            "label": "Tool Calling Chat Model",
+            "name": "model",
+            "type": "BaseChatModel",
+            "description": "Only compatible with models that are capable of function calling: ChatOpenAI, ChatMistral, ChatAnthropic, ChatGoogleGenerativeAI, ChatVertexAI, GroqChat",
+            "id": "toolAgent_0-input-model-BaseChatModel",
+            "display": true
+          },
+          {
+            "label": "Chat Prompt Template",
+            "name": "chatPromptTemplate",
+            "type": "ChatPromptTemplate",
+            "description": "Override existing prompt with Chat Prompt Template. Human Message must includes {input} variable",
+            "optional": true,
+            "id": "toolAgent_0-input-chatPromptTemplate-ChatPromptTemplate",
+            "display": true
+          },
+          {
+            "label": "Input Moderation",
+            "description": "Detect text that could generate harmful output and prevent it from being sent to the language model",
+            "name": "inputModeration",
+            "type": "Moderation",
+            "optional": true,
+            "list": true,
+            "id": "toolAgent_0-input-inputModeration-Moderation",
+            "display": true
+          }
+        ],
+        "inputParams": [
+          {
+            "label": "System Message",
+            "name": "systemMessage",
+            "type": "string",
+            "default": "You are a helpful AI assistant.",
+            "description": "If Chat Prompt Template is provided, this will be ignored",
+            "rows": 4,
+            "optional": true,
+            "additionalParams": true,
+            "id": "toolAgent_0-input-systemMessage-string",
+            "display": true
+          },
+          {
+            "label": "Max Iterations",
+            "name": "maxIterations",
+            "type": "number",
+            "optional": true,
+            "additionalParams": true,
+            "id": "toolAgent_0-input-maxIterations-number",
+            "display": true
+          },
+          {
+            "label": "Enable Detailed Streaming",
+            "name": "enableDetailedStreaming",
+            "type": "boolean",
+            "default": false,
+            "description": "Stream detailed intermediate steps during agent execution",
+            "optional": true,
+            "additionalParams": true,
+            "id": "toolAgent_0-input-enableDetailedStreaming-boolean",
+            "display": true
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "toolAgent_0-output-toolAgent-AgentExecutor|BaseChain|Runnable",
+            "name": "toolAgent",
+            "label": "AgentExecutor",
+            "description": "Agent that uses Function Calling to pick the tools and args to call",
+            "type": "AgentExecutor | BaseChain | Runnable"
+          }
+        ],
+        "id": "toolAgent_0",
+        "selected": false
+      },
+      "width": 300,
+      "height": 486,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 915.7652364273202,
+        "y": 558.9471366024517
+      },
+      "dragging": false
+    },
+    {
+      "id": "chatOpenRouter_0",
+      "position": {
+        "x": 2276.6277049224723,
+        "y": 490.2584218798521
+      },
+      "type": "customNode",
+      "data": {
+        "label": "ChatOpenRouter",
+        "name": "chatOpenRouter",
+        "version": 1,
+        "type": "ChatOpenRouter",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/chatmodels/ChatOpenRouter/openRouter.svg",
+        "category": "Chat Models",
+        "description": "Wrapper around Open Router Inference API",
+        "baseClasses": [
+          "ChatOpenRouter",
+          "BaseChatOpenAI",
+          "BaseChatModel",
+          "BaseLanguageModel",
+          "Runnable"
+        ],
+        "credential": "35653f44-0b40-411c-a028-5ec967872187",
+        "inputs": {
+          "cache": "",
+          "modelName": "google/gemini-2.5-flash",
+          "temperature": "0.9",
+          "streaming": true,
+          "maxTokens": "",
+          "topP": "",
+          "frequencyPenalty": "",
+          "presencePenalty": "",
+          "timeout": "",
+          "basepath": "https://openrouter.ai/api/v1",
+          "baseOptions": "",
+          "allowImageUploads": "",
+          "imageResolution": "low"
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\chatmodels\\ChatOpenRouter\\ChatOpenRouter.js",
+        "inputAnchors": [
+          {
+            "label": "Cache",
+            "name": "cache",
+            "type": "BaseCache",
+            "optional": true,
+            "id": "chatOpenRouter_0-input-cache-BaseCache",
+            "display": true
+          }
+        ],
+        "inputParams": [
+          {
+            "label": "Connect Credential",
+            "name": "credential",
+            "type": "credential",
+            "credentialNames": ["openRouterApi"],
+            "optional": true,
+            "id": "chatOpenRouter_0-input-credential-credential",
+            "display": true
+          },
+          {
+            "label": "Model Name",
+            "name": "modelName",
+            "type": "string",
+            "placeholder": "openai/gpt-3.5-turbo",
+            "id": "chatOpenRouter_0-input-modelName-string",
+            "display": true
+          },
+          {
+            "label": "Temperature",
+            "name": "temperature",
+            "type": "number",
+            "step": 0.1,
+            "default": 0.9,
+            "optional": true,
+            "id": "chatOpenRouter_0-input-temperature-number",
+            "display": true
+          },
+          {
+            "label": "Streaming",
+            "name": "streaming",
+            "type": "boolean",
+            "default": true,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_0-input-streaming-boolean",
+            "display": true
+          },
+          {
+            "label": "Max Tokens",
+            "name": "maxTokens",
+            "type": "number",
+            "step": 1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_0-input-maxTokens-number",
+            "display": true
+          },
+          {
+            "label": "Top Probability",
+            "name": "topP",
+            "type": "number",
+            "step": 0.1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_0-input-topP-number",
+            "display": true
+          },
+          {
+            "label": "Frequency Penalty",
+            "name": "frequencyPenalty",
+            "type": "number",
+            "step": 0.1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_0-input-frequencyPenalty-number",
+            "display": true
+          },
+          {
+            "label": "Presence Penalty",
+            "name": "presencePenalty",
+            "type": "number",
+            "step": 0.1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_0-input-presencePenalty-number",
+            "display": true
+          },
+          {
+            "label": "Timeout",
+            "name": "timeout",
+            "type": "number",
+            "step": 1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_0-input-timeout-number",
+            "display": true
+          },
+          {
+            "label": "BasePath",
+            "name": "basepath",
+            "type": "string",
+            "optional": true,
+            "default": "https://openrouter.ai/api/v1",
+            "additionalParams": true,
+            "id": "chatOpenRouter_0-input-basepath-string",
+            "display": true
+          },
+          {
+            "label": "BaseOptions",
+            "name": "baseOptions",
+            "type": "json",
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_0-input-baseOptions-json",
+            "display": true
+          },
+          {
+            "label": "Allow Image Uploads",
+            "name": "allowImageUploads",
+            "type": "boolean",
+            "description": "Allow image input. Refer to the <a href=\"https://docs.flowiseai.com/using-flowise/uploads#image\" target=\"_blank\">docs</a> for more details.",
+            "default": false,
+            "optional": true,
+            "id": "chatOpenRouter_0-input-allowImageUploads-boolean",
+            "display": true
+          },
+          {
+            "label": "Image Resolution",
+            "description": "This parameter controls the resolution in which the model views the image.",
+            "name": "imageResolution",
+            "type": "options",
+            "options": [
+              {
+                "label": "Low",
+                "name": "low"
+              },
+              {
+                "label": "High",
+                "name": "high"
+              },
+              {
+                "label": "Auto",
+                "name": "auto"
+              }
+            ],
+            "default": "low",
+            "optional": false,
+            "show": {
+              "allowImageUploads": true
+            },
+            "id": "chatOpenRouter_0-input-imageResolution-options",
+            "display": false
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "chatOpenRouter_0-output-chatOpenRouter-ChatOpenRouter|BaseChatOpenAI|BaseChatModel|BaseLanguageModel|Runnable",
+            "name": "chatOpenRouter",
+            "label": "ChatOpenRouter",
+            "description": "Wrapper around Open Router Inference API",
+            "type": "ChatOpenRouter | BaseChatOpenAI | BaseChatModel | BaseLanguageModel | Runnable"
+          }
+        ],
+        "id": "chatOpenRouter_0",
+        "selected": false
+      },
+      "width": 300,
+      "height": 673,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 2276.6277049224723,
+        "y": 490.2584218798521
+      },
+      "dragging": false
+    },
+    {
+      "id": "chatPromptTemplate_0",
+      "position": {
+        "x": -352.3044635689475,
+        "y": 167.37071974201854
+      },
+      "type": "customNode",
+      "data": {
+        "label": "Chat Prompt Template",
+        "name": "chatPromptTemplate",
+        "version": 2,
+        "type": "ChatPromptTemplate",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/prompts/ChatPromptTemplate/prompt.svg",
+        "category": "Prompts",
+        "description": "Schema to represent a chat prompt",
+        "baseClasses": [
+          "ChatPromptTemplate",
+          "BaseChatPromptTemplate",
+          "BasePromptTemplate",
+          "Runnable"
+        ],
+        "inputs": {
+          "systemMessagePrompt": "## NATONAT BOT — SYSTEM PROMPT\n### Language: Instructions in English | Responses match the user (English or Egyptian Colloquial Arabic)\n### Version: 3.0 | Updated: 2026-06-04 | Changes: Human Sales Intelligence · Conversational Funnel · Smart Upselling · Objection Handling · Anti-Robot Tone · Order Closing Optimization\n\n---\n\n## 1. IDENTITY & ROLE\n\nYou are the official sales advisor and customer service representative for **natOnat**, the leading luxury travel accessories brand in Egypt (est. 2019 as an Amazon Startup). You specialize in premium luggage covers, smart packing solutions, and genuine leather passport wallets.\n\n**Your Personality:**\n- You are a knowledgeable, warm, and genuinely helpful advisor — NOT a script reader or robotic FAQ bot.\n- You hold natural, flowing conversations. You understand the customer's travel needs and guide them to the right solution.\n- You are confident in the product's value. You believe in what you're selling because it's genuinely premium.\n- You build rapport through brief, natural exchanges — not walls of text.\n\n**Location & Logistics:**\n- **Main Warehouse:** New Cairo (North Investors).\n- **Sales Channel:** Primarily via our official Website. NO physical branches.\n- **Shipping:** ALL Egypt via **Aramex**.\n- **Free Pickup:** Same-day from New Cairo warehouse — saves time and fees.\n\n---\n\n## 2. COMMUNICATION STYLE & SALES INTELLIGENCE\n\n### LANGUAGE MATCHING (ABSOLUTE RULE):\n- Detect language of EVERY message. Respond in EXACT same language.\n- English input (even one word) = ENTIRE reply in English. Zero exceptions.\n- Arabic input = Egyptian Colloquial Arabic (العامية). NEVER Formal Arabic.\n- NEVER mix languages in one reply.\n\n### TONE & PERSONALITY:\n\n**Arabic Mode:**\n- Act as \"المستشار الذكي بتاع السفر\" — warm, confident, polished.\n- MUST use \"حضرتك\" heavily. NEVER use 'Kaf' suffix on nouns/verbs.\n  - Nouns: \"طلب حضرتك\" (NOT \"طلبك\"), \"عنوان حضرتك\" (NOT \"عنوانك\")\n  - Verbs: \"أبعت لحضرتك\" (NOT \"أبعتلك\"), \"أساعد حضرتك\" (NOT \"أساعدك\")\n- Use First Name preceded by \"أستاذ/أستاذة\" occasionally (NOT every message).\n- Keep responses concise, natural, flowing — like a real human advisor texting.\n\n**English Mode:**\n- Premium, polished, warm. Use \"Mr./Ms.\" + First Name occasionally.\n- Keep it brief and helpful — not corporate or stiff.\n\n**BOTH Languages:**\n- NO EMOJIS. Zero. None.\n- NEVER use \"زبون/زبائن/زباين\" → ONLY \"عميل/عملاء\".\n- NEVER start with repetitive phrases (\"حاضر يا فندم\" / \"Noted, Sir\").\n- NEVER evaluate customer's choice (\"اختيار ممتاز\" / \"Excellent choice\").\n- NEVER repeat same opening line twice in one response.\n- Keep replies SHORT and purposeful. Answer what was asked, no more.\n\n### SALES INTELLIGENCE — CONVERSATIONAL SELLING:\n\n**Core Principle:** You are a sales closer disguised as a helpful advisor. Every reply must subtly advance the customer toward completing a purchase — without being pushy or robotic.\n\n**Conversational Flow Tactics:**\n1. **Ask, Don't Lecture:** When uncertain about what they need, ask ONE smart question instead of dumping info.\n   - Customer: \"عايز كفر شنطة\" → \"تمام يا فندم، حضرتك مسافر قريب ولا محتاج الكفر للتخزين؟\" (this qualifies their need)\n2. **Brief Benefit, Then Question:** When they describe a need, link a benefit briefly, then ask the next logical question.\n   - Customer: \"الشنطة بتتخدش كتير\" → \"الكفر هيحميها تماماً من أي خدش. حضرتك شنطتك حجمها إيه تقريباً؟\"\n3. **Create Momentum:** After answering, gently nudge toward next step.\n   - After giving price: \"تحب أعمل لحضرتك الأوردر؟\"\n   - After size confirmation: \"تمام، إيه المحافظة عشان أحسب التوصيل؟\"\n4. **Scarcity & Value (Natural, Not Fake):**\n   - \"الموديل ده من أكتر الموديلات اللي بتطلب عندنا\"\n   - \"الخامة دي مش موجودة في أي كفر تاني في مصر\"\n5. **Reduce Friction:** Make ordering feel effortless.\n   - \"لو حضرتك جاهز، ممكن أعمل الأوردر في ثواني\"\n   - \"محتاج مني اسم حضرتك والعنوان بس وخلاص\"\n\n**Objection Handling (CRITICAL):**\n- **\"غالي\" / \"Too expensive\":**\n  Reply: \"فاهم حضرتك. بس لو بصيت على الكفرات الرخيصة هتلاقي الطباعة بتبهت بعد أول سفرة والخامة رقيقة. ناتونات خامة فاخرة بتعيش سنين، وفيها سكوتش وتوكة قويين جداً مش هتلاقيهم في أي كفر تاني. يعني حضرتك بتستثمر في حاجة هتحمي شنطتك لسنين مش بس مرة.\"\n- **\"هفكر\" / \"I'll think about it\":**\n  Reply: \"طبعاً يا فندم خد وقتك. بس لو محتاج أي مساعدة في اختيار المقاس أو الموديل أنا موجود. ولو حضرتك عايز تشوف كل الموديلات: [category link]\"\n- **\"مش متأكد من المقاس\":**\n  Reply: \"بسيطة يا فندم، حضرتك تقيس ارتفاع الشنطة من غير العجل بالسنتيمتر وتقولي الرقم وأنا أحدد لحضرتك المقاس بالظبط.\"\n\n**Smart Upselling (Natural, Session-Aware):**\n- NEVER upsell a product the customer already discussed in this session.\n- Upsell ONLY after the customer shows clear buying intent or after completing order data.\n- **PackOnat Upsell (if not discussed):**\n  \"على فكرة يا فندم، لو حضرتك بتسافر كتير، عندنا منتج اسمه PackOnat — اختراع حصري من ناتونات، بيحافظ على هدوم حضرتك المكوية جوه الشنطة من غير ما تتكرمش. اللي جربه مستحيل يسافر من غيره بعد كده.\"\n- **Passport Wallet Upsell (if not discussed):**\n  \"وكمان عندنا محافظ باسبور جلد طبيعي فاخر بتيجي في بوكس هدايا — ممتازة كهدية أو لتنظيم أوراق السفر.\"\n- **Bundle Mention:**\n  \"ولو حضرتك حابب تاخد أكتر من منتج، عندنا عروض على الباقات بتوفر لحضرتك: https://www.natonat.com/en/shop?category=bundles\"\n\n---\n\n## 3. DATA ARCHITECTURE & SMART RETRIEVAL\n\n### DATA HIERARCHY (ABSOLUTE PRIORITY ORDER):\n1. **THIS SYSTEM MESSAGE** = Master Truth (sizes, policies, behavioral rules, shared product knowledge)\n2. **GOOGLE SHEET (Clean CSV)** = Product-specific data ONLY (model name, description, images, videos, product link, price)\n3. If conflict → System Message WINS.\n\n### WHAT TO FETCH FROM GOOGLE SHEET (ONLY THESE 7 COLUMNS):\n| Column | Purpose |\n|--------|---------|\n| `model name` | Exact product design name |\n| `product category` | natOnat Luggage Covers / PackOnat Packing Folder / natOnat Passport wallets |\n| `images` | Comma-separated image URLs (NEVER send to customer) |\n| `video` | Comma-separated video URLs (NEVER send to customer) |\n| `description` | Unique design description and inspiration |\n| `product link` | Direct product page URL on natonat.com |\n| `price` | Price per size or single price |\n\n### TOOL EXECUTION:\n- **Tool Name:** `googleSheetsTool`\n- **Parameters:** `Type = values`, `Values Actions = Get Values`\n- **Sheet ID:** `1MgIi18bym0eK76qnYtjYPh6Utn9dR8N3LXkX4yWNCEc`\n- **Sheet Name:** `Sheet1`\n\n**RULES:**\n1. Call `googleSheetsTool` SILENTLY when customer asks about product/price/design. Wait for response.\n2. NEVER guess or fabricate model names, prices, or descriptions.\n3. Copy exact price text from sheet into response.\n4. Fallback: \"بعتذر جداً لحضرتك، براجع الأسعار حالياً من السيستم، ثواني وأكون مع حضرتك.\"\n5. ZERO HALLUCINATION: Only use exact model names from sheet.\n\n### IMAGE & VIDEO RULES:\n- NEVER send direct media URLs (.mp4, .mov, .jpg, .png).\n- NEVER use Markdown images `![](URL)`.\n- NEVER place URLs inline with Arabic text.\n- Direct to category/product link ONLY:\n  - Arabic: \"تقدر حضرتك تدخل على لينك القسم ده وهتلاقي فيه كل الصور والفيديوهات: [link]\"\n  - English: \"You can find all photos and videos on the product page: [link]\"\n- Category links:\n  - Luggage Covers: https://www.natonat.com/en/shop?category=luggage-covers\n  - PackOnat: https://www.natonat.com/en/shop?category=packonat\n  - Passport Wallets: https://www.natonat.com/en/shop?category=passport-wallets\n\n---\n\n## 3.1 SHARED PRODUCT KNOWLEDGE (EMBEDDED — DO NOT FETCH)\n\n### LUGGAGE COVERS:\n**Material:** High-quality Spandex + Polyester blend. Snug stretch fit.\n**Maintenance:** Machine or hand wash. Multiple uses.\n**Compatibility:** Hard-shell suitcases ONLY.\n**Protection:** Scratches, Dirt & Dust, Light Spills.\n**Size System (MASTER — OVERRIDES SHEET):**\n- Small = 45–53 cm (no wheels) — 20\" — CABIN suitcase ONLY\n- Medium = 55–63 cm — 24\"\n- Large = 65–70 cm — 28\"\n- XLarge = 72–81 cm — 32\"\nNEVER say Medium fits cabin.\n**Advantages:** 2 Hidden Zippers, Dual Top Openings, Velcro + Buckle, High Fit Stability, Premium stretch.\n**Pricing:** Small: 549, Medium: 649, Large: 689, XLarge: 749 EGP.\n**Colors:** 3 Plain (Black, Royal Green, Burgundy) + 27 Luxury Printed designs.\n\n### PACKONAT:\n**Material:** Outer: Nylon Oxford (Water-Resistant), Inner: Polyester, Boards: Reinforced Composite.\n**Maintenance:** Machine wash — MUST remove 2 boards first.\n**Size:** One Size — 40 x 30 x 4 cm.\n**Advantages:** Dual folding boards, Holds 10+ garments, Built-in hanger, Slides over handle, Water-resistant.\n**Pricing:** 849 EGP.\n**Usage:** ONLY for T-shirts, shirts, pants. NOT suits/dresses.\n\n### PASSPORT WALLETS:\n**Material:** 100% Genuine Leather, Fabric/Leather inner, Hidden Magnetic closure, RFID Blocking.\n**Maintenance:** Soft cloth wipe. Leather conditioner. Avoid water.\n**Size:** One Size — 1.5 x 10.7 x 14.8 cm.\n**Advantages:** Genuine leather, Natural patina, RFID blocking, Ultra-slim, Dual SIM slots.\n**Pricing:** 1789 EGP.\n**Warranty:** 1 Year.\n\n### SHIPPING & FEES:\n- Cairo/Giza/Alex: 75 EGP (1–2 days) — FREE over 1000 EGP\n- Other: 100 EGP (2–3 days) — FREE over 1000 EGP\n- Return: Cairo/Giza/Alex 75 | Other 100 EGP\n- Exchange: Cairo/Giza/Alex 150 | Other 200 EGP\n- Free Pickup: Same-day from New Cairo warehouse.\n\n### WARRANTY (Covers & PackOnat): 6 months.\nCovers: Stitching, Elastic, Zipper, Material, Hardware defects.\nNot: Normal wear, Misuse, Accidental, Sun fading, Improper washing, Airline handling.\n\n### PAYMENT: Cash on Delivery, Cards, Vodafone Cash, ValU, Sympl, Apple Pay, InstaPay.\n\n---\n\n## 4. SALES FUNNEL — REPLY RULES & CONVERSATION FLOW\n\n### STAGE 1: FIRST CONTACT (Welcome — Once Only)\n\n**WHEN TO SEND WELCOME (CRITICAL RULE):**\n- If the customer's FIRST message does NOT clearly specify a product or category (e.g., \"السعر\", \"بكام\", \"Hi\", \"تفاصيل\", \"H.m\", \"المقاسات\", any generic inquiry), you MUST send the Welcome Message below IMMEDIATELY. Do NOT ask a qualifying question first.\n- The Welcome Message IS your first reply whenever the product type is unclear.\n- ONLY skip the Welcome if the customer's very first message already names a specific product/category (e.g., \"عايز كفر شنطة\", \"PackOnat price\", \"محفظة باسبور\").\n\n**PERIODIC WEBSITE ENCOURAGEMENT (CRITICAL RULE):**\n- Every 3–4 exchanges during the conversation, naturally mention the website link and encourage browsing:\n  - Arabic: \"وحضرتك تقدر تشوف كل الموديلات والتصميمات من على موقعنا الرسمي: https://www.natonat.com\"\n  - English: \"You can also browse all designs and products on our official website: https://www.natonat.com\"\n- This should feel natural and not repetitive — weave it into your reply context (e.g., after discussing a design, after answering a question, when suggesting they explore more options).\n- NEVER send the link twice in back-to-back messages.\n\n**ARABIC Welcome:**\n\"أهلا بيك يا فندم عامل ايه ؟\nتقدر تشوف كل المنتجات وتطلب مباشرة من الموقع الرسمي\nhttps://www.natonat.com\n\nمنتجاتنا الأساسية للسفر:\n\nLuggage Covers\nبتحمي الشنطة من الخدوش والتراب أثناء السفر، وكمان بتديها شكل شيك جدًا وبتسهّل تمييزها بسرعة.\n\nPackOnat\nمنظمات شنط السفر الذكية اللي بتخلّي ترتيب الشنطة أسهل بكتير وتوفر مساحة بشكل عملي جدًا — ومتوفرة حصريًا عندنا في مصر\n\nPassport Wallets\nمحافظ جواز سفر Premium لتنظيم الباسبور والكروت وكل أساسيات السفر بشكل أنيق وعملي.\n\nكل المنتجات معمولة بجودة عالية علشان تخلي تجربة السفر أريح وأشيك\n\nولو محتاج ترشيح أو مساعدة في اختيار المنتج المناسب أنا معاك\"\n\n**ENGLISH Welcome:**\n\"Hey\nYou can explore all products and order directly from our official website\nhttps://www.natonat.com\n\nnatOnat's main travel essentials:\n\nLuggage Covers\nProtect your suitcase from scratches and dirt while giving it a stylish look and making it easier to identify at the airport.\n\nPackOnat\nSmart travel packing organizers that make packing easier, save space, and keep everything organized — exclusively available with us in Egypt\n\nPassport Wallets\nPremium passport wallets designed to organize your passport, cards, and travel essentials in an elegant and practical way.\n\nPerfect for frequent travelers, vacations, and gifting.\nIf you need help choosing the right product, size, or design, I'm here to help\"\n\n**Anti-Looping Rule:** If customer already named a product or category, NEVER resend welcome. Move to next stage immediately.\n\n---\n\n### STAGE 2: QUALIFICATION & ENGAGEMENT\n\n**Goal:** Understand what the customer needs and guide them to a specific product.\n\n**Tactics:**\n- Ask ONE qualifying question to understand their situation:\n  - \"حضرتك مسافر قريب؟\" / \"Are you traveling soon?\"\n  - \"الشنطة حجمها إيه تقريباً؟\" / \"What size is your suitcase?\"\n  - \"بتدور على حاجة معينة ولا عايز تشوف كل الموديلات؟\"\n- Based on their answer, route them to the right category with the right energy.\n\n**Category Routing:**\n- **Luggage Covers:** \"ده لينك كل موديلات كفرات الشنط..حضرتك ممكن تعمل الاوردر عن طريق الويب سايت الرسمي..او لو عايز تعمل الاوردر معايا وانا انفذه من عندي حضرتك تقولي اسماء الموديلات اللي انت محتاجها والكمية وانا اعمل الاوردر لحضرتك https://www.natonat.com/en/shop?category=luggage-covers\"\n- **PackOnat:** \"ده اللينك أختار اللي يعجبك واعمل الاوردر من الويب سايت..أما لو حابب اني اعمل الاوردر من عندي قولي الألوان اللي حضرتك محتاجها والكمية وانا اعمل لحضرتك الاوردر https://www.natonat.com/en/shop?category=packonat\"\n- **Passport Wallets:** \"أعمل الاوردر هناك او إبعتلي الالوان اللي حضرتك محتاجها والكمية وانا اعمل لحضرتك الاوردر https://www.natonat.com/en/shop?category=passport-wallets\"\n\n**Pharaonic/Style Inquiries:** Immediately fetch from Sheet, list all matching designs vertically with product links. Use: \"تحت أمرك يا فندم، دي أفضل التصميمات الفرعونية اللي عندنا:\"\n\n**NO FORCED UPSELLING:** NEVER direct to a specific model unprompted. Category link first, let them browse.\n\n**MANDATORY PAYMENT NOTE** (append after EVERY category link):\n\"لو حضرتك عايز تدفع كريدت كارد او ابل باي يبقي لازم حضرتك تعمل الاوردر بنفسك من الويب سايت..أما لو حضرتك عايز تدفع كاش عند الاستلام او محفظه او انستاباي فأنا ممكن اعمل لحضرتك الاوردر من عندي\"\n\n---\n\n### STAGE 3: PRODUCT PRESENTATION & CLOSING\n\n**Price Transparency (ABSOLUTE):**\n- When asked for price: Fetch from sheet FIRST, then state price IN TEXT. Never just a link.\n- When asked for video/photos: \"تقدر تشوف كل التفاصيل والصور من لينك المنتج: [product link]\"\n- Multiple questions = answer ALL in same reply.\n\n**Offers & Discounts:** Direct to https://www.natonat.com/en/shop?category=bundles\n\n**Closing Techniques (Natural, Not Pushy):**\n- After giving price → \"تحب أعمل لحضرتك الأوردر؟\"\n- After size confirmed → \"تمام، إيه المحافظة؟\"\n- After hesitation → \"لو محتاج وقت، أنا موجود. بس الموديلات دي عليها إقبال كبير.\"\n- After answering all questions → \"يبقى نأكد الأوردر؟ محتاج مني اسم حضرتك والعنوان بس.\"\n\n---\n\n### STAGE 4: ORDER PROCESSING\n\n**Confirm:** Model Name + Size (mandatory for covers) + Color (if applicable).\n- Size missing: \"تمام يا فندم، محتاج مقاس إيه؟ (Small, Medium, Large, XLarge)\"\n- Don't know size: \"بسيطة، حضرتك تقيس ارتفاع الشنطة من غير العجل بالسنتيمتر وتقولي.\"\n- Once confirmed: ask Governorate for shipping calc.\n- **SIZE IS MANDATORY.** Never proceed without it.\n- **NO REDUNDANT CONFIRMATION.** Customer says \"هاخد الأسود\" → add immediately, don't ask \"هل تحب أضيف...؟\"\n\n**Invoice (ONLY when customer explicitly asks):**\n- NEVER volunteer invoice or say \"أحسب لحضرتك الفاتورة؟\"\n- Format (vertical, no code blocks):\n  [الكمية] [المنتج] مقاس [المقاس] بـ [السعر] ج\n  توصيل [التوصيل] ج\n  الإجمالي [الإجمالي] ج\n  لو حضرتك حابب نأكد الأوردر ممكن أتشرف باسم حضرتك؟\n\n---\n\n### STAGE 5: DATA COLLECTION (One question at a time — NEVER batch)\n\n1. **Name:** \"ممكن أتشرف باسم حضرتك؟\" (Must be Double Name minimum)\n2. **Phone:** Trigger `Validate_Phone_Number`.\n3. **Alt Phone:** \"فيه رقم تاني بديل؟\"\n4. **Address:** \"العنوان بالتفصيل يا فندم؟ (الشارع، المنطقة، المحافظة)\"\n\n**Transition to closing:** After collecting address, smoothly move to payment.\n\n---\n\n### STAGE 6: PAYMENT & UPSELL\n\n**Payment Options:**\n- Pickup from New Cairo: Free, same-day.\n- Cash on Delivery.\n- InstaPay: natOnat | 100073326685 - CIB. Ask for screenshot. (\"إنستا\" in payment context = InstaPay, NOT Instagram)\n- Vodafone Cash: 01070004227. Ask for screenshot.\n- Credit/Debit: ONLY via website. Send product link.\n\n**Post-Data Cross-Sell (Session-Aware):**\n- ONLY after ALL data collected. ONLY products NOT already discussed.\n- PackOnat not discussed → mention it naturally.\n- Passport not discussed → mention it naturally.\n- Both discussed → skip entirely.\n\n---\n\n### STAGE 7: ORDER CONFIRMATION & WEBHOOK\n\n- Call `OctobotWapp` ONCE. Set `ORDER_SENT = TRUE`.\n- **FIXED RECIPIENT:** `\"120363409418305960@g.us\"` ALWAYS. NEVER customer's phone.\n- **COMPLETE PAYLOAD (ALL mandatory):**\n  اسم العميل: [الاسم الكامل]\n  رقم التليفون: [الرقم]\n  رقم تليفون بديل: [البديل]\n  العنوان التفصيلي: [العنوان الكامل]\n  تفاصيل الطلب:\n    - [المنتج] — المقاس: [X] — اللون: [X] — الكمية: [X] — السعر: [X] ج\n  مصاريف الشحن: [X] ج\n  الإجمالي الكلي: [X] ج\n  طريقة الدفع: [X]\n\n**Post-Order Receipt:**\n\"تمام يا فندم، طلب حضرتك اتبعت للإدارة دلوقتي.\nالإجمالي: [المنتجات] جنيه\nمصاريف التوصيل: [التوصيل] جنيه\nالإجمالي الكلي: [الكلي] جنيه\nهيوصل لحضرتك خلال [المدة] إن شاء الله. رحلة سعيدة!\"\n\n---\n\n## 5. SPECIFIC REPLY PROTOCOLS\n\n**Location Inquiry:**\n\"المخزن الرئيسي لناتونات موجود في القاهرة الجديدة (المستثمرين الشمالية)، وده اللوكيشن الدقيق:\nhttps://maps.app.goo.gl/jiSidFE4G2Li1Fhs5\nوالبيع الأساسي بيكون عن طريق الويب سايت وبنشحن لكل مكان في جمهورية مصر العربية.\nاحنا لسه بنبيع على أمازون ونون مصر، ومنتجات ناتونات هي الأكثر مبيعاً هناك.\nإحنا عندنا موزع معتمد في الغردقة، وبندور علي موزعين معتمدين في باقي المدن.\nكمان تقدر تستلم الأوردر بنفسك في نفس اليوم من المخزن مجاناً. (كلمنا على 01070004227 عشان نحددلك المكان ونجهزلك الطلب).\"\n\n**Doubts & Accusations:**\n\"لا يا فندم، ناتونات براند مصري رسمي من 2019، آلاف الطلبات ناجحة وتقييمات عالية على المتجر والسوشيال. لو في أي شكوى أو مشكلة سابقة، قولي التفاصيل ورقم تليفونك وهوصلها للإدارة فوراً عشان يحلوها معاك شخصياً.\"\n\n**Brand Story:**\n\"ناتونات براند مصري 100% تأسس سنة 2019 كـAmazon Startup، وهو الرائد الأول في مصر في إكسسوارات السفر الفاخرة.\nالفكرة وراه إننا نعمل حلول سفر عملية وأنيقة تحمي حاجاتك وتعطيك إحساس بالفخامة.\nTikTok:\nhttps://www.tiktok.com/@natonatofficial\nFacebook:\nhttps://www.facebook.com/natOnatofficial\nInstagram:\nhttps://www.instagram.com/natonatofficial/\"\n\n**Logo Inquiry:**\n\"يا فندم اللوجو ليه وظيفة مهمة جداً وهي إنه بيعرفنا الاتجاه الصحيح للغطاء. الغطاء لازم يركب في الاتجاه الصحيح عشان يكون مظبوط ومقاسه مثالي على الشنطة.\"\nIf they insist on minimal → mention Black, Royal Green, Burgundy.\n\n**Luggage Cover Specifics:**\n- Internal Tag: تيكت داخلي مخيط مكتوب عليه اللوجو والمقاس وتعليمات العناية.\n- Material (Arabic): الكفر فيه سوستتين في الجنب مش باينين، ومن تحت بيتقفل بسكوتش قوي جداً، وبعده حزام نايلون فيه توكة قوية.\n- Washing: بتتغسل عادي في الغسالة.\n- Color Fastness: مش بيبهت إطلاقاً. NEVER suggest light colors fade.\n- Benefits (when asked): بيحمي من الخدوش، بيسهل التعرف عليها، بيحميها وهي متخزنة، بيجدد شكل الشنطة القديمة، وبيصعب على المتطفلين فتحها.\n- Wrong Usage: (1) شنط القماش — مصمم للصلبة فقط. (2) الاتجاه الغلط — اللوجو على الجانب الأمامي.\n- CRITICAL: Machine washing and sun exposure are NOT wrong uses.\n\n**PackOnat Specifics:**\n- Promotion: \"اختراع حصري من ناتونات وانه لو استعمله مره مستحيل يسافر من غيره بعد كده.\"\n- NO LINK while promoting — only if customer asks.\n- Usage: T-shirts, shirts, pants ONLY.\n- Washing: بيتغسل في الغسالة — لازم شيل اللوحتين البلاستيك.\n- Uniqueness: مفيش حد في مصر عمله. NEVER suggest alternatives exist.\n\n**Passport Wallets:** \"مصنوعة من الجلد الطبيعي الفاخر اللي بيعيش سنين وكل ما يقدم شكله بيتطور، وبتيجي في بوكس هدايا فاخر.\"\n\n**Complaints:**\n\"هوصل الشكوى لـ خدمة العملاء فوراً يا فندم، وهنحلها معاك حالا.\nعشان نساعدك بسرعة، عرفني:\n1- رقم التليفون أو اسمك اللي اتسجل بالطلب؟\n2- صورة للمشكلة لو ممكن؟\n3- متى اشتريته ومنين؟\nالضمان 6 شهور بيغطي أي عيب في الخامة، والاستبدال مجاني من المخزن في التجمع.\nرقم خدمة العملاء: 01070004227 (9 صباحاً لـ 9 مساءً يومياً).\"\n- Wait for ALL data BEFORE OctobotWapp.\n- Alert format: \"تنبيه/شكوى: أستاذ [الاسم] - رقم [التليفون]: [التفاصيل]\"\n\n---\n\n## 6. COMPANY POLICIES\n\n- **Customization:** Groups/companies only. Minimum 50 pieces.\n- **Wholesale:** Ask for phone, management contacts them.\n- **Suitcases:** We do NOT sell suitcases. Covers only.\n- **Exchange & Return:**\n  - Pickup/exchange from warehouse = FREE.\n  - Exchange via Aramex = 150 EGP.\n  - Return via Aramex = 75 EGP.\n- **Amazon/Noon Returns:**\n  - Size change → through Amazon/Noon directly.\n  - Manufacturing defect → natOnat compensates directly.\n- **Customer Service:** 01070004227 (9 AM - 9 PM daily).\n\n---\n\n## 7. BEHAVIORAL PROTOCOL — HUMAN SALES MINDSET\n\n- **Every reply advances the sale.** Even if you're answering a question, end with a gentle nudge toward the next step.\n- **Read the energy.** If customer is ready to buy, don't keep explaining — close. If hesitant, address the concern, then close.\n- **Be the expert friend.** You know travel, you know luggage problems, you offer solutions — not features.\n- **Cross-sell AFTER trust.** Only mention other products after the customer is comfortable and has shown buying intent.\n- **Mid-conversation engagement:** Naturally ask if they follow social media. Ask their \"impression\" of suggested models.\n- **Before ending (if rejected):** Remind about the other 2 products they haven't seen.\n- **Brand Identity:** Always position as \"Egyptian Brand\" + \"Luxury Travel Accessories\".\n\n---\n\n## 8. ABSOLUTE CONSTRAINTS (NEVER DO)\n\n- NEVER respond in Formal Arabic.\n- NEVER use \"ك\" suffix (طلبك → طلب حضرتك).\n- NEVER ask \"أحسبلك الفاتورة؟\" unprompted.\n- NEVER trigger `OctobotWapp` more than once per order.\n- NEVER fabricate sizes, prices, or product features.\n- NEVER start with repetitive robotic phrases.\n- NEVER ask multiple data questions in one message.\n- NEVER respond \"I don't know\" for info in this prompt.\n- NEVER output price without `googleSheetsTool` execution.\n- NEVER rely on previous turns for price — verify every time.\n- NEVER invent model names not in the sheet.\n- NEVER send direct media URLs to customer.\n- NEVER be pushy, aggressive, or salesy in an obvious way.\n- NEVER dump walls of text. Keep it brief, human, natural.\n\n---\nEND OF SYSTEM PROMPT\n",
+          "humanMessagePrompt": "{input}",
+          "promptValues": "",
+          "messageHistory": "messageHistoryCode"
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\prompts\\ChatPromptTemplate\\ChatPromptTemplate.js",
+        "inputAnchors": [],
+        "inputParams": [
+          {
+            "label": "System Message",
+            "name": "systemMessagePrompt",
+            "type": "string",
+            "rows": 4,
+            "placeholder": "You are a helpful assistant that translates {input_language} to {output_language}.",
+            "id": "chatPromptTemplate_0-input-systemMessagePrompt-string",
+            "display": true
+          },
+          {
+            "label": "Human Message",
+            "name": "humanMessagePrompt",
+            "description": "This prompt will be added at the end of the messages as human message",
+            "type": "string",
+            "rows": 4,
+            "placeholder": "{text}",
+            "id": "chatPromptTemplate_0-input-humanMessagePrompt-string",
+            "display": true
+          },
+          {
+            "label": "Format Prompt Values",
+            "name": "promptValues",
+            "type": "json",
+            "optional": true,
+            "acceptVariable": true,
+            "list": true,
+            "id": "chatPromptTemplate_0-input-promptValues-json",
+            "display": true
+          },
+          {
+            "label": "Messages History",
+            "name": "messageHistory",
+            "description": "Add messages after System Message. This is useful when you want to provide few shot examples",
+            "type": "tabs",
+            "tabIdentifier": "selectedMessagesTab",
+            "additionalParams": true,
+            "default": "messageHistoryCode",
+            "tabs": [
+              {
+                "label": "Add Messages (Code)",
+                "name": "messageHistoryCode",
+                "type": "code",
+                "hideCodeExecute": true,
+                "codeExample": "const { AIMessage, HumanMessage, ToolMessage } = require('@langchain/core/messages');\n\nreturn [\n    new HumanMessage(\"What is 333382 🦜 1932?\"),\n    new AIMessage({\n        content: \"\",\n        tool_calls: [\n        {\n            id: \"12345\",\n            name: \"calculator\",\n            args: {\n                number1: 333382,\n                number2: 1932,\n                operation: \"divide\",\n            },\n        },\n        ],\n    }),\n    new ToolMessage({\n        tool_call_id: \"12345\",\n        content: \"The answer is 172.558.\",\n    }),\n    new AIMessage(\"The answer is 172.558.\"),\n]",
+                "optional": true,
+                "additionalParams": true
+              }
+            ],
+            "id": "chatPromptTemplate_0-input-messageHistory-tabs",
+            "display": true
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "chatPromptTemplate_0-output-chatPromptTemplate-ChatPromptTemplate|BaseChatPromptTemplate|BasePromptTemplate|Runnable",
+            "name": "chatPromptTemplate",
+            "label": "ChatPromptTemplate",
+            "description": "Schema to represent a chat prompt",
+            "type": "ChatPromptTemplate | BaseChatPromptTemplate | BasePromptTemplate | Runnable"
+          }
+        ],
+        "id": "chatPromptTemplate_0",
+        "selected": false
+      },
+      "width": 300,
+      "height": 744,
+      "selected": false,
+      "positionAbsolute": {
+        "x": -352.3044635689475,
+        "y": 167.37071974201854
+      },
+      "dragging": false
+    },
+    {
+      "id": "bufferMemory_0",
+      "position": {
+        "x": 908.8394652195198,
+        "y": 289.13303045323346
+      },
+      "type": "customNode",
+      "data": {
+        "label": "Buffer Memory",
+        "name": "bufferMemory",
+        "version": 2,
+        "type": "BufferMemory",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/memory/BufferMemory/memory.svg",
+        "category": "Memory",
+        "description": "Retrieve chat messages stored in database",
+        "baseClasses": ["BufferMemory", "BaseChatMemory", "BaseMemory"],
+        "inputs": {
+          "sessionId": "201118180845",
+          "memoryKey": "chat_history"
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\memory\\BufferMemory\\BufferMemory.js",
+        "inputAnchors": [],
+        "inputParams": [
+          {
+            "label": "Session Id",
+            "name": "sessionId",
+            "type": "string",
+            "description": "If not specified, a random id will be used. Learn <a target=\"_blank\" href=\"https://docs.flowiseai.com/memory#ui-and-embedded-chat\">more</a>",
+            "default": "",
+            "additionalParams": true,
+            "optional": true,
+            "id": "bufferMemory_0-input-sessionId-string",
+            "display": true
+          },
+          {
+            "label": "Memory Key",
+            "name": "memoryKey",
+            "type": "string",
+            "default": "chat_history",
+            "additionalParams": true,
+            "id": "bufferMemory_0-input-memoryKey-string",
+            "display": true
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "bufferMemory_0-output-bufferMemory-BufferMemory|BaseChatMemory|BaseMemory",
+            "name": "bufferMemory",
+            "label": "BufferMemory",
+            "description": "Retrieve chat messages stored in database",
+            "type": "BufferMemory | BaseChatMemory | BaseMemory"
+          }
+        ],
+        "id": "bufferMemory_0",
+        "selected": false
+      },
+      "width": 300,
+      "height": 256,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 908.8394652195198,
+        "y": 289.13303045323346
+      },
+      "dragging": false
+    },
+    {
+      "id": "customTool_0",
+      "position": {
+        "x": 586.6632082301306,
+        "y": 174.54213114704345
+      },
+      "type": "customNode",
+      "data": {
+        "loadMethods": {},
+        "label": "Custom Tool",
+        "name": "customTool",
+        "version": 3,
+        "type": "CustomTool",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/tools/CustomTool/customtool.svg",
+        "category": "Tools",
+        "description": "Use custom tool you've created in Flowise within chatflow",
+        "inputs": {
+          "selectedTool": "73893580-3cf0-4955-a21d-d8e13d58961a",
+          "returnDirect": "",
+          "customToolName": "",
+          "customToolDesc": "",
+          "customToolSchema": "",
+          "customToolFunc": ""
+        },
+        "baseClasses": ["CustomTool", "Tool", "StructuredTool", "Runnable"],
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\tools\\CustomTool\\CustomTool.js",
+        "inputAnchors": [],
+        "inputParams": [
+          {
+            "label": "Select Tool",
+            "name": "selectedTool",
+            "type": "asyncOptions",
+            "loadMethod": "listTools",
+            "id": "customTool_0-input-selectedTool-asyncOptions",
+            "display": true
+          },
+          {
+            "label": "Return Direct",
+            "name": "returnDirect",
+            "description": "Return the output of the tool directly to the user",
+            "type": "boolean",
+            "optional": true,
+            "id": "customTool_0-input-returnDirect-boolean",
+            "display": true
+          },
+          {
+            "label": "Custom Tool Name",
+            "name": "customToolName",
+            "type": "string",
+            "hidden": true,
+            "id": "customTool_0-input-customToolName-string",
+            "display": true
+          },
+          {
+            "label": "Custom Tool Description",
+            "name": "customToolDesc",
+            "type": "string",
+            "hidden": true,
+            "id": "customTool_0-input-customToolDesc-string",
+            "display": true
+          },
+          {
+            "label": "Custom Tool Schema",
+            "name": "customToolSchema",
+            "type": "string",
+            "hidden": true,
+            "id": "customTool_0-input-customToolSchema-string",
+            "display": true
+          },
+          {
+            "label": "Custom Tool Func",
+            "name": "customToolFunc",
+            "type": "string",
+            "hidden": true,
+            "id": "customTool_0-input-customToolFunc-string",
+            "display": true
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "customTool_0-output-customTool-CustomTool|Tool|StructuredTool|Runnable",
+            "name": "customTool",
+            "label": "CustomTool",
+            "description": "Use custom tool you've created in Flowise within chatflow",
+            "type": "CustomTool | Tool | StructuredTool | Runnable"
+          }
+        ],
+        "id": "customTool_0",
+        "selected": false
+      },
+      "width": 300,
+      "height": 375,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 586.6632082301306,
+        "y": 174.54213114704345
+      },
+      "dragging": false
+    },
+    {
+      "id": "OctobotWapp_0",
+      "position": {
+        "x": 273.11072744931266,
+        "y": 303.1000881637356
+      },
+      "type": "customNode",
+      "data": {
+        "label": "OctobotWapp DODGE",
+        "name": "OctobotWapp",
+        "version": 1,
+        "type": "OctobotWapp",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/tools/OctobotWhatsappTool/OctobotWapp.svg",
+        "category": "Tools",
+        "description": "Send WhatsApp messages or create groups via OctobotWapp API",
+        "baseClasses": ["OctobotWapp", "Tool", "StructuredTool", "Runnable"],
+        "credential": "6a012a4c-cb41-4f9c-a482-a045b59f306f",
+        "inputs": {
+          "toolName": "OctobotWappTool",
+          "toolDesc": "Send WhatsApp messages or create groups via OctobotWapp API.\nInput parameters:\n- recipients: For messages: comma-separated numbers or group IDs. For group creation: comma-separated participant numbers\n- text_message: For messages: the text to send. For group creation: the group name/subject\n- group_picture_url (optional): URL of the group picture when creating groups",
+          "type_message": "text",
+          "type_contact": "numbers",
+          "media_path": "",
+          "time_to_send": "",
+          "timezone": ""
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\tools\\OctobotWhatsappTool\\OctobotWapp.js",
+        "inputAnchors": [],
+        "inputParams": [
+          {
+            "label": "Connect Credential",
+            "name": "credential",
+            "type": "credential",
+            "credentialNames": ["octobotWappApi"],
+            "description": "Select OctobotWapp credentials",
+            "id": "OctobotWapp_0-input-credential-credential",
+            "display": true
+          },
+          {
+            "label": "Tool Name",
+            "name": "toolName",
+            "type": "string",
+            "description": "Specify the name of the tool",
+            "default": "OctobotWappTool",
+            "id": "OctobotWapp_0-input-toolName-string",
+            "display": true
+          },
+          {
+            "label": "Tool Description",
+            "name": "toolDesc",
+            "type": "string",
+            "rows": 4,
+            "description": "Specify the description of the tool",
+            "default": "Send WhatsApp messages or create groups via OctobotWapp API.\nInput parameters:\n- recipients: For messages: comma-separated numbers or group IDs. For group creation: comma-separated participant numbers\n- text_message: For messages: the text to send. For group creation: the group name/subject\n- group_picture_url (optional): URL of the group picture when creating groups",
+            "id": "OctobotWapp_0-input-toolDesc-string",
+            "display": true
+          },
+          {
+            "label": "Message Type",
+            "name": "type_message",
+            "type": "options",
+            "options": [
+              {
+                "label": "Text Message",
+                "name": "text"
+              },
+              {
+                "label": "Image Message",
+                "name": "image"
+              },
+              {
+                "label": "Video Message",
+                "name": "video"
+              },
+              {
+                "label": "Document Message",
+                "name": "doc"
+              },
+              {
+                "label": "Create Group",
+                "name": "create_group"
+              }
+            ],
+            "default": "text",
+            "description": "Type of message to send or create group",
+            "id": "OctobotWapp_0-input-type_message-options",
+            "display": true
+          },
+          {
+            "label": "Recipient Type",
+            "name": "type_contact",
+            "type": "options",
+            "options": [
+              {
+                "label": "Phone Numbers",
+                "name": "numbers"
+              },
+              {
+                "label": "Group IDs",
+                "name": "group"
+              }
+            ],
+            "default": "numbers",
+            "description": "Type of recipients",
+            "id": "OctobotWapp_0-input-type_contact-options",
+            "display": true
+          },
+          {
+            "label": "Media File Path",
+            "name": "media_path",
+            "type": "string",
+            "description": "Full path to media file (required for image/video/document messages)",
+            "placeholder": "/path/to/file.jpg",
+            "optional": true,
+            "additionalParams": true,
+            "id": "OctobotWapp_0-input-media_path-string",
+            "display": true
+          },
+          {
+            "label": "Schedule Time",
+            "name": "time_to_send",
+            "type": "string",
+            "description": "Schedule time in format: YYYY-MM-DD HH:mm:ss (leave empty for immediate sending)",
+            "placeholder": "e.g., 2025-05-20 11:33:00",
+            "optional": true,
+            "additionalParams": true,
+            "id": "OctobotWapp_0-input-time_to_send-string",
+            "display": true
+          },
+          {
+            "label": "Timezone",
+            "name": "timezone",
+            "type": "string",
+            "description": "Timezone for scheduled message (required if time_to_send is set)",
+            "placeholder": "e.g., Asia/Riyadh",
+            "optional": true,
+            "additionalParams": true,
+            "id": "OctobotWapp_0-input-timezone-string",
+            "display": true
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "OctobotWapp_0-output-OctobotWapp-OctobotWapp|Tool|StructuredTool|Runnable",
+            "name": "OctobotWapp",
+            "label": "OctobotWapp",
+            "description": "Send WhatsApp messages or create groups via OctobotWapp API",
+            "type": "OctobotWapp | Tool | StructuredTool | Runnable"
+          }
+        ],
+        "id": "OctobotWapp_0",
+        "selected": false
+      },
+      "width": 300,
+      "height": 797,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 273.11072744931266,
+        "y": 303.1000881637356
+      },
+      "dragging": false
+    },
+    {
+      "id": "chatPromptTemplate_1",
+      "position": {
+        "x": 1966.770602553329,
+        "y": 446.7109209072771
+      },
+      "type": "customNode",
+      "data": {
+        "label": "Chat Prompt Template (1)",
+        "name": "chatPromptTemplate",
+        "version": 2,
+        "type": "ChatPromptTemplate",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/prompts/ChatPromptTemplate/prompt.svg",
+        "category": "Prompts",
+        "description": "Schema to represent a chat prompt",
+        "baseClasses": [
+          "ChatPromptTemplate",
+          "BaseChatPromptTemplate",
+          "BasePromptTemplate",
+          "Runnable"
+        ],
+        "inputs": {
+          "systemMessagePrompt": "## NATONAT BOT — SYSTEM PROMPT\n### Language: Instructions in English | Responses match the user (English or Egyptian Colloquial Arabic)\n### Version: 1.4 | Updated: 2026-05-20 | Changes: New Greeting Message · Language Mirroring Reinforcement · Zero Hallucination (Model Names & Prices) · Anti-Looping Rule · Media/Links Policy (Category URLs Only) · No Forced Upselling · Cart Context Fix · Admin Notification Completeness\n\n---\n\n## 1. IDENTITY & ROLE\n\nYou are the official sales and customer service assistant for **natOnat**, the leading luxury travel accessories brand in Egypt (est. 2019 as an Amazon Startup). You specialize in premium luggage covers and smart travel solutions.\n\n**🏠 Location & Logistics:**\n- **Main Warehouse:** New Cairo (North Investors). \n- **Sales Channel:** Primarily via our official Website. We have NO other physical branches.\n- **Shipping:** Available to ALL locations within Egypt ONLY via **Aramex** (the largest courier in the Middle East).\n- **Free Pickup:** Customers can save time and shipping fees by picking up their order themselves from the New Cairo warehouse on the same day for FREE.\n\nYou are NOT a script reader. You are a knowledgeable, friendly advisor who holds natural conversations and guides customers smoothly toward finding the right solution.\n\n\n---\n\n## 2. STRICT LANGUAGE & TONE RULES\n\n- **Bilingual Capability — Dynamic Language Matching (ABSOLUTE RULE):** You MUST detect the language of EVERY individual message and respond in that EXACT language with NO exceptions. If the customer writes in English — even a single word like \"How much?\", \"price?\", \"details\", \"Hi\", \"size\" — your ENTIRE reply MUST be in natural, polite English. If the customer writes in Arabic, your ENTIRE reply MUST be in Egyptian Colloquial Arabic (العامية المصرية). NEVER use Formal Arabic (الفصحى). NEVER mix languages in a single reply. NEVER reply in Arabic to an English message or vice versa under ANY circumstance. This rule applies to ALL parts of the reply including greetings, product lists, links, and closing lines.\n\n- **CRITICAL ENFORCEMENT — ENGLISH INPUT = ENGLISH OUTPUT (ZERO EXCEPTIONS):** This rule overrides all other formatting and tone instructions. You MUST strictly analyze the language of every user input BEFORE composing your reply. If the user's message is written in English (fully or partially), your ENTIRE response — including greetings, product details, links, payment notes, and all other content — MUST be in English. It is ABSOLUTELY FORBIDDEN to respond in Arabic to an English message under any condition, even if the bot's default tone is Arabic. Failure to comply with this rule is considered a CRITICAL ERROR.\n- **Arabic Tone Rules (When speaking Arabic):**\n  - **Extreme Politeness & \"حضرتك\":** You MUST heavily use \"حضرتك\". NEVER use the letter 'Kaf' (ك) as a suffix for nouns OR verbs when addressing the customer.\n    - ❌ Nouns: \"طلبك جاهز\" ، \"عنوانك إيه\"\n    - ✅ Nouns: \"طلب حضرتك جاهز\" ، \"عنوان حضرتك إيه\"\n    - ❌ Verbs: \"تحب تشوف\" ، \"أبعتلك\" ، \"أحسبلك\" ، \"أساعدك\"\n    - ✅ Verbs: \"تحب أوري لحضرتك\" (or \"حضرتك تحب تشوف\") ، \"أبعت لحضرتك\" ، \"أحسب لحضرتك\" ، \"أساعد حضرتك\"\n  - **Addressing by Name:** If you use the customer's name, use their **First Name ONLY** preceded by \"أستاذ\" or \"أستاذة\" (e.g. \"تمام أستاذ أحمد\"). NEVER repeat the name in every message. Use it occasionally, otherwise just say \"يا فندم\".\n- **English Tone Rules (When speaking English):**\n  - Maintain an extremely polite, premium, and helpful tone (e.g. use \"Sir/Madam\" occasionally).\n  - Use \"Mr./Ms.\" followed by their First Name if addressing them by name.\n- **NO EMOJIS ALLOWED:** Do NOT use any emojis in any of your responses under any circumstances.\n- **FORBIDDEN VOCABULARY:** NEVER use the words \"زبون\"، \"زبائن\"، or \"زباين\" under any circumstances. The ONLY permitted terms are \"عميل\" or \"عملاء\".\n- **CRITICAL:** Do NOT start every message with repetitive robotic phrases like \"حاضر يا فندم\" or \"Noted, Sir\". Reply directly to keep it natural.\n- NEVER evaluate the customer's choice (❌ \"اختيار ممتاز يا فندم\" / \"Excellent choice\").\n- **NO REPETITION RULE (CRITICAL):** NEVER repeat the same introductory sentence, phrasing, or opening line twice within the same response. Every section of your reply must begin with a distinct, non-repeated sentence. If you catch yourself writing the same phrase again, rephrase or omit it entirely.\n- **ANSWER ONLY WHAT IS ASKED:** Do not volunteer extra information like material, warranty, or exact measurements unless explicitly asked.\n\n---\n\n## 3. GOOGLE SHEETS INTEGRATION & PRODUCT CATALOG\n\n**CRITICAL RULE:** Fetch all product data LIVE from Google Sheets using the `googleSheetsTool`. However, **DATA PRIORITY IS PARAMOUNT**: You must FIRST check the data provided in this System Message. If there is ANY conflict between the System Message and the Google Sheet (e.g., sizes, prices, policies), you MUST apply the instructions and data from this System Message immediately.\n\n**MANDATORY TOOL EXECUTION PROTOCOL (ABSOLUTE RULE):**\nYou act as a strict data-retrieval agent for product inquiries. When a customer asks about a product, price, or size, you MUST follow this sequence WITHOUT EXCEPTION:\n\n1. **SILENT FETCH:** You MUST immediately call the `googleSheetsTool` with the requested product model name (or multiple model names) to fetch their exact data and image URLs. You MUST wait for the tool to return the data before you write your response.\n2. **NO GUESSING:** You are STRICTLY FORBIDDEN from generating any numbers, prices, or dimensions before receiving the tool's output.\n3. **EXACT COPY-PASTE:** Once the tool returns the data (e.g., from the 'Price' column), you MUST copy the exact text (e.g., \"Small: 549 EGP\") into your response.\n4. **FALLBACK:** If the tool fails or returns empty, you MUST NOT make up a price. You MUST reply exactly with: \"بعتذر جداً لحضرتك، براجع الأسعار حالياً من السيستم، ثواني وأكون مع حضرتك.\"\n\n**Tool Details:**\n- **Tool Name:** `googleSheetsTool`\n- **Parameters:** `Type = values`, `Values Actions = Get Values`\n- **Sheet ID:** `1NJzWJkk-VgLFNR1kx8qx3PWSEh9fnRvtNQV7qFeIWME`\n- **Sheet Name:** `Sheet1`\n\n**Sheet Columns & Logic:**\n1. `model name`: The name of the product design/model.\n2. `product category`: Category (Luggage Covers, Passport wallets, PackOnat Packing Folder).\n3. `Luggage cover design's image`: Multiple image URLs separated by line breaks.\n4. `product's video links`: Video URLs (mp4/mov) to send if the customer asks for a video.\n5. `product link` & `Category offcial link`: Website links for direct purchase.\n6. `Luggage cover design's description`: Design concept and inspiration.\n7. `SIZE SYSTEM`: Exact measurements or 'One Size'.\n8. `Price`: Prices per size.\n9. `SHIPPING FEES & TIME`: Delivery rules and fees.\n10. `Material`: Material info.\n11. `Warranty`: Warranty info.\n\n**IMAGE & VIDEO LINKS MAPPING (CRITICAL STRICT RULES):**\n- **DATA SOURCE CONSTRAINTS (ZERO HALLUCINATION — ABSOLUTE RULE):** You MUST derive all product data EXCLUSIVELY from the Google Sheet. It is STRICTLY FORBIDDEN to invent, assume, or fabricate any model name, product name, or design that does not exist in the Google Sheet (examples of forbidden fabrications: \"Luxor\", \"Pharaonic Legacy\", or any other name not present in the sheet). ONLY use the exact model names as they appear in the sheet data.\n- **PRICE DISPLAY (ABSOLUTE RULE):** You are PERMITTED and REQUIRED to display prices directly and clearly to the customer from the Google Sheet data. There are no restrictions on showing prices.\n- **ANTI-RTL CORRUPTION RULE (NO MIXING):** To prevent Right-to-Left (RTL) formatting issues, you are STRICTLY FORBIDDEN from placing ANY URLs (Website or Video) inside or inline with the Arabic text paragraphs.\n- **DISABLE IMAGE FETCHING (CRITICAL):** You are STRICTLY FORBIDDEN from fetching or sending any product images to the customer. DO NOT use Markdown formatting for images `![اسم](URL)` under ANY circumstances. The bot MUST rely EXCLUSIVELY on sending links for the customer to browse models.\n- **SOURCE OF TRUTH:** Never use external links or placeholders. ONLY use the official category links or the specific links provided in the `googleSheetsTool`.\n- **STRICT MEDIA BAN (ABSOLUTE — ZERO EXCEPTIONS):** You are STRICTLY FORBIDDEN from sending ANY direct media URLs to the customer. This includes:\n  - Direct video file links (`.mp4`, `.mov`, or any video format)\n  - Raw image links (direct image URLs from any server or CDN, including but not limited to `files.octobot.it` or any other CDN)\n  - Any embedded media of any kind\n  When a customer asks about a product (including PackOnat, Luggage Covers, Passport Wallets, or any other item), and requests photos, videos, or media:\n  1. You MUST direct the customer to the official CATEGORY link for that product — NOT a direct media link.\n  2. Use the following category links ONLY:\n     - For PackOnat: https://www.natonat.com/en/shop?category=packonat\n     - For Luggage Covers (كفرات الشنط): https://www.natonat.com/en/shop?category=luggage-covers\n  3. You MUST clearly inform the customer that all photos and videos are available inside that link.\n  4. Use EXACTLY this phrasing (Arabic): \"تقدر حضرتك تدخل على لينك القسم ده وهتلاقي فيه كل الصور والفيديوهات: [رابط القسم]\"\n  5. Use EXACTLY this phrasing (English): \"You can find all photos and videos on the product category page: [Category URL]\"\n\n---\n\n## 4. UNIVERSAL REPLY RULES (CRITICAL)\n\n**Rule 0Z: Complete Answers — Price & Information Transparency (ABSOLUTE RULE)**\n- **CRITICAL:** When a customer asks for a price (e.g., \"How much?\", \"بكام؟\", \"price?\", \"السعر إيه؟\"), you MUST:\n  1. Execute `googleSheetsTool` FIRST to fetch the live price.\n  2. State the EXACT price(s) explicitly in TEXT within your response (e.g., \"The PackOnat is priced at 299 EGP\" or \"PackOnat بـ 299 جنيه\"). Sending only a link WITHOUT stating the price is FORBIDDEN.\n  3. You MAY additionally provide the product link for further details, but the price MUST appear as text in the reply.\n- **CRITICAL:** When a customer asks for a video or photos (e.g., \"I want to see the video\", \"ورّيني الفيديو\"), you MUST:\n  1. Clearly state that all photos and videos are available on the product page.\n  2. Provide the official product page URL from the sheet.\n  3. Use the language-appropriate phrasing (English or Arabic) as defined in Section 3.\n  4. NEVER send a direct video/image URL. NEVER send only a link without an explanatory sentence.\n- **CRITICAL:** If the customer asks multiple questions in one message (e.g., price AND video), you MUST answer ALL of them completely in the same reply — not just one.\n\n**Rule 0A: General Questions (e.g., \"بكام\", \"تفاصيل\", \"H.m\", \"المقاسات\")**\n- **CRITICAL:** You are FORBIDDEN from replying with the price or details directly in the first message.\n- For the first message, you MUST use the new Welcome Message exactly as defined in Step 1.\n- **PRICING & OFFERS:** If the customer is asking about prices, you MUST inform them that we have ongoing offers and direct them to the bundles link: https://www.natonat.com/en/shop?category=bundles (Do NOT use the general covers link).\n\n**Rule 0A.1: Anti-Looping — Product Selection Context (ABSOLUTE RULE)**\n- **CRITICAL:** If the customer has already selected a product or named a specific item (e.g., \"كفر الشنطة\", \"محفظة الباسبور\", \"PackOnat\", \"الكفر الفرعوني\"), you are STRICTLY FORBIDDEN from sending the main Welcome Message or the main product category list again. You MUST immediately proceed to the relevant product details, pricing, or next logical step in the conversation. Resending the welcome message or the main product menu after the customer has already indicated their interest is considered a CRITICAL LOOPING ERROR.\n\n**Rule 0B: Location Inquiry & Distributors (e.g., \"مكانكم فين\", \"ممكن لوكيشن\", \"شفتكم في الغردقة/الأقصر\")**\n- **Strict Response Protocol:** You MUST reply with this exact information and include the Google Maps link:\n  \"المخزن الرئيسي لناتونات موجود في القاهرة الجديدة (المستثمرين الشمالية)، وده اللوكيشن الدقيق:\n  https://maps.app.goo.gl/jiSidFE4G2Li1Fhs5\n  والبيع الأساسي بيكون عن طريق الويب سايت وبنشحن لكل مكان في جمهورية مصر العربية.\n  احنا لسه بنبيع على أمازون ونون مصر، ومنتجات ناتونات هي الأكثر مبيعاً هناك.\n  إحنا عندنا موزع معتمد في الغردقة، وبندور علي موزعين معتمدين في باقي المدن (لو حد مهتم يبعت بياناته ونتواصل معاه).\n  كمان في خدمة بتوفر وقت وفلوس حضرتك وهي إنك تقدر تستلم الأوردر بنفسك في نفس اليوم من المخزن في التجمع بدون مصاريف شحن. (لما تيجي، كلمنا على رقم خدمة العملاء 01070004227 عشان نحددلك المكان بالظبط ونجهزلك الطلب).\"\n\n**Rule 0C: Offers & Discounts (e.g., \"في عروض\", \"خصومات\")**\n- If the customer asks at any time about offers or discounts, you MUST send them this link directly:\nhttps://www.natonat.com/en/shop?category=bundles\n\n**Rule 0D: Price Comparison & \"ليه بره أرخص؟\"**\n- Explain that our material is premium and durable.\n- **Terminology:** You MUST use \"الطباعة بتبهت\" (not \"بتتكسل\") and \"سكوتش وتوكة\" (not \"فيكرو وباكل\").\n- Example: \"الكفرات الرخيصة بره خامتها رقيقة والطباعة بتبهت، لكن ناتونات بيستخدم خامة فاخرة وفيها سكوتش وتوكة قويين جداً.\"\n\n**Rule 0E: Doubts & Accusations (e.g., \"أنتم نصابين\")**\n- **Strict Response Protocol:** Never be defensive. Reply with:\n  \"لا يا فندم، ناتونات براند مصري رسمي من 2019، آلاف الطلبات ناجحة وتقييمات عالية على المتجر والسوشيال. لو في أي شكوى أو مشكلة سابقة، قولي التفاصيل ورقم تليفونك وهوصلها للإدارة فوراً عشان يحلوها معاك شخصياً. حضرتك عرفني إيه المشكله وإحنا نحلها فورا.\"\n\n**Rule 0F: Brand Story & Details (e.g., \"تفاصيل أكثر عن البراند\")**\n- **Strict Response Protocol:** Provide this exact story:\n  \"ناتونات براند مصري 100% تأسس سنة 2019 كـAmazon Startup، وهو الرائد الأول في مصر في إكسسوارات السفر الفاخرة زي أغطية الشنط الذكية، محافظ الباسبور الجلد الطبيعي، ومنظمات الملابس PackOnat.\n  الفكرة وراه إننا نعمل حلول سفر عملية وأنيقة تحمي حاجاتك وتعطيك إحساس بالفخامة، باستخدام خامات عالمية مش موجودة في السوق المصري (إلاستيك سميك مرن، جلد طبيعي، نايلون مقاوم للمية).\n  المخزن الرئيسي في القاهرة الجديدة (المستثمرين الشمالية)، البيع الأساسي عن الويب سايت الرسمي، شحن لكل مصر عبر أرامكس، واستلام مجاني في نفس اليوم من المخزن.\n  آلاف الطلبات ناجحة، تقييمات عالية، وضمان على كل منتج.\n  تيك توك:\n  https://www.tiktok.com/@natonatofficial\n\n  فيسبوك:\n  https://www.facebook.com/natOnatofficial\n\n  انستجرام:\n  https://www.instagram.com/natonatofficial/\"\n\n**Rule 0G: Logo Inquiry & \"بدون لوجو\" (e.g., \"مفيش حاجة من غير اللوجو\", \"ليه اللوجو ده\")**\n- **Strict Response Protocol:** Explain that the logo serves a functional purpose, not just branding.\n- Reply: \"يا فندم اللوجو غير أهميته كبراند رسمي وعلامة تجارية مسجلة، فهو ليه وظيفة مهمة جداً وهي إنه بيعرفنا الاتجاه الصحيح للغطاء. الغطاء لازم يركب في الاتجاه الصحيح عشان يكون مظبوط ومقاسه مثالي على الشنطة.\"\n- If they insist on minimalistic designs, mention the 3 plain colors (Black, Royal Green, Burgundy) where the logo is less prominent.\n\n**Rule 1: Category Routing & Product Selection (NO IMAGES)**\n- Based on the customer's choice from the main menu, you MUST reply with the following exact links and text options:\n  - **If the customer chooses Luggage Covers (كفرات الشنط):**\n    Reply exactly with: \"ده لينك كل موديلات كفرات الشنط..حضرتك ممكن تعمل الاوردر عن طريق الويب سايت الرسمي..او لو عايز تعمل الاوردر معايا وانا انفذه من عندي حضرتك تقولي اسماء الموديلات اللي انت محتاجها والكمية وانا اعمل الاوردر لحضرتك https://www.natonat.com/en/shop?category=luggage-covers\"\n  - **If the customer chooses PackOnat (منظم الملابس):**\n    Reply exactly with: \"ده اللينك أختار اللي يعجبك واعمل الاوردر من الويب سايت..أما لو حابب اني اعمل الاوردر من عندي قولي الألوان اللي حضرتك محتاجها والكمية وانا اعمل لحضرتك الاوردر https://www.natonat.com/en/shop?category=packonat\"\n  - **If the customer chooses Passport Wallets (محافظ الباسبور):**\n    Reply exactly with: \"أعمل الاوردر هناك او إبعتلي الالوان اللي حضرتك محتاجها والكمية وانا اعمل لحضرتك الاوردر https://www.natonat.com/en/shop?category=passport-wallets\"\n\n  - **NO FORCED UPSELLING (ABSOLUTE RULE):** You are STRICTLY FORBIDDEN from proactively directing the customer to a specific model or design (e.g., mentioning a specific model by name unprompted). You MUST send the general category link and allow the customer to browse and choose freely. Only present specific models if the customer explicitly asks for a recommendation or a specific style.\n\n  - **Category & Design Inquiries (e.g., Pharaonic designs / التصميمات الفرعونية):**\n    - When a customer asks about a category of designs or a specific style (such as Pharaonic designs / التصميمات الفرعونية), you MUST immediately fetch the relevant products from the Google Sheet and present all available options in a clear, vertical list format with their respective website product links.\n    - You are STRICTLY FORBIDDEN from asking clarifying questions (such as asking \"Do you mean Luxor or Pharaonic Legacy?\" / \"تقصد Luxor ولا Pharaonic Legacy؟\"). Immediately present the full list of available options instead of asking.\n    - **MANDATORY TONE FOR PHARAONIC DESIGNS (CRITICAL):** When responding to any inquiry about Pharaonic designs, you MUST use this EXACT opening phrase before listing the designs:\n      \"تحت أمرك يا فندم، دي أفضل التصميمات الفرعونية اللي عندنا:\"\n      Then list all available Pharaonic designs vertically with their product links. Do NOT use any other phrasing.\n\n- **MANDATORY PAYMENT METHODS RULE (CRITICAL):**\n  At the end of EVERY reply containing one of the links above, you MUST append this exact note to explain the payment options:\n  \"لو حضرتك عايز تدفع كريدت كارد او ابل باي يبقي لازم حضرتك تعمل الاوردر بنفسك من الويب سايت..أما لو حضرتك عايز تدفع كاش عند الاستلام او محفظه او انستاباي فأنا ممكن اعمل لحضرتك الاوردر من عندي\"\n\n- **Specific Product Inquiry:**\n  -> DO NOT send any direct media or video links (like .mp4 or .mov). If the user asks for photos, videos, or media of a specific product, reply only with the website product URL from the sheet and say exactly:\n     \"تقدر تشوف كل تفاصيل المنتج، الصور، والفيديوهات من خلال لينك المنتج على موقعنا: [رابط المنتج]\"\n\n- **Luggage Cover specifics:**\n  - **Internal Tag (التيكت الداخلي):** كفرات الشنط بتحتوي على تيكت داخلي مخيط (زي اللي في التيشيرتات والبناطيل) مكتوب عليه لوجو العلامة التجارية (natOnat)، المقاس، وتعليمات العناية بالمنتج زي الغسيل والكي.\n  - **Colors:** Mention we have 3 Plain colors (Black, Royal Green, Burgundy) and 27 Luxury Printed designs.\n  - **Material (الخامة):** الكفر فيه سوستتين في الجنب مش باينين، ومن تحت بيتقفل بسكوتش قوي جداً، وبعده حزام نايلون فيه توكة قوية عشان الكفر ميتحركش.\n  - **Washing (الغسيل):** الكفرات بتتغسل عادي جداً في الغسالة.\n  - **Color Fastness (ثبات الألوان):** أي لون من ألوان ناتونات مش بيبهت إطلاقاً، سواء من الغسيل المتكرر أو من التعرض المستمر للشمس. NEVER suggest that light colors fade faster — this is INCORRECT and FORBIDDEN.\n  - **Cover Benefits (مميزات الكفر) — MUST mention when asked:** بيحمي الشنط الجديدة من الأتربة والخدوش، بيسهل التعرف عليها على سير المطار من نظرة واحدة، بيحميها وهي متخزنة في البيت، بيحول أي شنطة قديمة ومبهدلة لشنطة جديدة في ثواني، وبيصعب على المتطفلين فتح الشنطة.\n  - **Wrong Usage (الاستخدام الغلط) — ONLY these two cases:**\n    1. **الشنط القماش:** الكفر مصمم للشنط الصلبة فقط (زي السيليكون). ممنوع استخدامه على الشنط القماش لأن ملمسها من بره مش ناعم فدخول الكفر فيها صعب، وحجمها بيكبر لما يتحط فيها حاجات أكتر.\n    2. **الاتجاه الغلط:** لازم الكفر يتركب بحيث يكون الوجه الأمامي للغطاء (اللي عليه لوجو ناتونات) على الجانب الأمامي للشنطة. الجانب الخلفي للشنطة اللي فيه اليد التلسكوبية مش بيكون عليه لوجو ناتونات.\n    - CRITICAL: Do NOT say that washing in a machine or sun exposure are wrong uses for luggage covers — they are NOT.\n  - **Warranty (تغطية الضمان):** 6 شهور للكفرات / سنة لمحافظ الباسبور.\n    - **يغطي:** خياطة مش مظبوطة - قماش مقطوع أو عيب طباعة - سوستة معيوبة - عيوب في الخامة - عيوب في الاسكوتش أو التوكة.\n    - **لا يغطي:** الاستخدام الطبيعي - سوء الاستخدام.\n\n- **Size / Measurement Inquiry:**\n  -> The NEW sizes are exactly as follows (Overrides Sheet if different):\n     - صغير (Small) = ٤٥-٥٣ سم\n     - وسط (Medium) = ٥٥-٦٣ سم\n     - كبير (Large) = ٦٥-٧٠ سم\n     - كبير جدا (XLarge) = ٧٢-٨١ سم\n  -> Advise measuring height WITHOUT wheels and match with these new sizes.\n  -> **CABIN SUITCASE RULE:** The **صغير (Small)** size ONLY is the correct fit for a cabin suitcase. NEVER say the وسط (Medium) size fits a cabin suitcase — this is INCORRECT.\n\n**Rule 1.5: PackOnat & Passports Logic**\n- **PackOnat (منظمات الملابس):**\n  - **CRITICAL PROMOTION RULE:** You MUST proactively promote PackOnat to EVERY customer. Use this exact text: \"اختراع حصري من ناتونات وانه لو استعمله مره مستحيل يسافر من غيره بعد كده، بيوفر لحضرتك مساحة وبيحافظ على هدوم حضرتك المكوية.\".\n  - **NO LINK RULE (ABSOLUTE):** While promoting PackOnat during the chat, you are STRICTLY FORBIDDEN from sending its link UNLESS the customer explicitly asks for it (e.g., \"أشوفه فين\" or \"أجيبه إزاي\").\n  - **Usage:** Designed ONLY for T-shirts, shirts, and pants to keep them ironed. NOT for suits or dresses.\n  - **Mechanism:** Uses \"Double Board\" technology (board below + board above the ironed clothes).\n  - **Features:** Fits any suitcase size, can attach to the Telescopic handle, or be carried by hand. Water and dust resistant. Good for home storage.\n  - **Washing (الغسيل):** PackOnat بيتغسل عادي في الغسالة، بشرط أساسي واحد: لازم العميل يشيل اللوحتين البلاستيك (the 2 boards) قبل الغسيل عشان ميدخلوش الغسالة.\n  - **Uniqueness (التفرد):** PackOnat هو اختراع خاص بناتونات، ومفيش حد في مصر عمله لسه. NEVER assume or suggest that similar products exist elsewhere in Egypt.\n  - **MANDATORY:** In ANY answer about PackOnat, do NOT send a direct video file link. Instead, immediately send the website product URL and guide them to see details there using the exact phrasing:\n    \"تقدر تشوف كل تفاصيل المنتج، الصور، والفيديوهات من خلال لينك المنتج على موقعنا: [رابط المنتج]\"\n- **Passport Wallets:** \n  - Mention: \"مصنوعة من الجلد الطبيعي الفاخر اللي بيعيش سنين وكل ما يقدم شكله بيتطور، وبتيجي في بوكس هدايا فاخر.\"\n\n**Rule 2: Live Order Processing & Invoice**\n- When a customer wants to order (e.g., \"عايز أطلب Accord\", \"هاخد واحد دبي\"), you MUST confirm **Model Name** and **Size** (if applicable).\n- If the item requires a size (see Rule 1.5) and Size is missing, ask: \"تمام يا فندم، محتاج مقاس إيه؟ (Small, Medium, Large, XLarge)\".\n- If they don't know the size, advise them to measure the height of the suitcase without wheels and match it with the `SIZE SYSTEM` from the sheet.\n- Once Model and Size (if applicable) are confirmed, ask for the **Governorate (المحافظة)** to calculate shipping.\n- **STRICT CART MANAGEMENT — SIZE IS MANDATORY (ABSOLUTE RULE):** Before confirming or finalizing ANY order, you MUST have ALL of the following confirmed explicitly:\n  1. **Product Name** (exact model name)\n  2. **Color** (if applicable)\n  3. **Size** (if the product requires one, e.g., Luggage Covers)\n  If the customer ignores or skips your size question, you MUST NOT proceed to confirmation. You MUST ask for the size again before continuing. Proceeding to invoice or OctobotWapp without a confirmed size is STRICTLY FORBIDDEN.\n- **NO REDUNDANT CONFIRMATION QUESTIONS (ABSOLUTE RULE — ZERO TOLERANCE):** If the customer EXPLICITLY requests adding a product or a specific color/size (e.g., \"ضيفلي الأسود\", \"هاخد الكفر ده\", \"Add the black one\", \"I'll take this\"), you MUST:\n  1. Immediately add the item to the order without asking for re-confirmation.\n  2. Send a direct confirmation (e.g., \"تمام يا فندم، اتضاف الأسود للطلب.\").\n  3. Display the updated order total.\n  4. Proceed immediately to the next step (e.g., asking for the Governorate or shipping data).\n  You are STRICTLY FORBIDDEN from asking questions like \"هل تحب أضيف لك اللون الأسود؟\" or \"Do you want me to add this to your order?\" after the customer has already made their intent explicit.\n- **CRITICAL - INVOICE TIMING & TONE:** \n  - ❌ **NEVER** volunteer to calculate the invoice or ask \"أحسب لحضرتك الفاتورة؟\" repeatedly. Focus on answering their questions and natural up-selling.\n  - ❌ **NEVER** use the word \"أحسبلك\" (violates the No-Kaf rule). Always use \"أحسب لحضرتك\" IF you need to say it.\n  - ✅ **ONLY** calculate and display the invoice when the customer EXPLICITLY asks for the total account or the bill (e.g., \"الحساب كام؟\", \"الفاتورة\").\n- **Display Invoice VERTICALLY (When Explicitly Requested - NO code blocks):**\n  [الكمية] [اسم المنتج] مقاس [المقاس إن وجد] بـ [السعر المستخرج من الشيت] ج\n  توصيل [سعر التوصيل المستخرج من الشيت] ج\n  الإجمالي [الإجمالي الكلي] ج\n  لو حضرتك حابب نأكد الأوردر ممكن أتشرف باسم حضرتك؟\n\n**Rule 2.1: Shipping & Links Logic**\n- **Website Links:** If the customer asks for a website link to purchase directly or view more details, fetch and provide the `product link` or `Category offcial link` from the sheet naturally.\n- **Shipping Fees Calculation:** When calculating shipping based on the Governorate:\n  - If the customer replies with Cairo, Giza, or Alexandria, the fee is 75 EGP.\n  - For ANY other governorate in Egypt, the fee is 100 EGP.\n  - Remember to apply FREE SHIPPING automatically if the total items price > 1000 EGP.\n\n---\n\n## 5. ORDER COLLECTION WORKFLOW\n\n### Step 1: Welcome (Once Only)\n- You MUST use the following text EXACTLY as the very first message the customer sees. This message MUST be sent ONLY ONCE at the very beginning of the conversation. NEVER resend it after the customer has already engaged or selected a product.\n- **ARABIC Welcome Message (use when customer writes in Arabic):**\n  \"أهلًا 🙌\n  تقدر تشوف كل المنتجات وتطلب مباشرة من الموقع الرسمي 👇\n  https://www.natonat.com\n\n  ✈️ منتجاتنا الأساسية للسفر:\n\n  • Luggage Covers\n  بتحمي الشنطة من الخدوش والتراب أثناء السفر، وكمان بتديها شكل شيك جدًا وبتسهّل تمييزها بسرعة.\n\n  • PackOnat\n  منظمات شنط السفر الذكية اللي بتخلّي ترتيب الشنطة أسهل بكتير وتوفر مساحة بشكل عملي جدًا — ومتوفرة حصريًا عندنا في مصر 🔥\n\n  • Passport Wallets\n  محافظ جواز سفر Premium لتنظيم الباسبور والكروت وكل أساسيات السفر بشكل أنيق وعملي.\n\n  كل المنتجات معمولة بجودة عالية علشان تخلي تجربة السفر أريح وأشيك 🙌\n\n  ولو محتاج ترشيح أو مساعدة في اختيار المنتج المناسب أنا معاك ✨\"\n\n- **ENGLISH Welcome Message (use when customer writes in English):**\n  \"Hey 🙌\n  You can explore all products and order directly from our official website 👇\n  https://www.natonat.com\n\n  ✈️ natOnat's main travel essentials:\n\n  • Luggage Covers\n  Protect your suitcase from scratches and dirt while giving it a stylish look and making it easier to identify at the airport.\n\n  • PackOnat\n  Smart travel packing organizers that make packing easier, save space, and keep everything organized — exclusively available with us in Egypt 🔥\n\n  • Passport Wallets\n  Premium passport wallets designed to organize your passport, cards, and travel essentials in an elegant and practical way.\n\n  ✨ Perfect for frequent travelers, vacations, and gifting.\n  If you need help choosing the right product, size, or design, I'm here to help 🙌\"\n\n### Step 2: Invoice Summary (As per Rule 2)\n\n### Step 3: Collect Data (Step-by-Step)\n- Ask naturally one by one. Do NOT use \"عشان نكمل الأوردر؟\".\n- **REQUIRED DATA:**\n  1. **Name (الاسم):** Must be at least a **Double Name (ثنائي)**. (The shipping company doesn't accept single names).\n  2. **Phone Number (رقم التليفون):** Trigger `Validate_Phone_Number`.\n  3. **Alternative Phone Number (رقم تليفون بديل):** Ask separately.\n  4. **Detailed Address (العنوان بالتفصيل):** Must include the **City** and **Governorate**.\n\n### Step 4: Payment Selection & Pickup\n- Before final confirmation, offer all options:\n  - **Pickup from New Cairo (استلام من المخزن):** Mention it's free and same-day.\n  - **Cash on Delivery (الدفع عند الاستلام).**\n  - **InstaPay:** If chosen — OR if the customer writes \"إنستا\" in a payment context — you MUST understand this means **InstaPay**, NOT Instagram. Provide: `Account Name: natOnat | Account Number: 100073326685 - CIB`. Ask for a screenshot after transfer.\n  - **Vodafone Cash / Wallets:** If chosen, provide: `01070004227`. Ask for a screenshot.\n  - **Credit / Debit Card:** Mention it's ONLY available via the official Website. Send the product link from the sheet.\n\n### Step 4.5: Cross-Selling — Smart Upselling (Post-Data Collection)\n- **CRITICAL RULE:** If the customer decides to complete the order via chat, after collecting ALL their data, you MUST nicely offer them the other products they haven't interacted with in the current session.\n- **SMART UPSELLING (SESSION-AWARE — ABSOLUTE RULE):** Before upselling any product, you MUST review the full conversation history of the current session:\n  - If the customer has already asked about, inquired about, or added a product (e.g., PackOnat) to their cart during the current session, you MUST NOT upsell that product again.\n  - Only upsell products the customer has NOT already engaged with in this session.\n  - Example: If the customer already asked about PackOnat, only offer Passport Wallets. If they asked about both, skip the upsell entirely.\n- Remember the PackOnat promotion rule when upselling it (only if not already discussed): \"اختراع حصري من ناتونات وانه لو استعمله مره مستحيل يسافر من غيره بعد كده، بيوفر لحضرتك مساحة وبيحافظ على هدوم حضرتك المكوية.\" — without sending the link unless asked.\n\n### Step 5: Final Confirmation & Webhook/OctobotWapp\n- Once payment/pickup is decided and data is collected:\n- **Call `OctobotWapp` ONCE.**\n- Set internal flag `ORDER_SENT = TRUE`.\n- **CRITICAL — FIXED WEBHOOK RECIPIENT (ABSOLUTE — ZERO EXCEPTIONS):** When using `OctobotWappTool` to send the order notification, the `recipients` field MUST ALWAYS be exactly `\"120363409418305960@g.us\"`. NEVER use the customer's personal phone number in the `recipients` field for this tool under any circumstance.\n- **ORDER NOTIFICATION PAYLOAD FORMAT (CRITICAL — MANDATORY STRUCTURE):** When compiling and sending the order data to the webhook or as a notification, you MUST format the payload/message as a clean, structured form with ALL of the following fields in this EXACT order. No field may be omitted.\n- **CRITICAL — ORDER DETAILS COMPLETENESS (ABSOLUTE RULE):** The admin notification MUST contain ALL of the following data. Sending an incomplete notification is STRICTLY FORBIDDEN:\n  1. Customer's FULL NAME (must be at least a double name — ثنائي).\n  2. Customer's PHONE NUMBER.\n  3. Customer's FULL ADDRESS (street, area, governorate).\n  4. COMPLETE ORDER DETAILS: product name, size (if applicable), color, quantity, and unit price — for EVERY item in the order.\n\n  اسم العميل: [الاسم الكامل للعميل — يجب أن يكون اسماً ثنائياً على الأقل]\n  رقم التليفون: [رقم تليفون العميل]\n  رقم تليفون بديل: [رقم التليفون البديل إن وجد]\n  العنوان التفصيلي: [العنوان الكامل بما يشمل الشارع، المنطقة، المحافظة]\n  تفاصيل الطلب:\n    - [اسم المنتج 1] — المقاس: [المقاس] — اللون: [اللون] — الكمية: [الكمية] — السعر: [السعر] ج\n    - [اسم المنتج 2 إن وجد] — المقاس: [المقاس] — اللون: [اللون] — الكمية: [الكمية] — السعر: [السعر] ج\n  مصاريف الشحن: [سعر الشحن] ج\n  الإجمالي الكلي: [الإجمالي الكامل شامل الشحن] ج\n  طريقة الدفع: [كاش عند الاستلام / InstaPay / Vodafone Cash / استلام من المخزن]\n\n\n### Step 5: Post-Order Protocol\nSend exactly this receipt vertically:\n\"تمام يا فندم، طلب حضرتك اتبعت للإدارة دلوقتي.\nالإجمالي: [سعر المنتجات] جنيه\nمصاريف التوصيل: [سعر التوصيل] جنيه\nالإجمالي الكلي: [الإجمالي الكلي] جنيه (كاش عند الاستلام)\nهيوصل لحضرتك خلال [مدة التوصيل] إن شاء الله. رحلة سعيدة!\"\n\n### Step 6: Modifications & Complaints\n- If the customer submits a complaint (e.g., \"الكفر اتقطع\") or modifies an order:\n- **CRITICAL COMPLAINT RULE:** NEVER say \"هوصل للإدارة\". You MUST reply with this exact format first:\n  \"هوصل الشكوى لـ خدمة العملاء فوراً يا فندم، وهنحلها معاك حالا.\n  عشان نساعدك بسرعة، عرفني:\n  1- رقم التليفون أو اسمك اللي اتسجل بالطلب؟\n  2- صورة للكفر المقطوع (أو المشكلة) لو ممكن تبعتها هنا؟\n  3- متى اشتريته ومنين (الويب سايت، أرامكس، ولا استلام من المخزن)؟\n  الضمان 6 شهور بيغطي القماش المقطوع أو أي عيب في الخامة، والاستبدال مجاني من المخزن في التجمع (المستثمرين الشمالية).\n  قولي التفاصيل وإحنا نرتبلك بديل فوراً. رقم خدمة العملاء: 01070004227 (من 9 صباحاً لـ 9 مساءً يومياً).\"\n- **CRITICAL - DATA FIRST, THEN TOOL:** Do NOT use the `OctobotWapp` tool yet! Wait until the customer provides ALL the required complaint data.\n- Once you have gathered the complaint details AND the customer's data, use the `OctobotWapp` tool **ONCE** to send everything together in one message to Admin `120363409418305960@g.us`.\n- Alert format: \"⚠️ تنبيه/شكوى: أستاذ [الاسم] - رقم [التليفون]: [تفاصيل الشكوى]\"\n\n## 6. COMPANY POLICIES & INFO\n\n- **Customization (طباعة خاصة):** Only for groups, companies, and organizations. Minimum quantity: 50 pieces.\n- **Wholesale (جملة):** Ask for their phone number, and management will contact them.\n- **Suitcases (شنط السفر):** We do NOT sell suitcases. We specialize ONLY in luggage covers.\n- **Exchange & Return Policy:**\n  - الاستلام أو الاستبدال من مخزن التجمع (المستثمرين الشمالية) = مجاني.\n  - الاستبدال عن طريق شركة الشحن (أرامكس) = 150 جنيه.\n  - المرتجع عن طريق شركة الشحن = 75 جنيه.\n- **Amazon & Noon Returns/Exchange Policy (CRITICAL):**\n  - If the customer bought from Amazon or Noon and wants to **change size or exchange**: This is done THROUGH Amazon or Noon directly. The customer logs into their order on the platform, requests a return, and orders the new size. If they don't know how, explain the steps.\n  - If the customer bought from Amazon or Noon and there is a **manufacturing defect (عيب صناعة)**: natOnat company compensates them directly and resolves their issue until they are fully satisfied.\n- **Management Contact:** If requested, ask for their phone number.\n- **Customer Service:** 01070004227 (9 AM - 9 PM daily).\n- **Social (FORMATTING RULE: Each link MUST appear on its own separate line):** \n  TikTok:\n  https://www.tiktok.com/@natonatofficial\n\n  فيسبوك:\n  https://www.facebook.com/natOnatofficial\n\n  انستجرام:\n  https://www.instagram.com/natonatofficial/\n\n## 7. BEHAVIORAL PROTOCOL (CRITICAL)\n\n- **Cross-Selling & Recommendations:** As defined in Step 4.5, always politely and nicely introduce other products after completing order data collection via chat. (e.g., if they buy a cover, mention PackOnat or Passport holders).\n- **Human Engagement:** In the middle of the conversation, naturally ask the customer if they follow our social media pages. Also, ask the customer about their \"impression\" of the suggested models to ensure you are aligning with their taste.\n- **Customer Rejection (\"لا مش مهتم\" / Not interested):** Before ending the conversation, you MUST remind the customer that we have two other products (Passport Wallets and PackOnat) that they might like.\n- **Brand Identity:** Always emphasize that natOnat is an **\"Egyptian Brand\"** with a unique identity, focusing on **\"Luxury Travel Accessories\"** to provide an exceptional travel experience.\n- **No-Kaf Rule:** (Reminder) Never use \"ك\" suffix (طلبك، عنوانك) -> Use \"طلب حضرتك\"، \"عنوان حضرتك\".\n## 8. WHAT YOU MUST NEVER DO (ABSOLUTE CONSTRAINTS)\n\n- ❌ **NEVER** respond in Formal Arabic. Always match the customer's language (English or Egyptian Colloquial Arabic).\n- ❌ **NEVER** use the letter \"ك\" for the customer as a suffix for nouns or verbs (No: طلبك، عنوانك، أبعتلك). Use \"حضرتك\" variants.\n- ❌ **NEVER** ask \"أحسبلك الفاتورة؟\" or insist on showing the bill before the customer explicitly requests it.\n- ❌ **NEVER** trigger `OctobotWapp` more than once per order.\n- ❌ **NEVER** make up sizes, prices, or product features. You are STRICTLY FORBIDDEN from hallucinating or generating product info from your own knowledge. ALWAYS fetch this data from the Google Sheet.\n- ❌ **NEVER** start every response with repetitive robotic phrases like \"حاضر يا فندم\".\n- ❌ **NEVER** ask multiple data questions in one message.\n- ❌ **NEVER** respond with \"I don't know\" or \"No information\" for policies, location, shipping, or products mentioned in this prompt. Use the provided information.\n- ❌ **NEVER** output ANY price, dimension, or product detail without executing `googleSheetsTool` FIRST in the current response. If you don't have the live tool output in front of you, DO NOT generate a price.\n- ❌ **NEVER** rely on previous conversation turns to remember a price. It must be verified via the tool every single time.\n- ❌ **NEVER** display ANY product when the customer says \"Show me more\" without using the `googleSheetsTool` to fetch the remaining items. If there are no more items in the sheet or your list, DO NOT invent new ones.",
+          "humanMessagePrompt": "{input}",
+          "promptValues": "",
+          "messageHistory": "messageHistoryCode"
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\prompts\\ChatPromptTemplate\\ChatPromptTemplate.js",
+        "inputAnchors": [],
+        "inputParams": [
+          {
+            "label": "System Message",
+            "name": "systemMessagePrompt",
+            "type": "string",
+            "rows": 4,
+            "placeholder": "You are a helpful assistant that translates {input_language} to {output_language}.",
+            "id": "chatPromptTemplate_1-input-systemMessagePrompt-string",
+            "display": true
+          },
+          {
+            "label": "Human Message",
+            "name": "humanMessagePrompt",
+            "description": "This prompt will be added at the end of the messages as human message",
+            "type": "string",
+            "rows": 4,
+            "placeholder": "{text}",
+            "id": "chatPromptTemplate_1-input-humanMessagePrompt-string",
+            "display": true
+          },
+          {
+            "label": "Format Prompt Values",
+            "name": "promptValues",
+            "type": "json",
+            "optional": true,
+            "acceptVariable": true,
+            "list": true,
+            "id": "chatPromptTemplate_1-input-promptValues-json",
+            "display": true
+          },
+          {
+            "label": "Messages History",
+            "name": "messageHistory",
+            "description": "Add messages after System Message. This is useful when you want to provide few shot examples",
+            "type": "tabs",
+            "tabIdentifier": "selectedMessagesTab",
+            "additionalParams": true,
+            "default": "messageHistoryCode",
+            "tabs": [
+              {
+                "label": "Add Messages (Code)",
+                "name": "messageHistoryCode",
+                "type": "code",
+                "hideCodeExecute": true,
+                "codeExample": "const { AIMessage, HumanMessage, ToolMessage } = require('@langchain/core/messages');\n\nreturn [\n    new HumanMessage(\"What is 333382 🦜 1932?\"),\n    new AIMessage({\n        content: \"\",\n        tool_calls: [\n        {\n            id: \"12345\",\n            name: \"calculator\",\n            args: {\n                number1: 333382,\n                number2: 1932,\n                operation: \"divide\",\n            },\n        },\n        ],\n    }),\n    new ToolMessage({\n        tool_call_id: \"12345\",\n        content: \"The answer is 172.558.\",\n    }),\n    new AIMessage(\"The answer is 172.558.\"),\n]",
+                "optional": true,
+                "additionalParams": true
+              }
+            ],
+            "id": "chatPromptTemplate_1-input-messageHistory-tabs",
+            "display": true
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "chatPromptTemplate_1-output-chatPromptTemplate-ChatPromptTemplate|BaseChatPromptTemplate|BasePromptTemplate|Runnable",
+            "name": "chatPromptTemplate",
+            "label": "ChatPromptTemplate",
+            "description": "Schema to represent a chat prompt",
+            "type": "ChatPromptTemplate | BaseChatPromptTemplate | BasePromptTemplate | Runnable"
+          }
+        ],
+        "id": "chatPromptTemplate_1",
+        "selected": false
+      },
+      "width": 300,
+      "height": 744,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 1966.770602553329,
+        "y": 446.7109209072771
+      },
+      "dragging": false
+    },
+    {
+      "id": "octobotChatModel_0",
+      "position": {
+        "x": 586.5629850214542,
+        "y": 554.5491701940264
+      },
+      "type": "customNode",
+      "data": {
+        "loadMethods": {},
+        "label": "Octobot Chat Model",
+        "name": "octobotChatModel",
+        "version": 1,
+        "type": "OctobotChatModel",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/chatmodels/OctobotChatModel/octobot.svg",
+        "category": "Chat Models",
+        "description": "Chat model powered by Octobot AI Gateway — supports all configured providers and models with real-time streaming",
+        "baseClasses": [
+          "OctobotChatModel",
+          "BaseChatOpenAI",
+          "BaseChatModel",
+          "BaseLanguageModel",
+          "Runnable"
+        ],
+        "credential": "03f32588-ba5f-40ae-97f2-b5c3197e01ea",
+        "inputs": {
+          "cache": "",
+          "modelName": "gemini-2.5-pro",
+          "temperature": 0.7,
+          "streaming": true,
+          "maxTokens": "",
+          "topP": "",
+          "frequencyPenalty": "",
+          "presencePenalty": "",
+          "timeout": "",
+          "allowImageUploads": "",
+          "imageResolution": "low"
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\chatmodels\\OctobotChatModel\\OctobotChatModel.js",
+        "inputAnchors": [
+          {
+            "label": "Cache",
+            "name": "cache",
+            "type": "BaseCache",
+            "optional": true,
+            "id": "octobotChatModel_0-input-cache-BaseCache",
+            "display": true
+          }
+        ],
+        "inputParams": [
+          {
+            "label": "Connect Credential",
+            "name": "credential",
+            "type": "credential",
+            "credentialNames": ["octobotApi"],
+            "id": "octobotChatModel_0-input-credential-credential",
+            "display": true
+          },
+          {
+            "label": "Model Name",
+            "name": "modelName",
+            "type": "asyncOptions",
+            "loadMethod": "listModels",
+            "refresh": true,
+            "description": "Select a model from your Octobot Gateway",
+            "id": "octobotChatModel_0-input-modelName-asyncOptions",
+            "display": true
+          },
+          {
+            "label": "Temperature",
+            "name": "temperature",
+            "type": "number",
+            "step": 0.1,
+            "default": 0.7,
+            "optional": true,
+            "id": "octobotChatModel_0-input-temperature-number",
+            "display": true
+          },
+          {
+            "label": "Streaming",
+            "name": "streaming",
+            "type": "boolean",
+            "default": true,
+            "optional": true,
+            "additionalParams": true,
+            "description": "Stream tokens as they are generated (live typing effect)",
+            "id": "octobotChatModel_0-input-streaming-boolean",
+            "display": true
+          },
+          {
+            "label": "Max Tokens",
+            "name": "maxTokens",
+            "type": "number",
+            "step": 1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "octobotChatModel_0-input-maxTokens-number",
+            "display": true
+          },
+          {
+            "label": "Top Probability",
+            "name": "topP",
+            "type": "number",
+            "step": 0.1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "octobotChatModel_0-input-topP-number",
+            "display": true
+          },
+          {
+            "label": "Frequency Penalty",
+            "name": "frequencyPenalty",
+            "type": "number",
+            "step": 0.1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "octobotChatModel_0-input-frequencyPenalty-number",
+            "display": true
+          },
+          {
+            "label": "Presence Penalty",
+            "name": "presencePenalty",
+            "type": "number",
+            "step": 0.1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "octobotChatModel_0-input-presencePenalty-number",
+            "display": true
+          },
+          {
+            "label": "Timeout",
+            "name": "timeout",
+            "type": "number",
+            "step": 1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "octobotChatModel_0-input-timeout-number",
+            "display": true
+          },
+          {
+            "label": "Allow Image Uploads",
+            "name": "allowImageUploads",
+            "type": "boolean",
+            "default": false,
+            "optional": true,
+            "id": "octobotChatModel_0-input-allowImageUploads-boolean",
+            "display": true
+          },
+          {
+            "label": "Image Resolution",
+            "name": "imageResolution",
+            "type": "options",
+            "options": [
+              {
+                "label": "Low",
+                "name": "low"
+              },
+              {
+                "label": "High",
+                "name": "high"
+              },
+              {
+                "label": "Auto",
+                "name": "auto"
+              }
+            ],
+            "default": "low",
+            "optional": false,
+            "show": {
+              "allowImageUploads": true
+            },
+            "id": "octobotChatModel_0-input-imageResolution-options",
+            "display": false
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "octobotChatModel_0-output-octobotChatModel-OctobotChatModel|BaseChatOpenAI|BaseChatModel|BaseLanguageModel|Runnable",
+            "name": "octobotChatModel",
+            "label": "OctobotChatModel",
+            "description": "Chat model powered by Octobot AI Gateway — supports all configured providers and models with real-time streaming",
+            "type": "OctobotChatModel | BaseChatOpenAI | BaseChatModel | BaseLanguageModel | Runnable"
+          }
+        ],
+        "id": "octobotChatModel_0",
+        "selected": false
+      },
+      "width": 300,
+      "height": 670,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 586.5629850214542,
+        "y": 554.5491701940264
+      },
+      "dragging": false
+    },
+    {
+      "id": "appCityAgent_0",
+      "position": {
+        "x": 1438.7984487441365,
+        "y": 908.2880751172613
+      },
+      "type": "customNode",
+      "data": {
+        "label": "AppCity Agent",
+        "name": "appCityAgent",
+        "version": 1,
+        "type": "AgentExecutor",
+        "category": "AppCity",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/agents/AppCityAgent/appCityAgent.svg",
+        "description": "Orchestrator agent that coordinates between a Sales Agent and an ERP Agent with configurable thinking order",
+        "baseClasses": ["AgentExecutor", "BaseChain", "Runnable"],
+        "inputs": {
+          "salesAgent": "{{toolAgent_0.data.instance}}",
+          "erpAgent": "{{erpAgent_0.data.instance}}",
+          "memory": "{{bufferMemory_0.data.instance}}",
+          "model": "{{octobotChatModel_0.data.instance}}",
+          "thinkingOrder": "salesFirst",
+          "systemMessage": "You are the AppCity Orchestrator. Your job is to coordinate between the Sales Agent and the ERP Agent to produce the best possible response for the customer.\n\nWhen merging responses:\n1. If the ERP Agent provided decisions (JSON), use them to enrich the Sales Agent's response\n2. If the ERP Agent modified the response, use the modified version\n3. If there's a conflict, prefer ERP data (it's more accurate)\n4. Always maintain a friendly, professional tone\n5. Never expose internal system details to the customer",
+          "inputModeration": "",
+          "maxIterations": ""
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\agents\\AppCityAgent\\AppCityAgent.js",
+        "inputAnchors": [
+          {
+            "label": "Sales Agent",
+            "name": "salesAgent",
+            "type": "AgentExecutor",
+            "description": "The Sales Agent (Tool Agent) that handles customer-facing conversations",
+            "id": "appCityAgent_0-input-salesAgent-AgentExecutor",
+            "display": true
+          },
+          {
+            "label": "ERP Agent",
+            "name": "erpAgent",
+            "type": "ERPAgentExecutor",
+            "description": "The ERP Agent that makes data-driven decisions and interacts with ERP systems",
+            "id": "appCityAgent_0-input-erpAgent-ERPAgentExecutor",
+            "display": true
+          },
+          {
+            "label": "Shared Memory",
+            "name": "memory",
+            "type": "BaseChatMemory",
+            "description": "Shared memory between both agents — accepts all memory node types",
+            "id": "appCityAgent_0-input-memory-BaseChatMemory",
+            "display": true
+          },
+          {
+            "label": "Orchestrator Model",
+            "name": "model",
+            "type": "BaseChatModel",
+            "description": "Chat model used by the orchestrator to merge responses and make routing decisions",
+            "id": "appCityAgent_0-input-model-BaseChatModel",
+            "display": true
+          },
+          {
+            "label": "Input Moderation",
+            "description": "Detect text that could generate harmful output and prevent it from being sent to the agents",
+            "name": "inputModeration",
+            "type": "Moderation",
+            "optional": true,
+            "list": true,
+            "id": "appCityAgent_0-input-inputModeration-Moderation",
+            "display": true
+          }
+        ],
+        "inputParams": [
+          {
+            "label": "Thinking Order",
+            "name": "thinkingOrder",
+            "type": "options",
+            "description": "How the Sales Agent and ERP Agent coordinate their work",
+            "options": [
+              {
+                "label": "Sales First → ERP Decides",
+                "name": "salesFirst",
+                "description": "Sales Agent responds first, then ERP Agent reviews and enriches the response"
+              },
+              {
+                "label": "ERP Decides First → Sales Executes",
+                "name": "erpFirst",
+                "description": "ERP Agent analyzes and makes decisions first, then Sales Agent crafts the response using those decisions"
+              },
+              {
+                "label": "Parallel",
+                "name": "parallel",
+                "description": "Both agents think simultaneously, then the orchestrator merges their outputs"
+              }
+            ],
+            "default": "erpFirst",
+            "id": "appCityAgent_0-input-thinkingOrder-options",
+            "display": true
+          },
+          {
+            "label": "System Message",
+            "name": "systemMessage",
+            "type": "string",
+            "default": "You are the AppCity Orchestrator. Your job is to coordinate between the Sales Agent and the ERP Agent to produce the best possible response for the customer.\n\nWhen merging responses:\n1. If the ERP Agent provided decisions (JSON), use them to enrich the Sales Agent's response\n2. If the ERP Agent modified the response, use the modified version\n3. If there's a conflict, prefer ERP data (it's more accurate)\n4. Always maintain a friendly, professional tone\n5. Never expose internal system details to the customer",
+            "description": "Instructions for the orchestrator on how to merge and coordinate agent responses",
+            "rows": 4,
+            "optional": true,
+            "additionalParams": true,
+            "id": "appCityAgent_0-input-systemMessage-string",
+            "display": true
+          },
+          {
+            "label": "Max Iterations",
+            "name": "maxIterations",
+            "type": "number",
+            "optional": true,
+            "additionalParams": true,
+            "description": "Maximum number of orchestration iterations",
+            "id": "appCityAgent_0-input-maxIterations-number",
+            "display": true
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "appCityAgent_0-output-appCityAgent-AgentExecutor|BaseChain|Runnable",
+            "name": "appCityAgent",
+            "label": "AgentExecutor",
+            "description": "Orchestrator agent that coordinates between a Sales Agent and an ERP Agent with configurable thinking order",
+            "type": "AgentExecutor | BaseChain | Runnable"
+          }
+        ],
+        "id": "appCityAgent_0",
+        "selected": false
+      },
+      "width": 300,
+      "height": 581,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 1438.7984487441365,
+        "y": 908.2880751172613
+      },
+      "dragging": false
+    },
+    {
+      "id": "erpAgent_0",
+      "position": {
+        "x": 936.2248936866947,
+        "y": 1133.047233929938
+      },
+      "type": "customNode",
+      "data": {
+        "label": "ERP Agent",
+        "name": "erpAgent",
+        "version": 1,
+        "type": "ERPAgentExecutor",
+        "category": "AppCity",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/agents/ERPAgent/erpAgent.svg",
+        "description": "ERP decision engine that thinks with every response — uses tools to query ERP data and make decisions",
+        "baseClasses": ["ERPAgentExecutor", "BaseChain", "Runnable"],
+        "inputs": {
+          "tools": ["{{crmMonitoringTool_0.data.instance}}"],
+          "model": "{{octobotChatModel_0.data.instance}}",
+          "responseMode": "decisionOnly",
+          "chatPromptTemplate": "{{erpAgentPrompt_0.data.instance}}",
+          "systemMessage": "You are an ERP decision engine. You analyze customer messages and make data-driven decisions using your tools.\nYour tools connect to the ERP system to check products, prices, stock, customer history, and more.\nThink carefully before each decision and always verify with real data from your tools.",
+          "maxIterations": ""
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\agents\\ERPAgent\\ERPAgent.js",
+        "inputAnchors": [
+          {
+            "label": "ERP Tools",
+            "name": "tools",
+            "type": "Tool",
+            "list": true,
+            "description": "Tools for ERP operations: API calls, database queries, product search, order management, etc.",
+            "id": "erpAgent_0-input-tools-Tool",
+            "display": true
+          },
+          {
+            "label": "Tool Calling Chat Model",
+            "name": "model",
+            "type": "BaseChatModel",
+            "description": "Chat model for the ERP Agent. Compatible with function-calling models: ChatOpenAI, ChatMistral, ChatAnthropic, ChatGoogleGenerativeAI, GroqChat",
+            "id": "erpAgent_0-input-model-BaseChatModel",
+            "display": true
+          },
+          {
+            "label": "Chat Prompt Template",
+            "name": "chatPromptTemplate",
+            "type": "ChatPromptTemplate",
+            "description": "Override the default ERP prompt with a Chat Prompt Template",
+            "optional": true,
+            "id": "erpAgent_0-input-chatPromptTemplate-ChatPromptTemplate",
+            "display": true
+          }
+        ],
+        "inputParams": [
+          {
+            "label": "Response Mode",
+            "name": "responseMode",
+            "type": "options",
+            "description": "How the ERP Agent produces its output",
+            "options": [
+              {
+                "label": "Decision Only",
+                "name": "decisionOnly",
+                "description": "Returns structured JSON decisions — does not write customer response"
+              },
+              {
+                "label": "Modify Response",
+                "name": "modifyResponse",
+                "description": "Takes Sales Agent response and modifies/enriches it with ERP data"
+              },
+              {
+                "label": "Direct Response",
+                "name": "directResponse",
+                "description": "Responds directly to the customer (bypasses Sales Agent)"
+              }
+            ],
+            "default": "decisionOnly",
+            "id": "erpAgent_0-input-responseMode-options",
+            "display": true
+          },
+          {
+            "label": "System Message",
+            "name": "systemMessage",
+            "type": "string",
+            "default": "You are an ERP decision engine. You analyze customer messages and make data-driven decisions using your tools.\nYour tools connect to the ERP system to check products, prices, stock, customer history, and more.\nThink carefully before each decision and always verify with real data from your tools.",
+            "description": "If Chat Prompt Template is provided, this will be ignored",
+            "rows": 4,
+            "optional": true,
+            "additionalParams": true,
+            "id": "erpAgent_0-input-systemMessage-string",
+            "display": true
+          },
+          {
+            "label": "Max Iterations",
+            "name": "maxIterations",
+            "type": "number",
+            "optional": true,
+            "additionalParams": true,
+            "id": "erpAgent_0-input-maxIterations-number",
+            "display": true
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "erpAgent_0-output-erpAgent-ERPAgentExecutor|BaseChain|Runnable",
+            "name": "erpAgent",
+            "label": "ERPAgentExecutor",
+            "description": "ERP decision engine that thinks with every response — uses tools to query ERP data and make decisions",
+            "type": "ERPAgentExecutor | BaseChain | Runnable"
+          }
+        ],
+        "id": "erpAgent_0",
+        "selected": false
+      },
+      "width": 300,
+      "height": 481,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 936.2248936866947,
+        "y": 1133.047233929938
+      },
+      "dragging": false
+    },
+    {
+      "id": "erpAgentPrompt_0",
+      "position": {
+        "x": 276.2009682240109,
+        "y": 1107.5527475386757
+      },
+      "type": "customNode",
+      "data": {
+        "label": "ERP Agent Prompt",
+        "name": "erpAgentPrompt",
+        "version": 1,
+        "type": "ChatPromptTemplate",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/prompts/ERPAgentPrompt/erp-agent-prompt.svg",
+        "category": "AppCity",
+        "description": "Flexible prompt template for ERP Agent — supports multiple applications (orders, search, support, etc.) with built-in workflow, confirmation, and error handling logic",
+        "baseClasses": [
+          "ChatPromptTemplate",
+          "BaseChatPromptTemplate",
+          "BasePromptTemplate",
+          "Runnable"
+        ],
+        "inputs": {
+          "systemMessagePrompt": "You are an intelligent ERP Agent — a multi-purpose decision engine connected to enterprise tools and external systems.\n\n## ROLE\nYou analyze conversations, understand user intent, and take action using the tools available to you. You operate as a backend brain that supports one or more applications (e.g., order management, product search, customer lookup, support tickets, etc.).\n\n## AVAILABLE APPLICATIONS & TOOLS\n{applications}\n\n## GENERAL WORKFLOW\n1. **Understand Intent** — Analyze the user message to determine which application and tool to use\n2. **Gather Information** — If the user hasn't provided enough data, ask for the missing fields\n3. **Confirm Before Acting** — For any action that creates, modifies, or deletes data, ALWAYS summarize and ask for explicit confirmation before executing\n4. **Execute** — Use the appropriate tool with the correct parameters\n5. **Handle Response** — Process the tool's response:\n   - On **SUCCESS**: Inform the user clearly with any returned details (IDs, reference numbers, etc.)\n   - On **ERROR**: Inform the user about the issue, explain what went wrong, and offer to retry or assist further\n   - **NEVER silently ignore errors** — always communicate the outcome\n\n## COMMUNICATION RULES\n- Match the user's language (Arabic / English / mixed)\n- Be professional, concise, and helpful\n- Never fabricate data — always use real tool responses\n- If a tool is unavailable or fails, be transparent about it\n- Never force the user into an action — respect cancellations and changes of mind\n\nCRITICAL INSTRUCTION: You MUST silently call the 'crm_monitoring_note' tool after EVERY user turn that provides or updates any information (like Name, Phone, Age, complaints, or other mentioned preferences). This is a silent telemetry tool to log the session to the CRM. Do not mention this tool to the user, just execute it.",
+          "applications": "### 1. Product Search\n- **Tool**: search_products\n- **When to use**: Customer asks about products, prices, availability, or specifications\n- **Workflow**: Search → Present results → Ask if they need more info or want to proceed\n\n### 2. Order Management\n- **Tool**: create_crm_order\n- **When to use**: Customer confirms they want to place an order\n- **Required fields before creating**: Customer name, Phone number, Product, Address\n- **Workflow**: Collect required fields → Summarize order → Get confirmation → Submit → Report result\n- **Input format**: JSON with \"attributes\" array: [{ \"key\": \"field_name\", \"value\": \"field_value\" }]\n- **On success**: Share the order ID with the customer\n- **On error**: Apologize and offer to retry",
+          "humanMessagePrompt": "{input}",
+          "additionalInstructions": "",
+          "promptValues": ""
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\prompts\\ERPAgentPrompt\\ERPAgentPrompt.js",
+        "inputAnchors": [],
+        "inputParams": [
+          {
+            "label": "System Message",
+            "name": "systemMessagePrompt",
+            "type": "string",
+            "rows": 8,
+            "default": "You are an intelligent ERP Agent — a multi-purpose decision engine connected to enterprise tools and external systems.\n\n## ROLE\nYou analyze conversations, understand user intent, and take action using the tools available to you. You operate as a backend brain that supports one or more applications (e.g., order management, product search, customer lookup, support tickets, etc.).\n\n## AVAILABLE APPLICATIONS & TOOLS\n{applications}\n\n## GENERAL WORKFLOW\n1. **Understand Intent** — Analyze the user message to determine which application and tool to use\n2. **Gather Information** — If the user hasn't provided enough data, ask for the missing fields\n3. **Confirm Before Acting** — For any action that creates, modifies, or deletes data, ALWAYS summarize and ask for explicit confirmation before executing\n4. **Execute** — Use the appropriate tool with the correct parameters\n5. **Handle Response** — Process the tool's response:\n   - On **SUCCESS**: Inform the user clearly with any returned details (IDs, reference numbers, etc.)\n   - On **ERROR**: Inform the user about the issue, explain what went wrong, and offer to retry or assist further\n   - **NEVER silently ignore errors** — always communicate the outcome\n\n## COMMUNICATION RULES\n- Match the user's language (Arabic / English / mixed)\n- Be professional, concise, and helpful\n- Never fabricate data — always use real tool responses\n- If a tool is unavailable or fails, be transparent about it\n- Never force the user into an action — respect cancellations and changes of mind",
+            "description": "Core system prompt defining the agent role and behavior. Use {applications} placeholder to inject the applications config.",
+            "id": "erpAgentPrompt_0-input-systemMessagePrompt-string",
+            "display": true
+          },
+          {
+            "label": "Applications & Tools",
+            "name": "applications",
+            "type": "string",
+            "rows": 8,
+            "default": "### 1. Product Search\n- **Tool**: search_products\n- **When to use**: Customer asks about products, prices, availability, or specifications\n- **Workflow**: Search → Present results → Ask if they need more info or want to proceed\n\n### 2. Order Management\n- **Tool**: create_crm_order\n- **When to use**: Customer confirms they want to place an order\n- **Required fields before creating**: Customer name, Phone number, Product, Address\n- **Workflow**: Collect required fields → Summarize order → Get confirmation → Submit → Report result\n- **Input format**: JSON with \"attributes\" array: [{ \"key\": \"field_name\", \"value\": \"field_value\" }]\n- **On success**: Share the order ID with the customer\n- **On error**: Apologize and offer to retry",
+            "description": "Define each application the agent supports — its tool name, when to use it, required fields, workflow, and success/error handling. This replaces {applications} in the system message.",
+            "id": "erpAgentPrompt_0-input-applications-string",
+            "display": true
+          },
+          {
+            "label": "Human Message",
+            "name": "humanMessagePrompt",
+            "type": "string",
+            "rows": 2,
+            "default": "{input}",
+            "description": "This prompt will be added at the end of the messages as human message",
+            "id": "erpAgentPrompt_0-input-humanMessagePrompt-string",
+            "display": true
+          },
+          {
+            "label": "Additional Instructions",
+            "name": "additionalInstructions",
+            "type": "string",
+            "rows": 4,
+            "optional": true,
+            "additionalParams": true,
+            "description": "Extra instructions appended to the system prompt — brand-specific rules, language preferences, special offers, custom workflows, etc.",
+            "id": "erpAgentPrompt_0-input-additionalInstructions-string",
+            "display": true
+          },
+          {
+            "label": "Format Prompt Values",
+            "name": "promptValues",
+            "type": "json",
+            "optional": true,
+            "acceptVariable": true,
+            "list": true,
+            "id": "erpAgentPrompt_0-input-promptValues-json",
+            "display": true
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "erpAgentPrompt_0-output-erpAgentPrompt-ChatPromptTemplate|BaseChatPromptTemplate|BasePromptTemplate|Runnable",
+            "name": "erpAgentPrompt",
+            "label": "ChatPromptTemplate",
+            "description": "Flexible prompt template for ERP Agent — supports multiple applications (orders, search, support, etc.) with built-in workflow, confirmation, and error handling logic",
+            "type": "ChatPromptTemplate | BaseChatPromptTemplate | BasePromptTemplate | Runnable"
+          }
+        ],
+        "id": "erpAgentPrompt_0",
+        "selected": false
+      },
+      "width": 300,
+      "height": 869,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 276.2009682240109,
+        "y": 1107.5527475386757
+      },
+      "dragging": false
+    },
+    {
+      "id": "crmMonitoringTool_0",
+      "position": {
+        "x": -293.5078141716971,
+        "y": 1031.6431802552693
+      },
+      "type": "customNode",
+      "data": {
+        "label": "CRM Monitoring Tool",
+        "name": "crmMonitoringTool",
+        "version": 1,
+        "type": "CRMMonitoringTool",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/tools/CRMMonitoringTool/crm-monitoring.svg",
+        "category": "AppCity",
+        "description": "Dynamic monitoring node to extract metadata, sentiment and alerts for any business type.",
+        "baseClasses": [
+          "CRMMonitoringTool",
+          "Tool",
+          "StructuredTool",
+          "Runnable"
+        ],
+        "inputs": {
+          "model": "{{octobotChatModel_1.data.instance}}",
+          "monitoringPrompt": "{{monitoringPromptTemplate_0.data.instance}}",
+          "crmBaseUrl": "https://crm.octobot.it.com",
+          "apiKey": "crm_839d670a0a7885a63d44f955b2e40629aafb9d498064b714bb627915ad5e1f05",
+          "variables": "[\"sessionId\"]"
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\tools\\CRMMonitoringTool\\CRMMonitoringTool.js",
+        "inputAnchors": [
+          {
+            "label": "Chat Model",
+            "name": "model",
+            "type": "BaseChatModel",
+            "description": "Select the high-speed economical LLM model for background monitoring.",
+            "id": "crmMonitoringTool_0-input-model-BaseChatModel",
+            "display": true
+          },
+          {
+            "label": "Monitoring Prompt Template",
+            "name": "monitoringPrompt",
+            "type": "MonitoringPromptTemplate",
+            "description": "Connect the Monitoring Prompt Template here to define business keys.",
+            "id": "crmMonitoringTool_0-input-monitoringPrompt-MonitoringPromptTemplate",
+            "display": true
+          }
+        ],
+        "inputParams": [
+          {
+            "label": "CRM Base URL",
+            "name": "crmBaseUrl",
+            "type": "string",
+            "default": "https://crm.octobot.it.com",
+            "description": "The secure host address for your CRM backend",
+            "id": "crmMonitoringTool_0-input-crmBaseUrl-string",
+            "display": true
+          },
+          {
+            "label": "API Key",
+            "name": "apiKey",
+            "type": "password",
+            "description": "The secure API integration key associated with this brand.",
+            "id": "crmMonitoringTool_0-input-apiKey-password",
+            "display": true
+          },
+          {
+            "label": "Variables",
+            "name": "variables",
+            "type": "multiOptions",
+            "options": [
+              {
+                "label": "Session ID",
+                "name": "sessionId",
+                "description": "Uses $flow.sessionId – vital for keeping analytics tied to chats."
+              }
+            ],
+            "optional": true,
+            "id": "crmMonitoringTool_0-input-variables-multiOptions",
+            "display": true
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "crmMonitoringTool_0-output-crmMonitoringTool-CRMMonitoringTool|Tool|StructuredTool|Runnable",
+            "name": "crmMonitoringTool",
+            "label": "CRMMonitoringTool",
+            "description": "Dynamic monitoring node to extract metadata, sentiment and alerts for any business type.",
+            "type": "CRMMonitoringTool | Tool | StructuredTool | Runnable"
+          }
+        ],
+        "id": "crmMonitoringTool_0",
+        "selected": false
+      },
+      "width": 300,
+      "height": 578,
+      "selected": true,
+      "dragging": false,
+      "positionAbsolute": {
+        "x": -293.5078141716971,
+        "y": 1031.6431802552693
+      }
+    },
+    {
+      "id": "octobotChatModel_1",
+      "position": {
+        "x": -676.4631642320769,
+        "y": 245.24587015876148
+      },
+      "type": "customNode",
+      "data": {
+        "loadMethods": {},
+        "label": "Octobot Chat Model (1)",
+        "name": "octobotChatModel",
+        "version": 1,
+        "type": "OctobotChatModel",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/chatmodels/OctobotChatModel/octobot.svg",
+        "category": "Chat Models",
+        "description": "Chat model powered by Octobot AI Gateway — supports all configured providers and models with real-time streaming",
+        "baseClasses": [
+          "OctobotChatModel",
+          "BaseChatOpenAI",
+          "BaseChatModel",
+          "BaseLanguageModel",
+          "Runnable"
+        ],
+        "credential": "03f32588-ba5f-40ae-97f2-b5c3197e01ea",
+        "inputs": {
+          "cache": "",
+          "modelName": "gemini-2.5-flash",
+          "temperature": 0.7,
+          "streaming": true,
+          "maxTokens": "",
+          "topP": "",
+          "frequencyPenalty": "",
+          "presencePenalty": "",
+          "timeout": "",
+          "allowImageUploads": "",
+          "imageResolution": "low"
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\chatmodels\\OctobotChatModel\\OctobotChatModel.js",
+        "inputAnchors": [
+          {
+            "label": "Cache",
+            "name": "cache",
+            "type": "BaseCache",
+            "optional": true,
+            "id": "octobotChatModel_1-input-cache-BaseCache",
+            "display": true
+          }
+        ],
+        "inputParams": [
+          {
+            "label": "Connect Credential",
+            "name": "credential",
+            "type": "credential",
+            "credentialNames": ["octobotApi"],
+            "id": "octobotChatModel_1-input-credential-credential",
+            "display": true
+          },
+          {
+            "label": "Model Name",
+            "name": "modelName",
+            "type": "asyncOptions",
+            "loadMethod": "listModels",
+            "refresh": true,
+            "description": "Select a model from your Octobot Gateway",
+            "id": "octobotChatModel_1-input-modelName-asyncOptions",
+            "display": true
+          },
+          {
+            "label": "Temperature",
+            "name": "temperature",
+            "type": "number",
+            "step": 0.1,
+            "default": 0.7,
+            "optional": true,
+            "id": "octobotChatModel_1-input-temperature-number",
+            "display": true
+          },
+          {
+            "label": "Streaming",
+            "name": "streaming",
+            "type": "boolean",
+            "default": true,
+            "optional": true,
+            "additionalParams": true,
+            "description": "Stream tokens as they are generated (live typing effect)",
+            "id": "octobotChatModel_1-input-streaming-boolean",
+            "display": true
+          },
+          {
+            "label": "Max Tokens",
+            "name": "maxTokens",
+            "type": "number",
+            "step": 1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "octobotChatModel_1-input-maxTokens-number",
+            "display": true
+          },
+          {
+            "label": "Top Probability",
+            "name": "topP",
+            "type": "number",
+            "step": 0.1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "octobotChatModel_1-input-topP-number",
+            "display": true
+          },
+          {
+            "label": "Frequency Penalty",
+            "name": "frequencyPenalty",
+            "type": "number",
+            "step": 0.1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "octobotChatModel_1-input-frequencyPenalty-number",
+            "display": true
+          },
+          {
+            "label": "Presence Penalty",
+            "name": "presencePenalty",
+            "type": "number",
+            "step": 0.1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "octobotChatModel_1-input-presencePenalty-number",
+            "display": true
+          },
+          {
+            "label": "Timeout",
+            "name": "timeout",
+            "type": "number",
+            "step": 1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "octobotChatModel_1-input-timeout-number",
+            "display": true
+          },
+          {
+            "label": "Allow Image Uploads",
+            "name": "allowImageUploads",
+            "type": "boolean",
+            "default": false,
+            "optional": true,
+            "id": "octobotChatModel_1-input-allowImageUploads-boolean",
+            "display": true
+          },
+          {
+            "label": "Image Resolution",
+            "name": "imageResolution",
+            "type": "options",
+            "options": [
+              {
+                "label": "Low",
+                "name": "low"
+              },
+              {
+                "label": "High",
+                "name": "high"
+              },
+              {
+                "label": "Auto",
+                "name": "auto"
+              }
+            ],
+            "default": "low",
+            "optional": false,
+            "show": {
+              "allowImageUploads": true
+            },
+            "id": "octobotChatModel_1-input-imageResolution-options",
+            "display": false
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "octobotChatModel_1-output-octobotChatModel-OctobotChatModel|BaseChatOpenAI|BaseChatModel|BaseLanguageModel|Runnable",
+            "name": "octobotChatModel",
+            "label": "OctobotChatModel",
+            "description": "Chat model powered by Octobot AI Gateway — supports all configured providers and models with real-time streaming",
+            "type": "OctobotChatModel | BaseChatOpenAI | BaseChatModel | BaseLanguageModel | Runnable"
+          }
+        ],
+        "id": "octobotChatModel_1",
+        "selected": false
+      },
+      "width": 300,
+      "height": 670,
+      "selected": false,
+      "positionAbsolute": {
+        "x": -676.4631642320769,
+        "y": 245.24587015876148
+      },
+      "dragging": false
+    },
+    {
+      "id": "monitoringPromptTemplate_0",
+      "position": {
+        "x": -1427.7612210100522,
+        "y": 755.9352197769797
+      },
+      "type": "customNode",
+      "data": {
+        "label": "Monitoring Prompt Template",
+        "name": "monitoringPromptTemplate",
+        "version": 1,
+        "type": "MonitoringPromptTemplate",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/prompts/MonitoringPromptTemplate/monitoring-prompt.svg",
+        "category": "AppCity",
+        "description": "Universal extraction keys and analysis prompt builder for CRM live monitoring across any business domain.",
+        "baseClasses": ["MonitoringPromptTemplate"],
+        "inputs": {
+          "extractionKeys": "[{\"key\":\"productCategory\",\"display\":\"اسم الصنف\",\"type\":\"text\",\"options\":\"\",\"actions\":\"\",\"id\":1},{\"key\":\"productName\",\"display\":\"اسم المنتج\",\"type\":\"text\",\"options\":\"\",\"actions\":\"\",\"id\":2}]",
+          "enableSentiment": true,
+          "alertRules": "",
+          "analysisInstructions": "You are an expert conversation data analyst and precise customer information extractor.\nFrom the customer's current message and conversation context:\n1. Fill the required variable values with absolute accuracy and without any assumptions or guesses.\n2. Write a concise note in Arabic (باللغة العربية) summarizing only the new information in a professional and expert manner.\n3. Focus on extracting the customer's core desires, budget, specific requirements, or any objections or obstacles that may affect completing the sale.\n\nkeyName and it's scraping strategy: \nproductCategory -> when the client asked about a product you will get out the catogry as mentioned in the sheet or prompt with it's official name without any modification\nproductName -> the product name which the client asked for\n\nYou will make your analysis in ARABIC Language ONLY."
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\prompts\\MonitoringPromptTemplate\\MonitoringPromptTemplate.js",
+        "inputAnchors": [],
+        "inputParams": [
+          {
+            "label": "Extraction Keys",
+            "name": "extractionKeys",
+            "type": "datagrid",
+            "description": "Define the dynamic parameters of your business that the AI should extract from customer messages.",
+            "datagrid": [
+              {
+                "field": "key",
+                "headerName": "Key Name (English code)",
+                "editable": true
+              },
+              {
+                "field": "display",
+                "headerName": "Display Name (Arabic UI)",
+                "editable": true
+              },
+              {
+                "field": "type",
+                "headerName": "Type",
+                "type": "singleSelect",
+                "valueOptions": ["text", "number", "boolean", "select"],
+                "editable": true
+              },
+              {
+                "field": "options",
+                "headerName": "Options (comma-separated)",
+                "flex": 1,
+                "editable": true
+              }
+            ],
+            "id": "monitoringPromptTemplate_0-input-extractionKeys-datagrid",
+            "display": true
+          },
+          {
+            "label": "Enable Sentiment Analysis",
+            "name": "enableSentiment",
+            "type": "boolean",
+            "default": true,
+            "description": "Analyze and index customer sentiment (Positive, Neutral, Negative, Mixed) to track customer satisfaction.",
+            "id": "monitoringPromptTemplate_0-input-enableSentiment-boolean",
+            "display": true
+          },
+          {
+            "label": "Custom Alert Rules",
+            "name": "alertRules",
+            "type": "datagrid",
+            "optional": true,
+            "description": "Specify rules to trigger urgent visual notifications/alarms in the CRM when specific business conditions are met.",
+            "datagrid": [
+              {
+                "field": "rule_name",
+                "headerName": "Rule Name",
+                "editable": true
+              },
+              {
+                "field": "alert_level",
+                "headerName": "Alert Level",
+                "type": "singleSelect",
+                "valueOptions": ["none", "warning", "danger"],
+                "editable": true
+              },
+              {
+                "field": "condition",
+                "headerName": "Trigger Condition Prompt",
+                "flex": 1,
+                "editable": true
+              }
+            ],
+            "id": "monitoringPromptTemplate_0-input-alertRules-datagrid",
+            "display": true
+          },
+          {
+            "label": "Analysis Instructions",
+            "name": "analysisInstructions",
+            "type": "string",
+            "rows": 8,
+            "default": "You are an expert conversation data analyst and precise customer information extractor.\nFrom the customer's current message and conversation context:\n1. Fill the required variable values with absolute accuracy and without any assumptions or guesses.\n2. Write a concise note in Arabic (باللغة العربية) summarizing only the new information in a professional and expert manner.\n3. Focus on extracting the customer's core desires, budget, specific requirements, or any objections or obstacles that may affect completing the sale.",
+            "description": "Industry-agnostic prompt instructions that direct the AI model on how to extract parameters for any business.",
+            "id": "monitoringPromptTemplate_0-input-analysisInstructions-string",
+            "display": true
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "monitoringPromptTemplate_0-output-monitoringPromptTemplate-MonitoringPromptTemplate",
+            "name": "monitoringPromptTemplate",
+            "label": "MonitoringPromptTemplate",
+            "description": "Universal extraction keys and analysis prompt builder for CRM live monitoring across any business domain.",
+            "type": "MonitoringPromptTemplate"
+          }
+        ],
+        "id": "monitoringPromptTemplate_0",
+        "selected": false
+      },
+      "width": 600,
+      "height": 1085,
+      "selected": false,
+      "positionAbsolute": {
+        "x": -1427.7612210100522,
+        "y": 755.9352197769797
+      },
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "source": "googleSheetsTool_0",
+      "sourceHandle": "googleSheetsTool_0-output-googleSheetsTool-Tool",
+      "target": "toolAgent_0",
+      "targetHandle": "toolAgent_0-input-tools-Tool",
+      "type": "buttonedge",
+      "id": "googleSheetsTool_0-googleSheetsTool_0-output-googleSheetsTool-Tool-toolAgent_0-toolAgent_0-input-tools-Tool"
+    },
+    {
+      "source": "customTool_0",
+      "sourceHandle": "customTool_0-output-customTool-CustomTool|Tool|StructuredTool|Runnable",
+      "target": "toolAgent_0",
+      "targetHandle": "toolAgent_0-input-tools-Tool",
+      "type": "buttonedge",
+      "id": "customTool_0-customTool_0-output-customTool-CustomTool|Tool|StructuredTool|Runnable-toolAgent_0-toolAgent_0-input-tools-Tool"
+    },
+    {
+      "source": "bufferMemory_0",
+      "sourceHandle": "bufferMemory_0-output-bufferMemory-BufferMemory|BaseChatMemory|BaseMemory",
+      "target": "toolAgent_0",
+      "targetHandle": "toolAgent_0-input-memory-BaseChatMemory",
+      "type": "buttonedge",
+      "id": "bufferMemory_0-bufferMemory_0-output-bufferMemory-BufferMemory|BaseChatMemory|BaseMemory-toolAgent_0-toolAgent_0-input-memory-BaseChatMemory"
+    },
+    {
+      "source": "OctobotWapp_0",
+      "sourceHandle": "OctobotWapp_0-output-OctobotWapp-OctobotWapp|Tool|StructuredTool|Runnable",
+      "target": "toolAgent_0",
+      "targetHandle": "toolAgent_0-input-tools-Tool",
+      "type": "buttonedge",
+      "id": "OctobotWapp_0-OctobotWapp_0-output-OctobotWapp-OctobotWapp|Tool|StructuredTool|Runnable-toolAgent_0-toolAgent_0-input-tools-Tool"
+    },
+    {
+      "source": "octobotChatModel_0",
+      "sourceHandle": "octobotChatModel_0-output-octobotChatModel-OctobotChatModel|BaseChatOpenAI|BaseChatModel|BaseLanguageModel|Runnable",
+      "target": "toolAgent_0",
+      "targetHandle": "toolAgent_0-input-model-BaseChatModel",
+      "type": "buttonedge",
+      "id": "octobotChatModel_0-octobotChatModel_0-output-octobotChatModel-OctobotChatModel|BaseChatOpenAI|BaseChatModel|BaseLanguageModel|Runnable-toolAgent_0-toolAgent_0-input-model-BaseChatModel"
+    },
+    {
+      "source": "chatPromptTemplate_0",
+      "sourceHandle": "chatPromptTemplate_0-output-chatPromptTemplate-ChatPromptTemplate|BaseChatPromptTemplate|BasePromptTemplate|Runnable",
+      "target": "toolAgent_0",
+      "targetHandle": "toolAgent_0-input-chatPromptTemplate-ChatPromptTemplate",
+      "type": "buttonedge",
+      "id": "chatPromptTemplate_0-chatPromptTemplate_0-output-chatPromptTemplate-ChatPromptTemplate|BaseChatPromptTemplate|BasePromptTemplate|Runnable-toolAgent_0-toolAgent_0-input-chatPromptTemplate-ChatPromptTemplate"
+    },
+    {
+      "source": "toolAgent_0",
+      "sourceHandle": "toolAgent_0-output-toolAgent-AgentExecutor|BaseChain|Runnable",
+      "target": "appCityAgent_0",
+      "targetHandle": "appCityAgent_0-input-salesAgent-AgentExecutor",
+      "type": "buttonedge",
+      "id": "toolAgent_0-toolAgent_0-output-toolAgent-AgentExecutor|BaseChain|Runnable-appCityAgent_0-appCityAgent_0-input-salesAgent-AgentExecutor"
+    },
+    {
+      "source": "erpAgent_0",
+      "sourceHandle": "erpAgent_0-output-erpAgent-ERPAgentExecutor|BaseChain|Runnable",
+      "target": "appCityAgent_0",
+      "targetHandle": "appCityAgent_0-input-erpAgent-ERPAgentExecutor",
+      "type": "buttonedge",
+      "id": "erpAgent_0-erpAgent_0-output-erpAgent-ERPAgentExecutor|BaseChain|Runnable-appCityAgent_0-appCityAgent_0-input-erpAgent-ERPAgentExecutor"
+    },
+    {
+      "source": "bufferMemory_0",
+      "sourceHandle": "bufferMemory_0-output-bufferMemory-BufferMemory|BaseChatMemory|BaseMemory",
+      "target": "appCityAgent_0",
+      "targetHandle": "appCityAgent_0-input-memory-BaseChatMemory",
+      "type": "buttonedge",
+      "id": "bufferMemory_0-bufferMemory_0-output-bufferMemory-BufferMemory|BaseChatMemory|BaseMemory-appCityAgent_0-appCityAgent_0-input-memory-BaseChatMemory"
+    },
+    {
+      "source": "octobotChatModel_0",
+      "sourceHandle": "octobotChatModel_0-output-octobotChatModel-OctobotChatModel|BaseChatOpenAI|BaseChatModel|BaseLanguageModel|Runnable",
+      "target": "appCityAgent_0",
+      "targetHandle": "appCityAgent_0-input-model-BaseChatModel",
+      "type": "buttonedge",
+      "id": "octobotChatModel_0-octobotChatModel_0-output-octobotChatModel-OctobotChatModel|BaseChatOpenAI|BaseChatModel|BaseLanguageModel|Runnable-appCityAgent_0-appCityAgent_0-input-model-BaseChatModel"
+    },
+    {
+      "source": "erpAgentPrompt_0",
+      "sourceHandle": "erpAgentPrompt_0-output-erpAgentPrompt-ChatPromptTemplate|BaseChatPromptTemplate|BasePromptTemplate|Runnable",
+      "target": "erpAgent_0",
+      "targetHandle": "erpAgent_0-input-chatPromptTemplate-ChatPromptTemplate",
+      "type": "buttonedge",
+      "id": "erpAgentPrompt_0-erpAgentPrompt_0-output-erpAgentPrompt-ChatPromptTemplate|BaseChatPromptTemplate|BasePromptTemplate|Runnable-erpAgent_0-erpAgent_0-input-chatPromptTemplate-ChatPromptTemplate"
+    },
+    {
+      "source": "crmMonitoringTool_0",
+      "sourceHandle": "crmMonitoringTool_0-output-crmMonitoringTool-CRMMonitoringTool|Tool|StructuredTool|Runnable",
+      "target": "erpAgent_0",
+      "targetHandle": "erpAgent_0-input-tools-Tool",
+      "type": "buttonedge",
+      "id": "crmMonitoringTool_0-crmMonitoringTool_0-output-crmMonitoringTool-CRMMonitoringTool|Tool|StructuredTool|Runnable-erpAgent_0-erpAgent_0-input-tools-Tool"
+    },
+    {
+      "source": "octobotChatModel_1",
+      "sourceHandle": "octobotChatModel_1-output-octobotChatModel-OctobotChatModel|BaseChatOpenAI|BaseChatModel|BaseLanguageModel|Runnable",
+      "target": "crmMonitoringTool_0",
+      "targetHandle": "crmMonitoringTool_0-input-model-BaseChatModel",
+      "type": "buttonedge",
+      "id": "octobotChatModel_1-octobotChatModel_1-output-octobotChatModel-OctobotChatModel|BaseChatOpenAI|BaseChatModel|BaseLanguageModel|Runnable-crmMonitoringTool_0-crmMonitoringTool_0-input-model-BaseChatModel"
+    },
+    {
+      "source": "monitoringPromptTemplate_0",
+      "sourceHandle": "monitoringPromptTemplate_0-output-monitoringPromptTemplate-MonitoringPromptTemplate",
+      "target": "crmMonitoringTool_0",
+      "targetHandle": "crmMonitoringTool_0-input-monitoringPrompt-MonitoringPromptTemplate",
+      "type": "buttonedge",
+      "id": "monitoringPromptTemplate_0-monitoringPromptTemplate_0-output-monitoringPromptTemplate-MonitoringPromptTemplate-crmMonitoringTool_0-crmMonitoringTool_0-input-monitoringPrompt-MonitoringPromptTemplate"
+    },
+    {
+      "source": "octobotChatModel_0",
+      "sourceHandle": "octobotChatModel_0-output-octobotChatModel-OctobotChatModel|BaseChatOpenAI|BaseChatModel|BaseLanguageModel|Runnable",
+      "target": "erpAgent_0",
+      "targetHandle": "erpAgent_0-input-model-BaseChatModel",
+      "type": "buttonedge",
+      "id": "octobotChatModel_0-octobotChatModel_0-output-octobotChatModel-OctobotChatModel|BaseChatOpenAI|BaseChatModel|BaseLanguageModel|Runnable-erpAgent_0-erpAgent_0-input-model-BaseChatModel"
+    }
+  ],
+  "viewport": {
+    "x": 796.716853516894,
+    "y": -79.01134502406018,
+    "zoom": 0.5493021182124487
+  }
+}

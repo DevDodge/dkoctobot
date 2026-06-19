@@ -16,8 +16,12 @@ export class OctobotChatModel
   constructor(id: string, fields?: ChatOpenAIFields) {
     super(fields);
     this.id = id;
-    this.configuredModel = fields?.modelName ?? "";
+    this.configuredModel = fields?.model || fields?.modelName || "";
     this.configuredMaxToken = fields?.maxTokens;
+    // Ensure model is set for @langchain/openai v0.6+
+    if (fields?.model) {
+      this.model = fields.model;
+    }
   }
 
   revertToOriginalModel(): void {

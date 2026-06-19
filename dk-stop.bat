@@ -22,16 +22,16 @@ if exist "F:\DK-Platform\.dk-running.lock" (
     echo            Lock file was not present.
 )
 
-:: ---- Step 2: Kill ALL node processes on port 1255 ----
-echo [DK-Platform] Step 2/4: Killing server process on port 1255...
+:: ---- Step 2: Kill ALL node processes on port 1252 ----
+echo [DK-Platform] Step 2/4: Killing server process on port 1252...
 set "KILLED=0"
-for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":1255 " ^| findstr "LISTENING" 2^>nul') do (
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":1252 " ^| findstr "LISTENING" 2^>nul') do (
     echo            Terminating PID: %%a
     taskkill /PID %%a /T /F >nul 2>&1
     set "KILLED=1"
 )
 if "%KILLED%"=="0" (
-    echo            No process found on port 1255.
+    echo            No process found on port 1252.
 ) else (
     echo            Server process terminated.
 )

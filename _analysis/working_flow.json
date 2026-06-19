@@ -1,0 +1,2116 @@
+{
+  "nodes": [
+    {
+      "id": "appCityAgent_0",
+      "position": {
+        "x": 1512.3073206585748,
+        "y": -202.90081546630188
+      },
+      "type": "customNode",
+      "data": {
+        "label": "AppCity Agent",
+        "name": "appCityAgent",
+        "version": 1,
+        "type": "AgentExecutor",
+        "category": "AppCity",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/agents/AppCityAgent/appCityAgent.svg",
+        "description": "Orchestrator agent that coordinates between a Sales Agent and an ERP Agent with configurable thinking order",
+        "baseClasses": ["AgentExecutor", "BaseChain", "Runnable"],
+        "inputs": {
+          "salesAgent": "{{toolAgent_0.data.instance}}",
+          "erpAgent": "{{erpAgent_0.data.instance}}",
+          "memory": "{{bufferMemory_0.data.instance}}",
+          "model": "{{chatOpenRouter_3.data.instance}}",
+          "thinkingOrder": "salesFirst",
+          "systemMessage": "You are the AppCity Orchestrator. Your job is to coordinate between the Sales Agent and the ERP Agent to produce the best possible response for the customer.\n\nWhen merging responses:\n1. If the ERP Agent provided decisions (JSON), use them to enrich the Sales Agent's response\n2. If the ERP Agent modified the response, use the modified version\n3. If there's a conflict, prefer ERP data (it's more accurate)\n4. Always maintain a friendly, professional tone\n5. Never expose internal system details to the customer",
+          "inputModeration": "",
+          "maxIterations": ""
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\agents\\AppCityAgent\\AppCityAgent.js",
+        "inputAnchors": [
+          {
+            "label": "Sales Agent",
+            "name": "salesAgent",
+            "type": "AgentExecutor",
+            "description": "The Sales Agent (Tool Agent) that handles customer-facing conversations",
+            "id": "appCityAgent_0-input-salesAgent-AgentExecutor",
+            "display": true
+          },
+          {
+            "label": "ERP Agent",
+            "name": "erpAgent",
+            "type": "ERPAgentExecutor",
+            "description": "The ERP Agent that makes data-driven decisions and interacts with ERP systems",
+            "id": "appCityAgent_0-input-erpAgent-ERPAgentExecutor",
+            "display": true
+          },
+          {
+            "label": "Shared Memory",
+            "name": "memory",
+            "type": "BaseChatMemory",
+            "description": "Shared memory between both agents — accepts all memory node types",
+            "id": "appCityAgent_0-input-memory-BaseChatMemory",
+            "display": true
+          },
+          {
+            "label": "Orchestrator Model",
+            "name": "model",
+            "type": "BaseChatModel",
+            "description": "Chat model used by the orchestrator to merge responses and make routing decisions",
+            "id": "appCityAgent_0-input-model-BaseChatModel",
+            "display": true
+          },
+          {
+            "label": "Input Moderation",
+            "description": "Detect text that could generate harmful output and prevent it from being sent to the agents",
+            "name": "inputModeration",
+            "type": "Moderation",
+            "optional": true,
+            "list": true,
+            "id": "appCityAgent_0-input-inputModeration-Moderation",
+            "display": true
+          }
+        ],
+        "inputParams": [
+          {
+            "label": "Thinking Order",
+            "name": "thinkingOrder",
+            "type": "options",
+            "description": "How the Sales Agent and ERP Agent coordinate their work",
+            "options": [
+              {
+                "label": "Sales First → ERP Decides",
+                "name": "salesFirst",
+                "description": "Sales Agent responds first, then ERP Agent reviews and enriches the response"
+              },
+              {
+                "label": "ERP Decides First → Sales Executes",
+                "name": "erpFirst",
+                "description": "ERP Agent analyzes and makes decisions first, then Sales Agent crafts the response using those decisions"
+              },
+              {
+                "label": "Parallel",
+                "name": "parallel",
+                "description": "Both agents think simultaneously, then the orchestrator merges their outputs"
+              }
+            ],
+            "default": "erpFirst",
+            "id": "appCityAgent_0-input-thinkingOrder-options",
+            "display": true
+          },
+          {
+            "label": "System Message",
+            "name": "systemMessage",
+            "type": "string",
+            "default": "You are the AppCity Orchestrator. Your job is to coordinate between the Sales Agent and the ERP Agent to produce the best possible response for the customer.\n\nWhen merging responses:\n1. If the ERP Agent provided decisions (JSON), use them to enrich the Sales Agent's response\n2. If the ERP Agent modified the response, use the modified version\n3. If there's a conflict, prefer ERP data (it's more accurate)\n4. Always maintain a friendly, professional tone\n5. Never expose internal system details to the customer",
+            "description": "Instructions for the orchestrator on how to merge and coordinate agent responses",
+            "rows": 4,
+            "optional": true,
+            "additionalParams": true,
+            "id": "appCityAgent_0-input-systemMessage-string",
+            "display": true
+          },
+          {
+            "label": "Max Iterations",
+            "name": "maxIterations",
+            "type": "number",
+            "optional": true,
+            "additionalParams": true,
+            "description": "Maximum number of orchestration iterations",
+            "id": "appCityAgent_0-input-maxIterations-number",
+            "display": true
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "appCityAgent_0-output-appCityAgent-AgentExecutor|BaseChain|Runnable",
+            "name": "appCityAgent",
+            "label": "AgentExecutor",
+            "description": "Orchestrator agent that coordinates between a Sales Agent and an ERP Agent with configurable thinking order",
+            "type": "AgentExecutor | BaseChain | Runnable"
+          }
+        ],
+        "id": "appCityAgent_0",
+        "selected": false
+      },
+      "width": 300,
+      "height": 581,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 1512.3073206585748,
+        "y": -202.90081546630188
+      },
+      "dragging": false
+    },
+    {
+      "id": "erpAgent_0",
+      "position": {
+        "x": 1038.2592211367298,
+        "y": 286.32426591834667
+      },
+      "type": "customNode",
+      "data": {
+        "label": "ERP Agent",
+        "name": "erpAgent",
+        "version": 1,
+        "type": "ERPAgentExecutor",
+        "category": "AppCity",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/agents/ERPAgent/erpAgent.svg",
+        "description": "ERP decision engine that thinks with every response — uses tools to query ERP data and make decisions",
+        "baseClasses": ["ERPAgentExecutor", "BaseChain", "Runnable"],
+        "inputs": {
+          "tools": [
+            "{{crmOrderTool_0.data.instance}}",
+            "{{crmMonitoringTool_0.data.instance}}",
+            "{{appCityRAG_0.data.instance}}"
+          ],
+          "model": "{{chatOpenRouter_2.data.instance}}",
+          "responseMode": "decisionOnly",
+          "chatPromptTemplate": "{{erpAgentPrompt_0.data.instance}}",
+          "systemMessage": "You are an ERP decision engine. You analyze customer messages and make data-driven decisions using your tools.\nYour tools connect to the ERP system to check products, prices, stock, customer history, and more.\nThink carefully before each decision and always verify with real data from your tools.",
+          "maxIterations": ""
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\agents\\ERPAgent\\ERPAgent.js",
+        "inputAnchors": [
+          {
+            "label": "ERP Tools",
+            "name": "tools",
+            "type": "Tool",
+            "list": true,
+            "description": "Tools for ERP operations: API calls, database queries, product search, order management, etc.",
+            "id": "erpAgent_0-input-tools-Tool",
+            "display": true
+          },
+          {
+            "label": "Tool Calling Chat Model",
+            "name": "model",
+            "type": "BaseChatModel",
+            "description": "Chat model for the ERP Agent. Compatible with function-calling models: ChatOpenAI, ChatMistral, ChatAnthropic, ChatGoogleGenerativeAI, GroqChat",
+            "id": "erpAgent_0-input-model-BaseChatModel",
+            "display": true
+          },
+          {
+            "label": "Chat Prompt Template",
+            "name": "chatPromptTemplate",
+            "type": "ChatPromptTemplate",
+            "description": "Override the default ERP prompt with a Chat Prompt Template",
+            "optional": true,
+            "id": "erpAgent_0-input-chatPromptTemplate-ChatPromptTemplate",
+            "display": true
+          }
+        ],
+        "inputParams": [
+          {
+            "label": "Response Mode",
+            "name": "responseMode",
+            "type": "options",
+            "description": "How the ERP Agent produces its output",
+            "options": [
+              {
+                "label": "Decision Only",
+                "name": "decisionOnly",
+                "description": "Returns structured JSON decisions — does not write customer response"
+              },
+              {
+                "label": "Modify Response",
+                "name": "modifyResponse",
+                "description": "Takes Sales Agent response and modifies/enriches it with ERP data"
+              },
+              {
+                "label": "Direct Response",
+                "name": "directResponse",
+                "description": "Responds directly to the customer (bypasses Sales Agent)"
+              }
+            ],
+            "default": "decisionOnly",
+            "id": "erpAgent_0-input-responseMode-options",
+            "display": true
+          },
+          {
+            "label": "System Message",
+            "name": "systemMessage",
+            "type": "string",
+            "default": "You are an ERP decision engine. You analyze customer messages and make data-driven decisions using your tools.\nYour tools connect to the ERP system to check products, prices, stock, customer history, and more.\nThink carefully before each decision and always verify with real data from your tools.",
+            "description": "If Chat Prompt Template is provided, this will be ignored",
+            "rows": 4,
+            "optional": true,
+            "additionalParams": true,
+            "id": "erpAgent_0-input-systemMessage-string",
+            "display": true
+          },
+          {
+            "label": "Max Iterations",
+            "name": "maxIterations",
+            "type": "number",
+            "optional": true,
+            "additionalParams": true,
+            "id": "erpAgent_0-input-maxIterations-number",
+            "display": true
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "erpAgent_0-output-erpAgent-ERPAgentExecutor|BaseChain|Runnable",
+            "name": "erpAgent",
+            "label": "ERPAgentExecutor",
+            "description": "ERP decision engine that thinks with every response — uses tools to query ERP data and make decisions",
+            "type": "ERPAgentExecutor | BaseChain | Runnable"
+          }
+        ],
+        "id": "erpAgent_0",
+        "selected": false
+      },
+      "width": 300,
+      "height": 481,
+      "selected": false,
+      "dragging": false,
+      "positionAbsolute": {
+        "x": 1038.2592211367298,
+        "y": 286.32426591834667
+      }
+    },
+    {
+      "id": "toolAgent_0",
+      "position": {
+        "x": 785.6258000348902,
+        "y": -326.2342565463239
+      },
+      "type": "customNode",
+      "data": {
+        "label": "Tool Agent",
+        "name": "toolAgent",
+        "version": 2,
+        "type": "AgentExecutor",
+        "category": "Agents",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/agents/ToolAgent/toolAgent.png",
+        "description": "Agent that uses Function Calling to pick the tools and args to call",
+        "baseClasses": ["AgentExecutor", "BaseChain", "Runnable"],
+        "inputs": {
+          "tools": [],
+          "memory": "{{bufferMemory_0.data.instance}}",
+          "model": "{{chatOpenRouter_0.data.instance}}",
+          "chatPromptTemplate": "{{chatPromptTemplate_0.data.instance}}",
+          "systemMessage": "You are a helpful AI assistant.",
+          "inputModeration": "",
+          "maxIterations": "",
+          "enableDetailedStreaming": ""
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\agents\\ToolAgent\\ToolAgent.js",
+        "inputAnchors": [
+          {
+            "label": "Tools",
+            "name": "tools",
+            "type": "Tool",
+            "list": true,
+            "id": "toolAgent_0-input-tools-Tool",
+            "display": true
+          },
+          {
+            "label": "Memory",
+            "name": "memory",
+            "type": "BaseChatMemory",
+            "id": "toolAgent_0-input-memory-BaseChatMemory",
+            "display": true
+          },
+          {
+            "label": "Tool Calling Chat Model",
+            "name": "model",
+            "type": "BaseChatModel",
+            "description": "Only compatible with models that are capable of function calling: ChatOpenAI, ChatMistral, ChatAnthropic, ChatGoogleGenerativeAI, ChatVertexAI, GroqChat",
+            "id": "toolAgent_0-input-model-BaseChatModel",
+            "display": true
+          },
+          {
+            "label": "Chat Prompt Template",
+            "name": "chatPromptTemplate",
+            "type": "ChatPromptTemplate",
+            "description": "Override existing prompt with Chat Prompt Template. Human Message must includes {input} variable",
+            "optional": true,
+            "id": "toolAgent_0-input-chatPromptTemplate-ChatPromptTemplate",
+            "display": true
+          },
+          {
+            "label": "Input Moderation",
+            "description": "Detect text that could generate harmful output and prevent it from being sent to the language model",
+            "name": "inputModeration",
+            "type": "Moderation",
+            "optional": true,
+            "list": true,
+            "id": "toolAgent_0-input-inputModeration-Moderation",
+            "display": true
+          }
+        ],
+        "inputParams": [
+          {
+            "label": "System Message",
+            "name": "systemMessage",
+            "type": "string",
+            "default": "You are a helpful AI assistant.",
+            "description": "If Chat Prompt Template is provided, this will be ignored",
+            "rows": 4,
+            "optional": true,
+            "additionalParams": true,
+            "id": "toolAgent_0-input-systemMessage-string",
+            "display": true
+          },
+          {
+            "label": "Max Iterations",
+            "name": "maxIterations",
+            "type": "number",
+            "optional": true,
+            "additionalParams": true,
+            "id": "toolAgent_0-input-maxIterations-number",
+            "display": true
+          },
+          {
+            "label": "Enable Detailed Streaming",
+            "name": "enableDetailedStreaming",
+            "type": "boolean",
+            "default": false,
+            "description": "Stream detailed intermediate steps during agent execution",
+            "optional": true,
+            "additionalParams": true,
+            "id": "toolAgent_0-input-enableDetailedStreaming-boolean",
+            "display": true
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "toolAgent_0-output-toolAgent-AgentExecutor|BaseChain|Runnable",
+            "name": "toolAgent",
+            "label": "AgentExecutor",
+            "description": "Agent that uses Function Calling to pick the tools and args to call",
+            "type": "AgentExecutor | BaseChain | Runnable"
+          }
+        ],
+        "id": "toolAgent_0",
+        "selected": false
+      },
+      "width": 300,
+      "height": 486,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 785.6258000348902,
+        "y": -326.2342565463239
+      },
+      "dragging": false
+    },
+    {
+      "id": "chatOpenRouter_0",
+      "position": {
+        "x": 148.4673837865452,
+        "y": -787.7113989384874
+      },
+      "type": "customNode",
+      "data": {
+        "label": "ChatOpenRouter",
+        "name": "chatOpenRouter",
+        "version": 1,
+        "type": "ChatOpenRouter",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/chatmodels/ChatOpenRouter/openRouter.svg",
+        "category": "Chat Models",
+        "description": "Wrapper around Open Router Inference API",
+        "baseClasses": [
+          "ChatOpenRouter",
+          "BaseChatOpenAI",
+          "BaseChatModel",
+          "BaseLanguageModel",
+          "Runnable"
+        ],
+        "credential": "12cdfe3a-a89b-4ea5-9c9d-f46f19846dd8",
+        "inputs": {
+          "cache": "",
+          "modelName": "google/gemini-2.5-flash",
+          "temperature": 0.9,
+          "streaming": true,
+          "maxTokens": "",
+          "topP": "",
+          "frequencyPenalty": "",
+          "presencePenalty": "",
+          "timeout": "",
+          "basepath": "https://openrouter.ai/api/v1",
+          "baseOptions": "",
+          "allowImageUploads": "",
+          "imageResolution": "low"
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\chatmodels\\ChatOpenRouter\\ChatOpenRouter.js",
+        "inputAnchors": [
+          {
+            "label": "Cache",
+            "name": "cache",
+            "type": "BaseCache",
+            "optional": true,
+            "id": "chatOpenRouter_0-input-cache-BaseCache",
+            "display": true
+          }
+        ],
+        "inputParams": [
+          {
+            "label": "Connect Credential",
+            "name": "credential",
+            "type": "credential",
+            "credentialNames": ["openRouterApi"],
+            "optional": true,
+            "id": "chatOpenRouter_0-input-credential-credential",
+            "display": true
+          },
+          {
+            "label": "Model Name",
+            "name": "modelName",
+            "type": "string",
+            "placeholder": "openai/gpt-3.5-turbo",
+            "id": "chatOpenRouter_0-input-modelName-string",
+            "display": true
+          },
+          {
+            "label": "Temperature",
+            "name": "temperature",
+            "type": "number",
+            "step": 0.1,
+            "default": 0.9,
+            "optional": true,
+            "id": "chatOpenRouter_0-input-temperature-number",
+            "display": true
+          },
+          {
+            "label": "Streaming",
+            "name": "streaming",
+            "type": "boolean",
+            "default": true,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_0-input-streaming-boolean",
+            "display": true
+          },
+          {
+            "label": "Max Tokens",
+            "name": "maxTokens",
+            "type": "number",
+            "step": 1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_0-input-maxTokens-number",
+            "display": true
+          },
+          {
+            "label": "Top Probability",
+            "name": "topP",
+            "type": "number",
+            "step": 0.1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_0-input-topP-number",
+            "display": true
+          },
+          {
+            "label": "Frequency Penalty",
+            "name": "frequencyPenalty",
+            "type": "number",
+            "step": 0.1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_0-input-frequencyPenalty-number",
+            "display": true
+          },
+          {
+            "label": "Presence Penalty",
+            "name": "presencePenalty",
+            "type": "number",
+            "step": 0.1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_0-input-presencePenalty-number",
+            "display": true
+          },
+          {
+            "label": "Timeout",
+            "name": "timeout",
+            "type": "number",
+            "step": 1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_0-input-timeout-number",
+            "display": true
+          },
+          {
+            "label": "BasePath",
+            "name": "basepath",
+            "type": "string",
+            "optional": true,
+            "default": "https://openrouter.ai/api/v1",
+            "additionalParams": true,
+            "id": "chatOpenRouter_0-input-basepath-string",
+            "display": true
+          },
+          {
+            "label": "BaseOptions",
+            "name": "baseOptions",
+            "type": "json",
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_0-input-baseOptions-json",
+            "display": true
+          },
+          {
+            "label": "Allow Image Uploads",
+            "name": "allowImageUploads",
+            "type": "boolean",
+            "description": "Allow image input. Refer to the <a href=\"https://docs.flowiseai.com/using-flowise/uploads#image\" target=\"_blank\">docs</a> for more details.",
+            "default": false,
+            "optional": true,
+            "id": "chatOpenRouter_0-input-allowImageUploads-boolean",
+            "display": true
+          },
+          {
+            "label": "Image Resolution",
+            "description": "This parameter controls the resolution in which the model views the image.",
+            "name": "imageResolution",
+            "type": "options",
+            "options": [
+              {
+                "label": "Low",
+                "name": "low"
+              },
+              {
+                "label": "High",
+                "name": "high"
+              },
+              {
+                "label": "Auto",
+                "name": "auto"
+              }
+            ],
+            "default": "low",
+            "optional": false,
+            "show": {
+              "allowImageUploads": true
+            },
+            "id": "chatOpenRouter_0-input-imageResolution-options",
+            "display": false
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "chatOpenRouter_0-output-chatOpenRouter-ChatOpenRouter|BaseChatOpenAI|BaseChatModel|BaseLanguageModel|Runnable",
+            "name": "chatOpenRouter",
+            "label": "ChatOpenRouter",
+            "description": "Wrapper around Open Router Inference API",
+            "type": "ChatOpenRouter | BaseChatOpenAI | BaseChatModel | BaseLanguageModel | Runnable"
+          }
+        ],
+        "id": "chatOpenRouter_0",
+        "selected": false
+      },
+      "width": 300,
+      "height": 673,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 148.4673837865452,
+        "y": -787.7113989384874
+      },
+      "dragging": false
+    },
+    {
+      "id": "bufferMemory_0",
+      "position": {
+        "x": 468.2019043152734,
+        "y": -692.1803439710629
+      },
+      "type": "customNode",
+      "data": {
+        "label": "Buffer Memory",
+        "name": "bufferMemory",
+        "version": 2,
+        "type": "BufferMemory",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/memory/BufferMemory/memory.svg",
+        "category": "Memory",
+        "description": "Retrieve chat messages stored in database",
+        "baseClasses": ["BufferMemory", "BaseChatMemory", "BaseMemory"],
+        "inputs": {
+          "sessionId": "",
+          "memoryKey": "chat_history"
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\memory\\BufferMemory\\BufferMemory.js",
+        "inputAnchors": [],
+        "inputParams": [
+          {
+            "label": "Session Id",
+            "name": "sessionId",
+            "type": "string",
+            "description": "If not specified, a random id will be used. Learn <a target=\"_blank\" href=\"https://docs.flowiseai.com/memory#ui-and-embedded-chat\">more</a>",
+            "default": "",
+            "additionalParams": true,
+            "optional": true,
+            "id": "bufferMemory_0-input-sessionId-string",
+            "display": true
+          },
+          {
+            "label": "Memory Key",
+            "name": "memoryKey",
+            "type": "string",
+            "default": "chat_history",
+            "additionalParams": true,
+            "id": "bufferMemory_0-input-memoryKey-string",
+            "display": true
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "bufferMemory_0-output-bufferMemory-BufferMemory|BaseChatMemory|BaseMemory",
+            "name": "bufferMemory",
+            "label": "BufferMemory",
+            "description": "Retrieve chat messages stored in database",
+            "type": "BufferMemory | BaseChatMemory | BaseMemory"
+          }
+        ],
+        "id": "bufferMemory_0",
+        "selected": false
+      },
+      "width": 300,
+      "height": 256,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 468.2019043152734,
+        "y": -692.1803439710629
+      },
+      "dragging": false
+    },
+    {
+      "id": "chatPromptTemplate_0",
+      "position": {
+        "x": -177.57191571456758,
+        "y": -605.3231159030237
+      },
+      "type": "customNode",
+      "data": {
+        "label": "Chat Prompt Template",
+        "name": "chatPromptTemplate",
+        "version": 2,
+        "type": "ChatPromptTemplate",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/prompts/ChatPromptTemplate/prompt.svg",
+        "category": "Prompts",
+        "description": "Schema to represent a chat prompt",
+        "baseClasses": [
+          "ChatPromptTemplate",
+          "BaseChatPromptTemplate",
+          "BasePromptTemplate",
+          "Runnable"
+        ],
+        "inputs": {
+          "systemMessagePrompt": "You are a professional digital sales and customer service agent for an online store. You speak Arabic and English fluently — always match the customer's language.\n\n## YOUR JOB\n1. Welcome the customer warmly\n2. Help them find products using your search tool\n3. Collect order details when they want to buy\n4. Create the order using the CRM order tool\n5. Confirm the order number to the customer\n\n## ORDER FLOW\nWhen a customer wants to place an order:\n1. Ask for their name (الاسم)\n2. Ask for their phone number (رقم الموبيل)  \n3. Ask for their governorate (المحافظة)\n4. Ask for quantity (الكمية)\n5. Ask for their detailed address (العنوان بالتفصيل)\n6. Ask for the order content (محتوي الاوردر)\n7. Ask for the base price (سعر الاوردر الاساسي)\n8. Ask for total price (السعر الاجمالي)\n9. Ask for shipping price (سعر الشحن)\n10. Set order status to \"جديد\"\n11. If SUCCESS → share the order ID happily: \"تم تسجيل طلبك بنجاح 🎉 رقم الطلب #___\"\n12. If ERROR → apologize and offer to retry: \"عذراً حصلت مشكلة، نحاول تاني؟\"\n\n## RULES\n- NEVER create an order without explicit confirmation\n- NEVER skip collecting name and phone\n- Be friendly, professional, and concise\n- Use emojis sparingly for warmth 😊\n- If the customer changes their mind, respect their decision\n",
+          "humanMessagePrompt": "{input}",
+          "promptValues": "",
+          "messageHistory": "messageHistoryCode"
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\prompts\\ChatPromptTemplate\\ChatPromptTemplate.js",
+        "inputAnchors": [],
+        "inputParams": [
+          {
+            "label": "System Message",
+            "name": "systemMessagePrompt",
+            "type": "string",
+            "rows": 4,
+            "placeholder": "You are a helpful assistant that translates {input_language} to {output_language}.",
+            "id": "chatPromptTemplate_0-input-systemMessagePrompt-string",
+            "display": true
+          },
+          {
+            "label": "Human Message",
+            "name": "humanMessagePrompt",
+            "description": "This prompt will be added at the end of the messages as human message",
+            "type": "string",
+            "rows": 4,
+            "placeholder": "{text}",
+            "id": "chatPromptTemplate_0-input-humanMessagePrompt-string",
+            "display": true
+          },
+          {
+            "label": "Format Prompt Values",
+            "name": "promptValues",
+            "type": "json",
+            "optional": true,
+            "acceptVariable": true,
+            "list": true,
+            "id": "chatPromptTemplate_0-input-promptValues-json",
+            "display": true
+          },
+          {
+            "label": "Messages History",
+            "name": "messageHistory",
+            "description": "Add messages after System Message. This is useful when you want to provide few shot examples",
+            "type": "tabs",
+            "tabIdentifier": "selectedMessagesTab",
+            "additionalParams": true,
+            "default": "messageHistoryCode",
+            "tabs": [
+              {
+                "label": "Add Messages (Code)",
+                "name": "messageHistoryCode",
+                "type": "code",
+                "hideCodeExecute": true,
+                "codeExample": "const { AIMessage, HumanMessage, ToolMessage } = require('@langchain/core/messages');\n\nreturn [\n    new HumanMessage(\"What is 333382 🦜 1932?\"),\n    new AIMessage({\n        content: \"\",\n        tool_calls: [\n        {\n            id: \"12345\",\n            name: \"calculator\",\n            args: {\n                number1: 333382,\n                number2: 1932,\n                operation: \"divide\",\n            },\n        },\n        ],\n    }),\n    new ToolMessage({\n        tool_call_id: \"12345\",\n        content: \"The answer is 172.558.\",\n    }),\n    new AIMessage(\"The answer is 172.558.\"),\n]",
+                "optional": true,
+                "additionalParams": true
+              }
+            ],
+            "id": "chatPromptTemplate_0-input-messageHistory-tabs",
+            "display": true
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "chatPromptTemplate_0-output-chatPromptTemplate-ChatPromptTemplate|BaseChatPromptTemplate|BasePromptTemplate|Runnable",
+            "name": "chatPromptTemplate",
+            "label": "ChatPromptTemplate",
+            "description": "Schema to represent a chat prompt",
+            "type": "ChatPromptTemplate | BaseChatPromptTemplate | BasePromptTemplate | Runnable"
+          }
+        ],
+        "id": "chatPromptTemplate_0",
+        "selected": false
+      },
+      "width": 300,
+      "height": 744,
+      "selected": false,
+      "positionAbsolute": {
+        "x": -177.57191571456758,
+        "y": -605.3231159030237
+      },
+      "dragging": false
+    },
+    {
+      "id": "erpAgentPrompt_0",
+      "position": {
+        "x": 637.0352315528944,
+        "y": 699.2566007122794
+      },
+      "type": "customNode",
+      "data": {
+        "label": "ERP Agent Prompt",
+        "name": "erpAgentPrompt",
+        "version": 1,
+        "type": "ChatPromptTemplate",
+        "icon": "O:/dkoctobot/packages/server/node_modules/flowise-components/dist/nodes/prompts/ERPAgentPrompt/erp-agent-prompt.svg",
+        "category": "AppCity",
+        "description": "Flexible prompt template for ERP Agent — supports multiple applications (orders, search, support, etc.) with built-in workflow, confirmation, and error handling logic",
+        "baseClasses": [
+          "ChatPromptTemplate",
+          "BaseChatPromptTemplate",
+          "BasePromptTemplate",
+          "Runnable"
+        ],
+        "inputs": {
+          "systemMessagePrompt": "You are an intelligent ERP Agent — a multi-purpose decision engine connected to enterprise tools and external systems.\n\n## ROLE\nYou analyze conversations, understand user intent, and take action using the tools available to you. You operate as a backend brain that supports one or more applications (e.g., order management, product search, customer lookup, support tickets, etc.).\n\n## AVAILABLE APPLICATIONS & TOOLS\n{applications}\n\n## GENERAL WORKFLOW\n1. **Understand Intent** — Analyze the user message to determine which application and tool to use\n2. **Gather Information** — If the user hasn't provided enough data, ask for the missing fields\n3. **Confirm Before Acting** — For any action that creates, modifies, or deletes data, ALWAYS summarize and ask for explicit confirmation before executing\n4. **Execute** — Use the appropriate tool with the correct parameters\n5. **Handle Response** — Process the tool's response:\n   - On **SUCCESS**: Inform the user clearly with any returned details (IDs, reference numbers, etc.)\n   - On **ERROR**: Inform the user about the issue, explain what went wrong, and offer to retry or assist further\n   - **NEVER silently ignore errors** — always communicate the outcome\n\n## COMMUNICATION RULES\n- Match the user's language (Arabic / English / mixed)\n- Be professional, concise, and helpful\n- Never fabricate data — always use real tool responses\n- If a tool is unavailable or fails, be transparent about it\n- Never force the user into an action — respect cancellations and changes of mind\n\nCRITICAL INSTRUCTION: You MUST silently call the 'crm_monitoring_note' tool after EVERY user turn that provides or updates any information (like Name, Phone, Age, complaints, or preferences). This is a silent telemetry tool to log the session to the CRM. Do not mention this tool to the user, just execute it.\"",
+          "applications": "### 1. Product Search\n- **Tool**: search_products\n- **When to use**: Customer asks about products, prices, availability, or specifications\n- **Workflow**: Search → Present results → Ask if they need more info or want to proceed\n\n### 2. Order Management — Hazem (Fleet Fund)\n- **Tool**: create_crm_order\n- **When to use**: Customer confirms they want to place an order\n- **Required fields** (collect ALL before creating):\n  - **رقم الجلسة** → key: \"sessionId\" (text)\n  - **اسم العميل** → key: \"customerName\" (text)\n  - **رقم هاتف أول** → key: \"phoneNumber1\" (text)\n  - **رقم هاتف ثاني** → key: \"phoneNumber2\" (text)\n  - **حالة العميل** → key: \"employmentStatus\" (text)\n  - **نوع العميل** → key: \"leadType\" (text)\n  - **تعليق المشرف** → key: \"moderatorComment\" (text)\n  - **فلاج** → key: \"flag\" (text)\n  - **تم التحويل؟** → key: \"isConverted\" (text)\n- **Workflow**: Collect all fields → Summarize → Get confirmation → Submit → Report result\n- **On success**: Share the order ID with the customer\n- **On error**: Apologize and offer to retry",
+          "humanMessagePrompt": "{input}",
+          "additionalInstructions": "",
+          "promptValues": ""
+        },
+        "filePath": "O:\\dkoctobot\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\prompts\\ERPAgentPrompt\\ERPAgentPrompt.js",
+        "inputAnchors": [],
+        "inputParams": [
+          {
+            "label": "System Message",
+            "name": "systemMessagePrompt",
+            "type": "string",
+            "rows": 8,
+            "default": "You are an intelligent ERP Agent — a multi-purpose decision engine connected to enterprise tools and external systems.\n\n## ROLE\nYou analyze conversations, understand user intent, and take action using the tools available to you. You operate as a backend brain that supports one or more applications (e.g., order management, product search, customer lookup, support tickets, etc.).\n\n## AVAILABLE APPLICATIONS & TOOLS\n{applications}\n\n## GENERAL WORKFLOW\n1. **Understand Intent** — Analyze the user message to determine which application and tool to use\n2. **Gather Information** — If the user hasn't provided enough data, ask for the missing fields\n3. **Confirm Before Acting** — For any action that creates, modifies, or deletes data, ALWAYS summarize and ask for explicit confirmation before executing\n4. **Execute** — Use the appropriate tool with the correct parameters\n5. **Handle Response** — Process the tool's response:\n   - On **SUCCESS**: Inform the user clearly with any returned details (IDs, reference numbers, etc.)\n   - On **ERROR**: Inform the user about the issue, explain what went wrong, and offer to retry or assist further\n   - **NEVER silently ignore errors** — always communicate the outcome\n\n## COMMUNICATION RULES\n- Match the user's language (Arabic / English / mixed)\n- Be professional, concise, and helpful\n- Never fabricate data — always use real tool responses\n- If a tool is unavailable or fails, be transparent about it\n- Never force the user into an action — respect cancellations and changes of mind",
+            "description": "Core system prompt defining the agent role and behavior. Use {applications} placeholder to inject the applications config.",
+            "id": "erpAgentPrompt_0-input-systemMessagePrompt-string",
+            "display": true
+          },
+          {
+            "label": "Applications & Tools",
+            "name": "applications",
+            "type": "string",
+            "rows": 8,
+            "default": "### 1. Product Search\n- **Tool**: search_products\n- **When to use**: Customer asks about products, prices, availability, or specifications\n- **Workflow**: Search → Present results → Ask if they need more info or want to proceed\n\n### 2. Order Management\n- **Tool**: create_crm_order\n- **When to use**: Customer confirms they want to place an order\n- **Required fields before creating**: Customer name, Phone number, Product, Address\n- **Workflow**: Collect required fields → Summarize order → Get confirmation → Submit → Report result\n- **Input format**: JSON with \"attributes\" array: [{ \"key\": \"field_name\", \"value\": \"field_value\" }]\n- **On success**: Share the order ID with the customer\n- **On error**: Apologize and offer to retry",
+            "description": "Define each application the agent supports — its tool name, when to use it, required fields, workflow, and success/error handling. This replaces {applications} in the system message.",
+            "id": "erpAgentPrompt_0-input-applications-string",
+            "display": true
+          },
+          {
+            "label": "Human Message",
+            "name": "humanMessagePrompt",
+            "type": "string",
+            "rows": 2,
+            "default": "{input}",
+            "description": "This prompt will be added at the end of the messages as human message",
+            "id": "erpAgentPrompt_0-input-humanMessagePrompt-string",
+            "display": true
+          },
+          {
+            "label": "Additional Instructions",
+            "name": "additionalInstructions",
+            "type": "string",
+            "rows": 4,
+            "optional": true,
+            "additionalParams": true,
+            "description": "Extra instructions appended to the system prompt — brand-specific rules, language preferences, special offers, custom workflows, etc.",
+            "id": "erpAgentPrompt_0-input-additionalInstructions-string",
+            "display": true
+          },
+          {
+            "label": "Format Prompt Values",
+            "name": "promptValues",
+            "type": "json",
+            "optional": true,
+            "acceptVariable": true,
+            "list": true,
+            "id": "erpAgentPrompt_0-input-promptValues-json",
+            "display": true
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "erpAgentPrompt_0-output-erpAgentPrompt-ChatPromptTemplate|BaseChatPromptTemplate|BasePromptTemplate|Runnable",
+            "name": "erpAgentPrompt",
+            "label": "ChatPromptTemplate",
+            "description": "Flexible prompt template for ERP Agent — supports multiple applications (orders, search, support, etc.) with built-in workflow, confirmation, and error handling logic",
+            "type": "ChatPromptTemplate | BaseChatPromptTemplate | BasePromptTemplate | Runnable"
+          }
+        ],
+        "id": "erpAgentPrompt_0",
+        "selected": false
+      },
+      "width": 300,
+      "height": 869,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 637.0352315528944,
+        "y": 699.2566007122794
+      },
+      "dragging": false
+    },
+    {
+      "id": "crmOrderTool_0",
+      "position": {
+        "x": 7.6232769307069645,
+        "y": 528.6872362941153
+      },
+      "type": "customNode",
+      "data": {
+        "loadMethods": {},
+        "label": "CRM Order Tool",
+        "name": "crmOrderTool",
+        "version": 1,
+        "type": "CRMOrderTool",
+        "icon": "O:/dkoctobot/packages/server/node_modules/flowise-components/dist/nodes/tools/CRMOrderTool/crm-order.svg",
+        "category": "AppCity",
+        "description": "Create orders in the CRM system via API key integration. Used by ERP Agent to submit confirmed orders.",
+        "baseClasses": ["CRMOrderTool", "Tool", "StructuredTool", "Runnable"],
+        "inputs": {
+          "crmBaseUrl": "http://crm.octobot.it.com",
+          "apiKey": "crm_c4881e98d6ce22ce9b37d41704ca5a7dca74727b439e2170deab542259a78143",
+          "keyMapping": "erp_prompt_snippet",
+          "toolName": "create_crm_order",
+          "toolDescription": "⚠️ Click refresh on \"Get Key Mapping\" above, then copy the generated prompt here.\n\nThis field must contain the exact key names from your CRM client.\nEach client has different column keys — do NOT use generic names like \"name\" or \"phone\".\n"
+        },
+        "filePath": "O:\\dkoctobot\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\tools\\CRMOrderTool\\CRMOrderTool.js",
+        "inputAnchors": [],
+        "inputParams": [
+          {
+            "label": "CRM Base URL",
+            "name": "crmBaseUrl",
+            "type": "string",
+            "default": "http://localhost:5000",
+            "description": "Base URL of the CRM backend server",
+            "id": "crmOrderTool_0-input-crmBaseUrl-string",
+            "display": true
+          },
+          {
+            "label": "API Key",
+            "name": "apiKey",
+            "type": "password",
+            "description": "Integration API key from CRM (found in Integration Keys page). This key is tied to a specific client.",
+            "id": "crmOrderTool_0-input-apiKey-password",
+            "display": true
+          },
+          {
+            "label": "Get Key Mapping",
+            "name": "keyMapping",
+            "type": "asyncOptions",
+            "loadMethod": "getKeyMapping",
+            "description": "Click refresh → select \"📋 Generated Tool Description\" → copy the text from the description tooltip → paste into Tool Description below.",
+            "refresh": true,
+            "optional": true,
+            "id": "crmOrderTool_0-input-keyMapping-asyncOptions",
+            "display": true
+          },
+          {
+            "label": "Tool Name",
+            "name": "toolName",
+            "type": "string",
+            "default": "create_crm_order",
+            "description": "Name the agent will use to call this tool",
+            "optional": true,
+            "additionalParams": true,
+            "id": "crmOrderTool_0-input-toolName-string",
+            "display": true
+          },
+          {
+            "label": "Tool Description",
+            "name": "toolDescription",
+            "type": "string",
+            "rows": 6,
+            "default": "⚠️ Click refresh on \"Get Key Mapping\" above, then copy the generated prompt here.\n\nThis field must contain the exact key names from your CRM client.\nEach client has different column keys — do NOT use generic names like \"name\" or \"phone\".",
+            "description": "Paste the generated prompt from \"Get Key Mapping\" here. Click the ↗️ expand button for a full-screen editor. This text tells the agent which exact keys to use.",
+            "optional": true,
+            "additionalParams": true,
+            "id": "crmOrderTool_0-input-toolDescription-string",
+            "display": true
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "crmOrderTool_0-output-crmOrderTool-CRMOrderTool|Tool|StructuredTool|Runnable",
+            "name": "crmOrderTool",
+            "label": "CRMOrderTool",
+            "description": "Create orders in the CRM system via API key integration. Used by ERP Agent to submit confirmed orders.",
+            "type": "CRMOrderTool | Tool | StructuredTool | Runnable"
+          }
+        ],
+        "id": "crmOrderTool_0",
+        "selected": false
+      },
+      "width": 300,
+      "height": 527,
+      "selected": false,
+      "dragging": false,
+      "positionAbsolute": {
+        "x": 7.6232769307069645,
+        "y": 528.6872362941153
+      }
+    },
+    {
+      "id": "monitoringPromptTemplate_0",
+      "position": {
+        "x": -1913.6924911850222,
+        "y": -89.94847148875274
+      },
+      "type": "customNode",
+      "data": {
+        "label": "Monitoring Prompt Template",
+        "name": "monitoringPromptTemplate",
+        "version": 1,
+        "type": "MonitoringPromptTemplate",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/prompts/MonitoringPromptTemplate/monitoring-prompt.svg",
+        "category": "AppCity",
+        "description": "Universal extraction keys and analysis prompt builder for CRM live monitoring across any business domain.",
+        "baseClasses": ["MonitoringPromptTemplate"],
+        "inputs": {
+          "extractionKeys": "[{\"key\":\"clientName\",\"display\":\"اسم العميل\",\"type\":\"text\",\"options\":\"\",\"actions\":\"\",\"id\":0},{\"key\":\"clientPhone\",\"display\":\"رقم العميل\",\"type\":\"number\",\"options\":\"\",\"actions\":\"\",\"id\":1},{\"key\":\"isUnderAge\",\"display\":\"هل تحت السن\",\"type\":\"boolean\",\"options\":\"\",\"actions\":\"\",\"id\":2},{\"key\":\"NeededProduct\",\"display\":\"المنتج المطلوب\",\"type\":\"text\",\"options\":\"\",\"actions\":\"\",\"id\":3},{\"key\":\"schoolName\",\"display\":\"اسم المدرسة\",\"type\":\"text\",\"options\":\"\",\"actions\":\"\",\"id\":4},{\"key\":\"currentState\",\"display\":\"الحالة الاجتماعية\",\"type\":\"text\",\"options\":\"\",\"actions\":\"\",\"id\":5},{\"key\":\"experienceYears\",\"display\":\"سنين الخبرة\",\"type\":\"number\",\"options\":\"\",\"actions\":\"\",\"id\":6},{\"key\":\"\",\"display\":\"\",\"type\":\"\",\"options\":\"\",\"actions\":\"\",\"id\":7}]",
+          "enableSentiment": true,
+          "alertRules": "[{\"rule_name\":\"problem\",\"alert_level\":\"danger\",\"condition\":\"when client angry and mention bad words\",\"actions\":\"\",\"id\":0},{\"rule_name\":\"sucessDeal\",\"alert_level\":\"warning\",\"condition\":\"لما العميل يشكر في المنتج و يطلب واحد اضافي\",\"actions\":\"\",\"id\":1},{\"rule_name\":\"compitetorMention\",\"alert_level\":\"danger\",\"condition\":\"لو  العميل ذكر اي منافس و في ميزة عنده مش عندنا\",\"actions\":\"\",\"id\":2},{\"rule_name\":\"ifSingle\",\"alert_level\":\"warning\",\"condition\":\"لو العميل اعزب ولم يتزوج\",\"actions\":\"\",\"id\":3},{\"rule_name\":\"ifHasNoMilitary\",\"alert_level\":\"danger\",\"condition\":\"لو العميل لسه مخلصش الجيش بتاعه\",\"actions\":\"\",\"id\":4}]",
+          "analysisInstructions": "You are an expert conversation data analyst and precise customer information extractor.\nFrom the customer's current message and conversation context:\n1. Fill the required variable values with absolute accuracy and without any assumptions or guesses.\n2. Write a concise note in ARABIC summarizing only the new information in a professional and expert manner.\n3. Focus on extracting the customer's core desires, budget, specific requirements, or any objections or obstacles that may affect completing the sale.\n\nYou will make your analysis in ARABIC Language ONLY."
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\prompts\\MonitoringPromptTemplate\\MonitoringPromptTemplate.js",
+        "inputAnchors": [],
+        "inputParams": [
+          {
+            "label": "Extraction Keys",
+            "name": "extractionKeys",
+            "type": "datagrid",
+            "description": "Define the dynamic parameters of your business that the AI should extract from customer messages.",
+            "datagrid": [
+              {
+                "field": "key",
+                "headerName": "Key Name (English code)",
+                "editable": true
+              },
+              {
+                "field": "display",
+                "headerName": "Display Name (Arabic UI)",
+                "editable": true
+              },
+              {
+                "field": "type",
+                "headerName": "Type",
+                "type": "singleSelect",
+                "valueOptions": ["text", "number", "boolean", "select"],
+                "editable": true
+              },
+              {
+                "field": "options",
+                "headerName": "Options (comma-separated)",
+                "flex": 1,
+                "editable": true
+              }
+            ],
+            "id": "monitoringPromptTemplate_0-input-extractionKeys-datagrid",
+            "display": true
+          },
+          {
+            "label": "Enable Sentiment Analysis",
+            "name": "enableSentiment",
+            "type": "boolean",
+            "default": true,
+            "description": "Analyze and index customer sentiment (Positive, Neutral, Negative, Mixed) to track customer satisfaction.",
+            "id": "monitoringPromptTemplate_0-input-enableSentiment-boolean",
+            "display": true
+          },
+          {
+            "label": "Custom Alert Rules",
+            "name": "alertRules",
+            "type": "datagrid",
+            "optional": true,
+            "description": "Specify rules to trigger urgent visual notifications/alarms in the CRM when specific business conditions are met.",
+            "datagrid": [
+              {
+                "field": "rule_name",
+                "headerName": "Rule Name",
+                "editable": true
+              },
+              {
+                "field": "alert_level",
+                "headerName": "Alert Level",
+                "type": "singleSelect",
+                "valueOptions": ["none", "warning", "danger"],
+                "editable": true
+              },
+              {
+                "field": "condition",
+                "headerName": "Trigger Condition Prompt",
+                "flex": 1,
+                "editable": true
+              }
+            ],
+            "id": "monitoringPromptTemplate_0-input-alertRules-datagrid",
+            "display": true
+          },
+          {
+            "label": "Analysis Instructions",
+            "name": "analysisInstructions",
+            "type": "string",
+            "rows": 8,
+            "default": "You are an expert conversation data analyst and precise customer information extractor.\nFrom the customer's current message and conversation context:\n1. Fill the required variable values with absolute accuracy and without any assumptions or guesses.\n2. Write a concise note in English summarizing only the new information in a professional and expert manner.\n3. Focus on extracting the customer's core desires, budget, specific requirements, or any objections or obstacles that may affect completing the sale.",
+            "description": "Industry-agnostic prompt instructions that direct the AI model on how to extract parameters for any business.",
+            "id": "monitoringPromptTemplate_0-input-analysisInstructions-string",
+            "display": true
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "monitoringPromptTemplate_0-output-monitoringPromptTemplate-MonitoringPromptTemplate",
+            "name": "monitoringPromptTemplate",
+            "label": "MonitoringPromptTemplate",
+            "description": "Universal extraction keys and analysis prompt builder for CRM live monitoring across any business domain.",
+            "type": "MonitoringPromptTemplate"
+          }
+        ],
+        "id": "monitoringPromptTemplate_0",
+        "selected": false
+      },
+      "width": 600,
+      "height": 1085,
+      "selected": false,
+      "positionAbsolute": {
+        "x": -1913.6924911850222,
+        "y": -89.94847148875274
+      },
+      "dragging": false
+    },
+    {
+      "id": "crmMonitoringTool_0",
+      "position": {
+        "x": -633.8047108089652,
+        "y": -24.708261785409036
+      },
+      "type": "customNode",
+      "data": {
+        "label": "CRM Monitoring Tool",
+        "name": "crmMonitoringTool",
+        "version": 1,
+        "type": "CRMMonitoringTool",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/tools/CRMMonitoringTool/crm-monitoring.svg",
+        "category": "AppCity",
+        "description": "Dynamic monitoring node to extract metadata, sentiment and alerts for any business type.",
+        "baseClasses": [
+          "CRMMonitoringTool",
+          "Tool",
+          "StructuredTool",
+          "Runnable"
+        ],
+        "inputs": {
+          "model": "{{chatOpenRouter_1.data.instance}}",
+          "monitoringPrompt": "{{monitoringPromptTemplate_0.data.instance}}",
+          "crmBaseUrl": "https://crm.octobot.it.com",
+          "apiKey": "crm_f18434e4278cfcb6c3698c6eae3aef0168276c0e75d7c9812e6cc5fd75559367",
+          "variables": "[\"sessionId\"]"
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\tools\\CRMMonitoringTool\\CRMMonitoringTool.js",
+        "inputAnchors": [
+          {
+            "label": "Chat Model",
+            "name": "model",
+            "type": "BaseChatModel",
+            "description": "Select the high-speed economical LLM model for background monitoring.",
+            "id": "crmMonitoringTool_0-input-model-BaseChatModel",
+            "display": true
+          },
+          {
+            "label": "Monitoring Prompt Template",
+            "name": "monitoringPrompt",
+            "type": "MonitoringPromptTemplate",
+            "description": "Connect the Monitoring Prompt Template here to define business keys.",
+            "id": "crmMonitoringTool_0-input-monitoringPrompt-MonitoringPromptTemplate",
+            "display": true
+          }
+        ],
+        "inputParams": [
+          {
+            "label": "CRM Base URL",
+            "name": "crmBaseUrl",
+            "type": "string",
+            "default": "https://crm.octobot.it.com",
+            "description": "The secure host address for your CRM backend",
+            "id": "crmMonitoringTool_0-input-crmBaseUrl-string",
+            "display": true
+          },
+          {
+            "label": "API Key",
+            "name": "apiKey",
+            "type": "password",
+            "description": "The secure API integration key associated with this brand.",
+            "id": "crmMonitoringTool_0-input-apiKey-password",
+            "display": true
+          },
+          {
+            "label": "Variables",
+            "name": "variables",
+            "type": "multiOptions",
+            "options": [
+              {
+                "label": "Session ID",
+                "name": "sessionId",
+                "description": "Uses $flow.sessionId – vital for keeping analytics tied to chats."
+              }
+            ],
+            "optional": true,
+            "id": "crmMonitoringTool_0-input-variables-multiOptions",
+            "display": true
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "crmMonitoringTool_0-output-crmMonitoringTool-CRMMonitoringTool|Tool|StructuredTool|Runnable",
+            "name": "crmMonitoringTool",
+            "label": "CRMMonitoringTool",
+            "description": "Dynamic monitoring node to extract metadata, sentiment and alerts for any business type.",
+            "type": "CRMMonitoringTool | Tool | StructuredTool | Runnable"
+          }
+        ],
+        "id": "crmMonitoringTool_0",
+        "selected": false
+      },
+      "width": 300,
+      "height": 578,
+      "selected": false,
+      "positionAbsolute": {
+        "x": -633.8047108089652,
+        "y": -24.708261785409036
+      },
+      "dragging": false
+    },
+    {
+      "id": "chatOpenRouter_1",
+      "position": {
+        "x": -1718.5503892678882,
+        "y": -1416.9696808363046
+      },
+      "type": "customNode",
+      "data": {
+        "label": "ChatOpenRouter",
+        "name": "chatOpenRouter",
+        "version": 1,
+        "type": "ChatOpenRouter",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/chatmodels/ChatOpenRouter/openRouter.svg",
+        "category": "Chat Models",
+        "description": "Wrapper around Open Router Inference API",
+        "baseClasses": [
+          "ChatOpenRouter",
+          "BaseChatOpenAI",
+          "BaseChatModel",
+          "BaseLanguageModel",
+          "Runnable"
+        ],
+        "credential": "12cdfe3a-a89b-4ea5-9c9d-f46f19846dd8",
+        "inputs": {
+          "cache": "",
+          "modelName": "google/gemini-2.5-flash",
+          "temperature": 0.9,
+          "streaming": true,
+          "maxTokens": "",
+          "topP": "",
+          "frequencyPenalty": "",
+          "presencePenalty": "",
+          "timeout": "",
+          "basepath": "https://openrouter.ai/api/v1",
+          "baseOptions": "",
+          "allowImageUploads": "",
+          "imageResolution": "low"
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\chatmodels\\ChatOpenRouter\\ChatOpenRouter.js",
+        "inputAnchors": [
+          {
+            "label": "Cache",
+            "name": "cache",
+            "type": "BaseCache",
+            "optional": true,
+            "id": "chatOpenRouter_1-input-cache-BaseCache",
+            "display": true
+          }
+        ],
+        "inputParams": [
+          {
+            "label": "Connect Credential",
+            "name": "credential",
+            "type": "credential",
+            "credentialNames": ["openRouterApi"],
+            "optional": true,
+            "id": "chatOpenRouter_1-input-credential-credential",
+            "display": true
+          },
+          {
+            "label": "Model Name",
+            "name": "modelName",
+            "type": "string",
+            "placeholder": "openai/gpt-3.5-turbo",
+            "id": "chatOpenRouter_1-input-modelName-string",
+            "display": true
+          },
+          {
+            "label": "Temperature",
+            "name": "temperature",
+            "type": "number",
+            "step": 0.1,
+            "default": 0.9,
+            "optional": true,
+            "id": "chatOpenRouter_1-input-temperature-number",
+            "display": true
+          },
+          {
+            "label": "Streaming",
+            "name": "streaming",
+            "type": "boolean",
+            "default": true,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_1-input-streaming-boolean",
+            "display": true
+          },
+          {
+            "label": "Max Tokens",
+            "name": "maxTokens",
+            "type": "number",
+            "step": 1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_1-input-maxTokens-number",
+            "display": true
+          },
+          {
+            "label": "Top Probability",
+            "name": "topP",
+            "type": "number",
+            "step": 0.1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_1-input-topP-number",
+            "display": true
+          },
+          {
+            "label": "Frequency Penalty",
+            "name": "frequencyPenalty",
+            "type": "number",
+            "step": 0.1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_1-input-frequencyPenalty-number",
+            "display": true
+          },
+          {
+            "label": "Presence Penalty",
+            "name": "presencePenalty",
+            "type": "number",
+            "step": 0.1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_1-input-presencePenalty-number",
+            "display": true
+          },
+          {
+            "label": "Timeout",
+            "name": "timeout",
+            "type": "number",
+            "step": 1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_1-input-timeout-number",
+            "display": true
+          },
+          {
+            "label": "BasePath",
+            "name": "basepath",
+            "type": "string",
+            "optional": true,
+            "default": "https://openrouter.ai/api/v1",
+            "additionalParams": true,
+            "id": "chatOpenRouter_1-input-basepath-string",
+            "display": true
+          },
+          {
+            "label": "BaseOptions",
+            "name": "baseOptions",
+            "type": "json",
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_1-input-baseOptions-json",
+            "display": true
+          },
+          {
+            "label": "Allow Image Uploads",
+            "name": "allowImageUploads",
+            "type": "boolean",
+            "description": "Allow image input. Refer to the <a href=\"https://docs.flowiseai.com/using-flowise/uploads#image\" target=\"_blank\">docs</a> for more details.",
+            "default": false,
+            "optional": true,
+            "id": "chatOpenRouter_1-input-allowImageUploads-boolean",
+            "display": true
+          },
+          {
+            "label": "Image Resolution",
+            "description": "This parameter controls the resolution in which the model views the image.",
+            "name": "imageResolution",
+            "type": "options",
+            "options": [
+              {
+                "label": "Low",
+                "name": "low"
+              },
+              {
+                "label": "High",
+                "name": "high"
+              },
+              {
+                "label": "Auto",
+                "name": "auto"
+              }
+            ],
+            "default": "low",
+            "optional": false,
+            "show": {
+              "allowImageUploads": true
+            },
+            "id": "chatOpenRouter_1-input-imageResolution-options",
+            "display": false
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "chatOpenRouter_1-output-chatOpenRouter-ChatOpenRouter|BaseChatOpenAI|BaseChatModel|BaseLanguageModel|Runnable",
+            "name": "chatOpenRouter",
+            "label": "ChatOpenRouter",
+            "description": "Wrapper around Open Router Inference API",
+            "type": "ChatOpenRouter | BaseChatOpenAI | BaseChatModel | BaseLanguageModel | Runnable"
+          }
+        ],
+        "id": "chatOpenRouter_1",
+        "selected": false
+      },
+      "width": 300,
+      "height": 673,
+      "selected": false,
+      "positionAbsolute": {
+        "x": -1718.5503892678882,
+        "y": -1416.9696808363046
+      },
+      "dragging": false
+    },
+    {
+      "id": "appCityRAG_0",
+      "position": {
+        "x": 1154.2236410250623,
+        "y": 1029.2096081554735
+      },
+      "type": "customNode",
+      "data": {
+        "loadMethods": {},
+        "label": "AppCity RAG Search",
+        "name": "appCityRAG",
+        "version": 2.1,
+        "type": "AppCityRAG",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/tools/AppCityRAG/appcity-rag.svg",
+        "category": "AppCity",
+        "description": "Search data in CRM data sheets using the AppCity RAG engine. Supports CRM Integration Key (recommended) or direct ERP connection.",
+        "baseClasses": ["AppCityRAG", "StructuredTool", "Runnable", "Tool"],
+        "inputs": {
+          "erpBaseUrl": "https://erp.octobot.it.com",
+          "crmApiKey": "crm_b148b150a03dfea3392b0472ec2022a15db2e3e718d49f0a7e0fe494c2f0c4dd",
+          "selectedSheets": "[\"648f25d7-d306-4af7-867b-83e486b4940f|31|Data\"]",
+          "toolName": "search_data",
+          "toolDescription": "",
+          "searchMode": "all_matches"
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\tools\\AppCityRAG\\AppCityRAG.js",
+        "inputAnchors": [],
+        "inputParams": [
+          {
+            "label": "ERP Base URL",
+            "name": "erpBaseUrl",
+            "type": "string",
+            "default": "https://erp.octobot.it.com",
+            "description": "Base URL of the ERP OctoBot gateway (where RAG search runs)",
+            "id": "appCityRAG_0-input-erpBaseUrl-string",
+            "display": true
+          },
+          {
+            "label": "CRM API Key",
+            "name": "crmApiKey",
+            "type": "password",
+            "description": "Integration API key from CRM (Integration Keys page). When set, loads allowed sheets from CRM and logs searches. Leave empty for direct ERP mode.",
+            "optional": true,
+            "id": "appCityRAG_0-input-crmApiKey-password",
+            "display": true
+          },
+          {
+            "label": "Data Sheets",
+            "name": "selectedSheets",
+            "type": "asyncMultiOptions",
+            "loadMethod": "listSheets",
+            "description": "Select the data sheets the agent can search. Selected sheets appear in the system message. Requires CRM API Key or ERP connection.",
+            "refresh": true,
+            "id": "appCityRAG_0-input-selectedSheets-asyncMultiOptions",
+            "display": true
+          },
+          {
+            "label": "Tool Name",
+            "name": "toolName",
+            "type": "string",
+            "default": "search_data",
+            "description": "Name the agent will use to call this tool",
+            "optional": true,
+            "additionalParams": true,
+            "id": "appCityRAG_0-input-toolName-string",
+            "display": true
+          },
+          {
+            "label": "Tool Description",
+            "name": "toolDescription",
+            "type": "string",
+            "rows": 4,
+            "default": "",
+            "description": "Auto-generated from selected sheets. Override to customize. This text tells the agent which sheets it can search and how to use the tool.",
+            "optional": true,
+            "additionalParams": true,
+            "id": "appCityRAG_0-input-toolDescription-string",
+            "display": true
+          },
+          {
+            "label": "Search Mode",
+            "name": "searchMode",
+            "type": "options",
+            "options": [
+              {
+                "label": "All Matches (return all matching rows)",
+                "name": "all_matches"
+              },
+              {
+                "label": "Best Match (return top 3-5 results)",
+                "name": "best_match"
+              }
+            ],
+            "default": "all_matches",
+            "description": "all_matches returns every row that matches the query (recommended for data sheets). best_match returns only the top few results ranked by relevance.",
+            "optional": true,
+            "additionalParams": true,
+            "id": "appCityRAG_0-input-searchMode-options",
+            "display": true
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "appCityRAG_0-output-appCityRAG-AppCityRAG|StructuredTool|Runnable|Tool",
+            "name": "appCityRAG",
+            "label": "AppCityRAG",
+            "description": "Search data in CRM data sheets using the AppCity RAG engine. Supports CRM Integration Key (recommended) or direct ERP connection.",
+            "type": "AppCityRAG | StructuredTool | Runnable | Tool"
+          }
+        ],
+        "id": "appCityRAG_0",
+        "selected": false
+      },
+      "width": 300,
+      "height": 555,
+      "selected": false,
+      "dragging": false,
+      "positionAbsolute": {
+        "x": 1154.2236410250623,
+        "y": 1029.2096081554735
+      }
+    },
+    {
+      "id": "chatOpenRouter_2",
+      "position": {
+        "x": -666.5007168757419,
+        "y": 1112.243609508739
+      },
+      "type": "customNode",
+      "data": {
+        "label": "ChatOpenRouter (2)",
+        "name": "chatOpenRouter",
+        "version": 1,
+        "type": "ChatOpenRouter",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/chatmodels/ChatOpenRouter/openRouter.svg",
+        "category": "Chat Models",
+        "description": "Wrapper around Open Router Inference API",
+        "baseClasses": [
+          "ChatOpenRouter",
+          "BaseChatOpenAI",
+          "BaseChatModel",
+          "BaseLanguageModel",
+          "Runnable"
+        ],
+        "credential": "12cdfe3a-a89b-4ea5-9c9d-f46f19846dd8",
+        "inputs": {
+          "cache": "",
+          "modelName": "google/gemini-2.5-flash",
+          "temperature": 0.9,
+          "streaming": true,
+          "maxTokens": "",
+          "topP": "",
+          "frequencyPenalty": "",
+          "presencePenalty": "",
+          "timeout": "",
+          "basepath": "https://openrouter.ai/api/v1",
+          "baseOptions": "",
+          "allowImageUploads": "",
+          "imageResolution": "low"
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\chatmodels\\ChatOpenRouter\\ChatOpenRouter.js",
+        "inputAnchors": [
+          {
+            "label": "Cache",
+            "name": "cache",
+            "type": "BaseCache",
+            "optional": true,
+            "id": "chatOpenRouter_2-input-cache-BaseCache",
+            "display": true
+          }
+        ],
+        "inputParams": [
+          {
+            "label": "Connect Credential",
+            "name": "credential",
+            "type": "credential",
+            "credentialNames": ["openRouterApi"],
+            "optional": true,
+            "id": "chatOpenRouter_2-input-credential-credential",
+            "display": true
+          },
+          {
+            "label": "Model Name",
+            "name": "modelName",
+            "type": "string",
+            "placeholder": "openai/gpt-3.5-turbo",
+            "id": "chatOpenRouter_2-input-modelName-string",
+            "display": true
+          },
+          {
+            "label": "Temperature",
+            "name": "temperature",
+            "type": "number",
+            "step": 0.1,
+            "default": 0.9,
+            "optional": true,
+            "id": "chatOpenRouter_2-input-temperature-number",
+            "display": true
+          },
+          {
+            "label": "Streaming",
+            "name": "streaming",
+            "type": "boolean",
+            "default": true,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_2-input-streaming-boolean",
+            "display": true
+          },
+          {
+            "label": "Max Tokens",
+            "name": "maxTokens",
+            "type": "number",
+            "step": 1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_2-input-maxTokens-number",
+            "display": true
+          },
+          {
+            "label": "Top Probability",
+            "name": "topP",
+            "type": "number",
+            "step": 0.1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_2-input-topP-number",
+            "display": true
+          },
+          {
+            "label": "Frequency Penalty",
+            "name": "frequencyPenalty",
+            "type": "number",
+            "step": 0.1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_2-input-frequencyPenalty-number",
+            "display": true
+          },
+          {
+            "label": "Presence Penalty",
+            "name": "presencePenalty",
+            "type": "number",
+            "step": 0.1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_2-input-presencePenalty-number",
+            "display": true
+          },
+          {
+            "label": "Timeout",
+            "name": "timeout",
+            "type": "number",
+            "step": 1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_2-input-timeout-number",
+            "display": true
+          },
+          {
+            "label": "BasePath",
+            "name": "basepath",
+            "type": "string",
+            "optional": true,
+            "default": "https://openrouter.ai/api/v1",
+            "additionalParams": true,
+            "id": "chatOpenRouter_2-input-basepath-string",
+            "display": true
+          },
+          {
+            "label": "BaseOptions",
+            "name": "baseOptions",
+            "type": "json",
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_2-input-baseOptions-json",
+            "display": true
+          },
+          {
+            "label": "Allow Image Uploads",
+            "name": "allowImageUploads",
+            "type": "boolean",
+            "description": "Allow image input. Refer to the <a href=\"https://docs.flowiseai.com/using-flowise/uploads#image\" target=\"_blank\">docs</a> for more details.",
+            "default": false,
+            "optional": true,
+            "id": "chatOpenRouter_2-input-allowImageUploads-boolean",
+            "display": true
+          },
+          {
+            "label": "Image Resolution",
+            "description": "This parameter controls the resolution in which the model views the image.",
+            "name": "imageResolution",
+            "type": "options",
+            "options": [
+              {
+                "label": "Low",
+                "name": "low"
+              },
+              {
+                "label": "High",
+                "name": "high"
+              },
+              {
+                "label": "Auto",
+                "name": "auto"
+              }
+            ],
+            "default": "low",
+            "optional": false,
+            "show": {
+              "allowImageUploads": true
+            },
+            "id": "chatOpenRouter_2-input-imageResolution-options",
+            "display": false
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "chatOpenRouter_2-output-chatOpenRouter-ChatOpenRouter|BaseChatOpenAI|BaseChatModel|BaseLanguageModel|Runnable",
+            "name": "chatOpenRouter",
+            "label": "ChatOpenRouter",
+            "description": "Wrapper around Open Router Inference API",
+            "type": "ChatOpenRouter | BaseChatOpenAI | BaseChatModel | BaseLanguageModel | Runnable"
+          }
+        ],
+        "id": "chatOpenRouter_2",
+        "selected": false
+      },
+      "width": 300,
+      "height": 673,
+      "selected": false,
+      "positionAbsolute": {
+        "x": -666.5007168757419,
+        "y": 1112.243609508739
+      },
+      "dragging": false
+    },
+    {
+      "id": "chatOpenRouter_3",
+      "position": {
+        "x": 1142.2353502258547,
+        "y": -1212.9402988677405
+      },
+      "type": "customNode",
+      "data": {
+        "label": "ChatOpenRouter (2) (3)",
+        "name": "chatOpenRouter",
+        "version": 1,
+        "type": "ChatOpenRouter",
+        "icon": "F:/DK-Platform/packages/server/node_modules/flowise-components/dist/nodes/chatmodels/ChatOpenRouter/openRouter.svg",
+        "category": "Chat Models",
+        "description": "Wrapper around Open Router Inference API",
+        "baseClasses": [
+          "ChatOpenRouter",
+          "BaseChatOpenAI",
+          "BaseChatModel",
+          "BaseLanguageModel",
+          "Runnable"
+        ],
+        "credential": "12cdfe3a-a89b-4ea5-9c9d-f46f19846dd8",
+        "inputs": {
+          "cache": "",
+          "modelName": "google/gemini-2.5-flash",
+          "temperature": 0.9,
+          "streaming": true,
+          "maxTokens": "",
+          "topP": "",
+          "frequencyPenalty": "",
+          "presencePenalty": "",
+          "timeout": "",
+          "basepath": "https://openrouter.ai/api/v1",
+          "baseOptions": "",
+          "allowImageUploads": "",
+          "imageResolution": "low"
+        },
+        "filePath": "F:\\DK-Platform\\packages\\server\\node_modules\\flowise-components\\dist\\nodes\\chatmodels\\ChatOpenRouter\\ChatOpenRouter.js",
+        "inputAnchors": [
+          {
+            "label": "Cache",
+            "name": "cache",
+            "type": "BaseCache",
+            "optional": true,
+            "id": "chatOpenRouter_3-input-cache-BaseCache",
+            "display": true
+          }
+        ],
+        "inputParams": [
+          {
+            "label": "Connect Credential",
+            "name": "credential",
+            "type": "credential",
+            "credentialNames": ["openRouterApi"],
+            "optional": true,
+            "id": "chatOpenRouter_3-input-credential-credential",
+            "display": true
+          },
+          {
+            "label": "Model Name",
+            "name": "modelName",
+            "type": "string",
+            "placeholder": "openai/gpt-3.5-turbo",
+            "id": "chatOpenRouter_3-input-modelName-string",
+            "display": true
+          },
+          {
+            "label": "Temperature",
+            "name": "temperature",
+            "type": "number",
+            "step": 0.1,
+            "default": 0.9,
+            "optional": true,
+            "id": "chatOpenRouter_3-input-temperature-number",
+            "display": true
+          },
+          {
+            "label": "Streaming",
+            "name": "streaming",
+            "type": "boolean",
+            "default": true,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_3-input-streaming-boolean",
+            "display": true
+          },
+          {
+            "label": "Max Tokens",
+            "name": "maxTokens",
+            "type": "number",
+            "step": 1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_3-input-maxTokens-number",
+            "display": true
+          },
+          {
+            "label": "Top Probability",
+            "name": "topP",
+            "type": "number",
+            "step": 0.1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_3-input-topP-number",
+            "display": true
+          },
+          {
+            "label": "Frequency Penalty",
+            "name": "frequencyPenalty",
+            "type": "number",
+            "step": 0.1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_3-input-frequencyPenalty-number",
+            "display": true
+          },
+          {
+            "label": "Presence Penalty",
+            "name": "presencePenalty",
+            "type": "number",
+            "step": 0.1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_3-input-presencePenalty-number",
+            "display": true
+          },
+          {
+            "label": "Timeout",
+            "name": "timeout",
+            "type": "number",
+            "step": 1,
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_3-input-timeout-number",
+            "display": true
+          },
+          {
+            "label": "BasePath",
+            "name": "basepath",
+            "type": "string",
+            "optional": true,
+            "default": "https://openrouter.ai/api/v1",
+            "additionalParams": true,
+            "id": "chatOpenRouter_3-input-basepath-string",
+            "display": true
+          },
+          {
+            "label": "BaseOptions",
+            "name": "baseOptions",
+            "type": "json",
+            "optional": true,
+            "additionalParams": true,
+            "id": "chatOpenRouter_3-input-baseOptions-json",
+            "display": true
+          },
+          {
+            "label": "Allow Image Uploads",
+            "name": "allowImageUploads",
+            "type": "boolean",
+            "description": "Allow image input. Refer to the <a href=\"https://docs.flowiseai.com/using-flowise/uploads#image\" target=\"_blank\">docs</a> for more details.",
+            "default": false,
+            "optional": true,
+            "id": "chatOpenRouter_3-input-allowImageUploads-boolean",
+            "display": true
+          },
+          {
+            "label": "Image Resolution",
+            "description": "This parameter controls the resolution in which the model views the image.",
+            "name": "imageResolution",
+            "type": "options",
+            "options": [
+              {
+                "label": "Low",
+                "name": "low"
+              },
+              {
+                "label": "High",
+                "name": "high"
+              },
+              {
+                "label": "Auto",
+                "name": "auto"
+              }
+            ],
+            "default": "low",
+            "optional": false,
+            "show": {
+              "allowImageUploads": true
+            },
+            "id": "chatOpenRouter_3-input-imageResolution-options",
+            "display": false
+          }
+        ],
+        "outputs": {},
+        "outputAnchors": [
+          {
+            "id": "chatOpenRouter_3-output-chatOpenRouter-ChatOpenRouter|BaseChatOpenAI|BaseChatModel|BaseLanguageModel|Runnable",
+            "name": "chatOpenRouter",
+            "label": "ChatOpenRouter",
+            "description": "Wrapper around Open Router Inference API",
+            "type": "ChatOpenRouter | BaseChatOpenAI | BaseChatModel | BaseLanguageModel | Runnable"
+          }
+        ],
+        "id": "chatOpenRouter_3",
+        "selected": false
+      },
+      "width": 300,
+      "height": 673,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 1142.2353502258547,
+        "y": -1212.9402988677405
+      },
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "source": "toolAgent_0",
+      "sourceHandle": "toolAgent_0-output-toolAgent-AgentExecutor|BaseChain|Runnable",
+      "target": "appCityAgent_0",
+      "targetHandle": "appCityAgent_0-input-salesAgent-AgentExecutor",
+      "type": "buttonedge",
+      "id": "toolAgent_0-toolAgent_0-output-toolAgent-AgentExecutor|BaseChain|Runnable-appCityAgent_0-appCityAgent_0-input-salesAgent-AgentExecutor"
+    },
+    {
+      "source": "erpAgent_0",
+      "sourceHandle": "erpAgent_0-output-erpAgent-ERPAgentExecutor|BaseChain|Runnable",
+      "target": "appCityAgent_0",
+      "targetHandle": "appCityAgent_0-input-erpAgent-ERPAgentExecutor",
+      "type": "buttonedge",
+      "id": "erpAgent_0-erpAgent_0-output-erpAgent-ERPAgentExecutor|BaseChain|Runnable-appCityAgent_0-appCityAgent_0-input-erpAgent-ERPAgentExecutor"
+    },
+    {
+      "source": "chatOpenRouter_0",
+      "sourceHandle": "chatOpenRouter_0-output-chatOpenRouter-ChatOpenRouter|BaseChatOpenAI|BaseChatModel|BaseLanguageModel|Runnable",
+      "target": "toolAgent_0",
+      "targetHandle": "toolAgent_0-input-model-BaseChatModel",
+      "type": "buttonedge",
+      "id": "chatOpenRouter_0-chatOpenRouter_0-output-chatOpenRouter-ChatOpenRouter|BaseChatOpenAI|BaseChatModel|BaseLanguageModel|Runnable-toolAgent_0-toolAgent_0-input-model-BaseChatModel"
+    },
+    {
+      "source": "bufferMemory_0",
+      "sourceHandle": "bufferMemory_0-output-bufferMemory-BufferMemory|BaseChatMemory|BaseMemory",
+      "target": "toolAgent_0",
+      "targetHandle": "toolAgent_0-input-memory-BaseChatMemory",
+      "type": "buttonedge",
+      "id": "bufferMemory_0-bufferMemory_0-output-bufferMemory-BufferMemory|BaseChatMemory|BaseMemory-toolAgent_0-toolAgent_0-input-memory-BaseChatMemory"
+    },
+    {
+      "source": "bufferMemory_0",
+      "sourceHandle": "bufferMemory_0-output-bufferMemory-BufferMemory|BaseChatMemory|BaseMemory",
+      "target": "appCityAgent_0",
+      "targetHandle": "appCityAgent_0-input-memory-BaseChatMemory",
+      "type": "buttonedge",
+      "id": "bufferMemory_0-bufferMemory_0-output-bufferMemory-BufferMemory|BaseChatMemory|BaseMemory-appCityAgent_0-appCityAgent_0-input-memory-BaseChatMemory"
+    },
+    {
+      "source": "chatPromptTemplate_0",
+      "sourceHandle": "chatPromptTemplate_0-output-chatPromptTemplate-ChatPromptTemplate|BaseChatPromptTemplate|BasePromptTemplate|Runnable",
+      "target": "toolAgent_0",
+      "targetHandle": "toolAgent_0-input-chatPromptTemplate-ChatPromptTemplate",
+      "type": "buttonedge",
+      "id": "chatPromptTemplate_0-chatPromptTemplate_0-output-chatPromptTemplate-ChatPromptTemplate|BaseChatPromptTemplate|BasePromptTemplate|Runnable-toolAgent_0-toolAgent_0-input-chatPromptTemplate-ChatPromptTemplate"
+    },
+    {
+      "source": "erpAgentPrompt_0",
+      "sourceHandle": "erpAgentPrompt_0-output-erpAgentPrompt-ChatPromptTemplate|BaseChatPromptTemplate|BasePromptTemplate|Runnable",
+      "target": "erpAgent_0",
+      "targetHandle": "erpAgent_0-input-chatPromptTemplate-ChatPromptTemplate",
+      "type": "buttonedge",
+      "id": "erpAgentPrompt_0-erpAgentPrompt_0-output-erpAgentPrompt-ChatPromptTemplate|BaseChatPromptTemplate|BasePromptTemplate|Runnable-erpAgent_0-erpAgent_0-input-chatPromptTemplate-ChatPromptTemplate"
+    },
+    {
+      "source": "crmOrderTool_0",
+      "sourceHandle": "crmOrderTool_0-output-crmOrderTool-CRMOrderTool|Tool|StructuredTool|Runnable",
+      "target": "erpAgent_0",
+      "targetHandle": "erpAgent_0-input-tools-Tool",
+      "type": "buttonedge",
+      "id": "crmOrderTool_0-crmOrderTool_0-output-crmOrderTool-CRMOrderTool|Tool|StructuredTool|Runnable-erpAgent_0-erpAgent_0-input-tools-Tool"
+    },
+    {
+      "source": "monitoringPromptTemplate_0",
+      "sourceHandle": "monitoringPromptTemplate_0-output-monitoringPromptTemplate-MonitoringPromptTemplate",
+      "target": "crmMonitoringTool_0",
+      "targetHandle": "crmMonitoringTool_0-input-monitoringPrompt-MonitoringPromptTemplate",
+      "type": "buttonedge",
+      "id": "monitoringPromptTemplate_0-monitoringPromptTemplate_0-output-monitoringPromptTemplate-MonitoringPromptTemplate-crmMonitoringTool_0-crmMonitoringTool_0-input-monitoringPrompt-MonitoringPromptTemplate"
+    },
+    {
+      "source": "chatOpenRouter_1",
+      "sourceHandle": "chatOpenRouter_1-output-chatOpenRouter-ChatOpenRouter|BaseChatOpenAI|BaseChatModel|BaseLanguageModel|Runnable",
+      "target": "crmMonitoringTool_0",
+      "targetHandle": "crmMonitoringTool_0-input-model-BaseChatModel",
+      "type": "buttonedge",
+      "id": "chatOpenRouter_1-chatOpenRouter_1-output-chatOpenRouter-ChatOpenRouter|BaseChatOpenAI|BaseChatModel|BaseLanguageModel|Runnable-crmMonitoringTool_0-crmMonitoringTool_0-input-model-BaseChatModel"
+    },
+    {
+      "source": "crmMonitoringTool_0",
+      "sourceHandle": "crmMonitoringTool_0-output-crmMonitoringTool-CRMMonitoringTool|Tool|StructuredTool|Runnable",
+      "target": "erpAgent_0",
+      "targetHandle": "erpAgent_0-input-tools-Tool",
+      "type": "buttonedge",
+      "id": "crmMonitoringTool_0-crmMonitoringTool_0-output-crmMonitoringTool-CRMMonitoringTool|Tool|StructuredTool|Runnable-erpAgent_0-erpAgent_0-input-tools-Tool"
+    },
+    {
+      "source": "chatOpenRouter_3",
+      "sourceHandle": "chatOpenRouter_3-output-chatOpenRouter-ChatOpenRouter|BaseChatOpenAI|BaseChatModel|BaseLanguageModel|Runnable",
+      "target": "appCityAgent_0",
+      "targetHandle": "appCityAgent_0-input-model-BaseChatModel",
+      "type": "buttonedge",
+      "id": "chatOpenRouter_3-chatOpenRouter_3-output-chatOpenRouter-ChatOpenRouter|BaseChatOpenAI|BaseChatModel|BaseLanguageModel|Runnable-appCityAgent_0-appCityAgent_0-input-model-BaseChatModel"
+    },
+    {
+      "source": "chatOpenRouter_2",
+      "sourceHandle": "chatOpenRouter_2-output-chatOpenRouter-ChatOpenRouter|BaseChatOpenAI|BaseChatModel|BaseLanguageModel|Runnable",
+      "target": "erpAgent_0",
+      "targetHandle": "erpAgent_0-input-model-BaseChatModel",
+      "type": "buttonedge",
+      "id": "chatOpenRouter_2-chatOpenRouter_2-output-chatOpenRouter-ChatOpenRouter|BaseChatOpenAI|BaseChatModel|BaseLanguageModel|Runnable-erpAgent_0-erpAgent_0-input-model-BaseChatModel"
+    },
+    {
+      "source": "appCityRAG_0",
+      "sourceHandle": "appCityRAG_0-output-appCityRAG-AppCityRAG|StructuredTool|Runnable|Tool",
+      "target": "erpAgent_0",
+      "targetHandle": "erpAgent_0-input-tools-Tool",
+      "type": "buttonedge",
+      "id": "appCityRAG_0-appCityRAG_0-output-appCityRAG-AppCityRAG|StructuredTool|Runnable|Tool-erpAgent_0-erpAgent_0-input-tools-Tool"
+    }
+  ],
+  "viewport": {
+    "x": 2192.5396395727894,
+    "y": 156.18967060214385,
+    "zoom": 0.7989408300217745
+  }
+}

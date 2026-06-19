@@ -14,9 +14,9 @@ cd /d "F:\DK-Platform"
 :: Create logs directory if missing
 if not exist "F:\DK-Platform\logs" mkdir "F:\DK-Platform\logs"
 
-:: ---- Check if server is already running on port 1255 ----
-for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":1255 " ^| findstr "LISTENING" 2^>nul') do (
-    echo [DK-Platform] Server is already running on port 1255 ^(PID: %%a^). Exiting.
+:: ---- Check if server is already running on port 1252 ----
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":1252 " ^| findstr "LISTENING" 2^>nul') do (
+    echo [DK-Platform] Server is already running on port 1252 ^(PID: %%a^). Exiting.
     echo [DK-Platform] [%date% %time%] Already running ^(PID: %%a^), skipped duplicate start. >> "F:\DK-Platform\logs\dk-watchdog.log"
     goto :eof
 )
@@ -41,7 +41,7 @@ echo [DK-Platform] Health-check loop launched (every 10 sec).
 
 :: ---- Set environment variables ----
 set NODE_ENV=production
-set PORT=1255
+set PORT=1252
 set APP_URL=https://www.dk.octobot.it.com
 set NODE_TLS_REJECT_UNAUTHORIZED=0
 set PGSSLMODE=disable

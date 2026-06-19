@@ -1,0 +1,90 @@
+# Standalone stack for the follow-up microservice:
+#   - dedicated Redis (timers, counters, message cache, cancel flags)
+#   - ClickHouse (append-heavy logs with automatic TTL retention)
+#   - the follow-up service itself
+#
+# The main Flowise server connects to these via FOLLOWUP_* / CLICKHOUSE_* env vars
+# and reaches the service API through FOLLOWUP_SERVICE_URL (proxy).
+#
+# Usage: docker compose -f docker/docker-compose-followup.yml up -d
+version: "3.8"
+
+services:
+  redis-followup:
+    image: redis:7-alpine
+    container_name: followup-redis
+    command: ["redis-server", "--maxmemory-policy", "noeviction", "--appendonly", "yes"]
+    ports:
+      - "6380:6379"
+    volumes:
+      - followup_redis_data:/data
+    restart: unless-stopped
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.3-alpine
+    container_name: followup-clickhouse
+    ports:
+      - "8123:8123" # HTTP
+      - "9000:9000" # native
+    environment:
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-followup}
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    volumes:
+      - followup_clickhouse_data:/var/lib/clickhouse
+    restart: unless-stopped
+
+  followup-service:
+    build:
+      context: ../packages/followup-service
+      dockerfile: Dockerfile
+    container_name: followup-service
+    depends_on:
+      - redis-followup
+      - clickhouse
+    ports:
+      - "3100:3100"
+    environment:
+      FOLLOWUP_SERVICE_PORT: "3100"
+      # Dedicated Redis
+      FOLLOWUP_REDIS_HOST: redis-followup
+      FOLLOWUP_REDIS_PORT: "6379"
+      # ClickHouse
+      CLICKHOUSE_URL: http://clickhouse:8123
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-followup}
+      CLICKHOUSE_LOG_RETENTION_DAYS: ${CLICKHOUSE_LOG_RETENTION_DAYS:-30}
+      # Postgres (config storage only — reuse the main DB, tiny dedicated pool)
+      DATABASE_HOST: ${DATABASE_HOST:-host.docker.internal}
+      DATABASE_PORT: ${DATABASE_PORT:-5432}
+      DATABASE_USER: ${DATABASE_USER:-postgres}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-}
+      DATABASE_NAME: ${DATABASE_NAME:-flowise}
+      DATABASE_SSL: ${DATABASE_SSL:-false}
+      FOLLOWUP_PG_POOL_MAX: "4"
+      # P0 resilience
+      FOLLOWUP_WEBHOOK_MAX_RETRIES: "3"
+      FOLLOWUP_MAX_WEBHOOKS_PER_SECOND: "${FOLLOWUP_MAX_WEBHOOKS_PER_SECOND:-100}"
+      FOLLOWUP_CIRCUIT_BREAKER_THRESHOLD: "${FOLLOWUP_CIRCUIT_BREAKER_THRESHOLD:-5}"
+      FOLLOWUP_CIRCUIT_BREAKER_RESET_MS: "${FOLLOWUP_CIRCUIT_BREAKER_RESET_MS:-60000}"
+      FOLLOWUP_AUTO_RESTART_MS: "${FOLLOWUP_AUTO_RESTART_MS:-300000}"
+      # Tuning
+      FOLLOWUP_WORKER_CONCURRENCY: ${FOLLOWUP_WORKER_CONCURRENCY:-50}
+      FOLLOWUP_POLL_INTERVAL_MS: ${FOLLOWUP_POLL_INTERVAL_MS:-1000}
+      FOLLOWUP_POLL_BATCH_SIZE: ${FOLLOWUP_POLL_BATCH_SIZE:-500}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3100/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  followup_redis_data:
+  followup_clickhouse_data:

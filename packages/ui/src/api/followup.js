@@ -30,6 +30,12 @@ const retryWebhook = (logId) => client.post(`/followup/retry/${logId}`);
 // Stats
 const getStats = (params = {}) => client.get("/followup/stats", { params });
 
+// Service Health & Admin (P0 resilience)
+const getHealth = () => client.get("/followup/health");
+const getCircuits = () => client.get("/followup/admin/circuits");
+const resetCircuits = (url) =>
+  client.post("/followup/admin/circuits/reset", url ? { url } : {});
+
 export default {
   getAllConfigs,
   getConfig,
@@ -46,4 +52,7 @@ export default {
   getLogById,
   retryWebhook,
   getStats,
+  getHealth,
+  getCircuits,
+  resetCircuits,
 };

@@ -13,6 +13,8 @@
     "start": "run-script-os",
     "start:windows": "cd packages/server/bin && run start",
     "start:default": "cd packages/server/bin && ./run start",
+    "start-followup": "pnpm --filter followup-service start",
+    "dev-followup": "pnpm --filter followup-service dev",
     "clean": "turbo run clean",
     "nuke": "turbo run nuke && rimraf node_modules .turbo",
     "quick": "pretty-quick --staged",

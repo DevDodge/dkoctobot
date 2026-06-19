@@ -33,6 +33,7 @@ import {
   IconChevronRight,
   IconRefresh,
   IconPercentage,
+  IconHeartbeat,
 } from "@tabler/icons-react";
 
 // API
@@ -214,6 +215,7 @@ const Dashboard = () => {
   const theme = useTheme();
   const [stats, setStats] = useState(null);
   const [configs, setConfigs] = useState([]);
+  const [health, setHealth] = useState(null);
   const [isLoading, setLoading] = useState(true);
 
   const handleEditConfig = (chatflowId, chatflowName) => {
@@ -229,9 +231,10 @@ const Dashboard = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [statsRes, configsRes] = await Promise.all([
+      const [statsRes, configsRes, healthRes] = await Promise.all([
         followupApi.getStats({ days: 7 }),
         followupApi.getAllConfigs(),
+        followupApi.getHealth().catch(() => ({ data: null })),
       ]);
       setStats(
         statsRes?.data || {
@@ -243,10 +246,12 @@ const Dashboard = () => {
         }
       );
       setConfigs(Array.isArray(configsRes?.data) ? configsRes.data : []);
+      setHealth(healthRes?.data || null);
     } catch (error) {
       console.error("Failed to fetch follow-up data:", error);
       setStats({ pending: 0, total: 0, sent: 0, failed: 0, successRate: 0 });
       setConfigs([]);
+      setHealth(null);
     } finally {
       setLoading(false);
     }
@@ -254,13 +259,50 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchData();
+    // Auto-refresh every 30s
+    const t = setInterval(() => fetchData(), 30000);
+    return () => clearInterval(t);
   }, []);
 
   return (
     <Box>
       {/* Stats Cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={2.4}>
+        <Grid item xs={12} sm={6} md={3} lg={2}>
+          <StatCard
+            title="Service"
+            value={
+              health?.status === "healthy"
+                ? "Healthy"
+                : health?.status === "degraded"
+                ? "Degraded"
+                : health?.status === "unhealthy"
+                ? "Down"
+                : "—"
+            }
+            icon={
+              <IconHeartbeat
+                size={22}
+                color={
+                  health?.status === "healthy"
+                    ? theme.palette.success.main
+                    : health?.status === "degraded"
+                    ? theme.palette.warning.main
+                    : theme.palette.error.main
+                }
+              />
+            }
+            color={
+              health?.status === "healthy"
+                ? theme.palette.success.main
+                : health?.status === "degraded"
+                ? theme.palette.warning.main
+                : theme.palette.error.main
+            }
+            isLoading={isLoading}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3} lg={2}>
           <StatCard
             title="Pending"
             value={stats?.pending || 0}
@@ -269,7 +311,7 @@ const Dashboard = () => {
             isLoading={isLoading}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
+        <Grid item xs={12} sm={6} md={3} lg={2}>
           <StatCard
             title="Fired (7d)"
             value={stats?.total || 0}
@@ -278,7 +320,7 @@ const Dashboard = () => {
             isLoading={isLoading}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
+        <Grid item xs={12} sm={6} md={3} lg={2}>
           <StatCard
             title="Success"
             value={stats?.sent || 0}
@@ -287,7 +329,7 @@ const Dashboard = () => {
             isLoading={isLoading}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
+        <Grid item xs={12} sm={6} md={3} lg={2}>
           <StatCard
             title="Failed"
             value={stats?.failed || 0}
@@ -296,7 +338,7 @@ const Dashboard = () => {
             isLoading={isLoading}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
+        <Grid item xs={12} sm={6} md={3} lg={2}>
           <StatCard
             title="Success Rate"
             value={`${stats?.successRate || 0}%`}

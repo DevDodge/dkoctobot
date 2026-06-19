@@ -10,6 +10,11 @@ import { v4 as uuidv4 } from "uuid";
 import { getErrorMessage } from "../../errors/utils";
 import { MODE } from "../../Interface";
 import { FollowUpService } from "../../services/follow-up";
+import { publishFollowUpEvent } from "../../utils/followUpPublisher";
+
+// When true, use the legacy in-process follow-up worker (Postgres + BullMQ).
+// Default (false) publishes lightweight events to the standalone follow-up service.
+const FOLLOWUP_LEGACY = process.env.FOLLOWUP_LEGACY === "true";
 
 // Per-chatflow concurrency tracking to prevent server freeze under burst traffic
 const activePredictions = new Map<string, number>();
@@ -45,18 +50,34 @@ function getFollowUpQueue(): any {
 }
 
 /**
- * Called immediately when a message is received — sets cancel flag FIRST (emergency brake),
- * then schedules new timers with true idle time adjustment.
+ * Called when a message is received. New path (default): publish a lightweight
+ * event to the standalone follow-up service via Redis Stream — no Postgres, no
+ * BullMQ in the request path. Legacy path (FOLLOWUP_LEGACY=true): the old
+ * in-process worker.
  * Uses sessionId as primary tracking key (stable per customer), falls back to chatId.
  */
 async function scheduleFollowUpIfEnabled(
   chatflowId: string,
   chatId?: string,
-  sessionId?: string
+  sessionId?: string,
+  question?: string
 ): Promise<void> {
-  // Use sessionId as primary key (stable per customer), fallback to chatId
   const trackingId = sessionId || chatId;
   if (!trackingId) return;
+
+  // New path: fire-and-forget event to the follow-up microservice.
+  if (!FOLLOWUP_LEGACY) {
+    await publishFollowUpEvent({
+      chatflowId,
+      chatId: chatId || trackingId,
+      sessionId,
+      role: "userMessage",
+      content: question || "",
+    });
+    return;
+  }
+
+  // ===== Legacy in-process path =====
   const service = getFollowUpService();
   if (!service) return;
 
@@ -222,7 +243,8 @@ const createPrediction = async (
           scheduleFollowUpIfEnabled(
             chatflowId,
             chatId,
-            effectiveSessionId
+            effectiveSessionId,
+            req.body.question
           ).catch(() => {});
         } catch (error) {
           if (chatId) {
@@ -248,7 +270,8 @@ const createPrediction = async (
         scheduleFollowUpIfEnabled(
           chatflowId,
           respChatId,
-          effectiveSessionId
+          effectiveSessionId,
+          req.body.question
         ).catch(() => {});
 
         return res.json(apiResponse);

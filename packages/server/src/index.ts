@@ -167,8 +167,13 @@ export class App {
         );
       }
 
-      // Initialize Follow-Up System (independent of queue mode — only needs Redis)
-      if (process.env.REDIS_HOST || process.env.REDIS_URL) {
+      // Initialize legacy in-process Follow-Up System ONLY when FOLLOWUP_LEGACY=true.
+      // By default follow-ups are handled by the standalone follow-up microservice,
+      // and the server merely publishes events + proxies the API.
+      if (
+        process.env.FOLLOWUP_LEGACY === "true" &&
+        (process.env.REDIS_HOST || process.env.REDIS_URL)
+      ) {
         try {
           const { FollowUpService } = require("./services/follow-up");
           const { FollowUpQueue } = require("./queue/FollowUpQueue");

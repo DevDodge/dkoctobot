@@ -13,6 +13,7 @@ import Dashboard from "./Dashboard";
 import Pending from "./Pending";
 import History from "./History";
 import Settings from "./Settings";
+import ServiceStatus from "./ServiceStatus";
 
 // icons
 import {
@@ -20,11 +21,12 @@ import {
   IconClock,
   IconHistory,
   IconSettings,
+  IconActivity,
 } from "@tabler/icons-react";
 
 // ==============================|| FOLLOW-UPS ||============================== //
 
-const tabMap = ["dashboard", "pending", "history", "settings"];
+const tabMap = ["dashboard", "pending", "history", "settings", "service"];
 
 const FollowUps = () => {
   const { tab } = useParams();
@@ -79,6 +81,11 @@ const FollowUps = () => {
               iconPosition="start"
               label="Settings"
             />
+            <Tab
+              icon={<IconActivity size={18} />}
+              iconPosition="start"
+              label="Service"
+            />
           </Tabs>
         </Box>
         <Box sx={{ p: 2 }}>
@@ -91,6 +98,7 @@ const FollowUps = () => {
               onEditDone={() => setEditTarget(null)}
             />
           )}
+          {activeTab === 4 && <ServiceStatus />}
         </Box>
       </MainCard>
     </>

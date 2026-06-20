@@ -1,11 +1,7 @@
 import { Pool } from "pg";
 import { env } from "../config/env";
 import { logger } from "../utils/logger";
-import {
-  ConfigBundle,
-  FollowUpConfig,
-  FollowUpStep,
-} from "../domain/types";
+import { ConfigBundle, FollowUpConfig, FollowUpStep } from "../domain/types";
 
 /**
  * ConfigProvider reads follow-up config + steps from Postgres.
@@ -33,7 +29,7 @@ export class ConfigProvider {
       connectionTimeoutMillis: 10000,
     });
     this.pool.on("error", (err) =>
-      logger.error("ConfigProvider pg pool error:", err.message)
+      logger.error("ConfigProvider pg pool error:", err.message),
     );
   }
 
@@ -41,7 +37,7 @@ export class ConfigProvider {
     await this.refreshAll();
     this.refreshTimer = setInterval(
       () => this.refreshAll().catch(() => {}),
-      env.configRefreshMs
+      env.configRefreshMs,
     );
   }
 
@@ -92,18 +88,18 @@ export class ConfigProvider {
   private async queryConfigs(): Promise<FollowUpConfig[]> {
     const { rows } = await this.pool.query(
       `SELECT id, "chatflowId", enabled, "includeSessionDetails", "maxMessages",
-              "createdDate", "updatedDate" FROM follow_up_config`
+              "createdDate", "updatedDate" FROM follow_up_config`,
     );
     return rows as FollowUpConfig[];
   }
 
   private async queryConfigByChatflow(
-    chatflowId: string
+    chatflowId: string,
   ): Promise<FollowUpConfig | null> {
     const { rows } = await this.pool.query(
       `SELECT id, "chatflowId", enabled, "includeSessionDetails", "maxMessages",
               "createdDate", "updatedDate" FROM follow_up_config WHERE "chatflowId" = $1 LIMIT 1`,
-      [chatflowId]
+      [chatflowId],
     );
     return (rows[0] as FollowUpConfig) || null;
   }
@@ -111,10 +107,10 @@ export class ConfigProvider {
   private async querySteps(configId: string): Promise<FollowUpStep[]> {
     const { rows } = await this.pool.query(
       `SELECT id, "configId", "chatflowId", "stepOrder", "stepName", "idleTimeout",
-              "idleTimeoutUnit", "webhookUrl", "webhookHeaders", "maxFires",
+              "idleTimeoutUnit", "webhookUrl", "webhookHeaders", maxfires as "maxFires",
               "createdDate", "updatedDate"
        FROM follow_up_step WHERE "configId" = $1 ORDER BY "stepOrder" ASC`,
-      [configId]
+      [configId],
     );
     return rows as FollowUpStep[];
   }

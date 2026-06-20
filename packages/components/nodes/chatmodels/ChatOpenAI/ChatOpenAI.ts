@@ -323,10 +323,13 @@ class ChatOpenAI_ChatModels implements INode {
         }
 
         if (proxyUrl) {
-            obj.configuration = {
+            const configWithProxy: any = {
                 ...obj?.configuration,
+                baseURL: basePath,
+                defaultHeaders: parsedBaseOptions,
                 httpAgent: new HttpsProxyAgent(proxyUrl)
             }
+            obj.configuration = configWithProxy
         }
 
         const multiModalOption: IMultiModalOption = {

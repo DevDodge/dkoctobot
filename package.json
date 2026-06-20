@@ -3,6 +3,7 @@
   "version": "3.0.13",
   "private": true,
   "homepage": "https://octobot.it.com",
+  "packageManager": "pnpm@10.31.0",
   "workspaces": [
     "packages/*"
   ],
@@ -44,5 +45,10 @@
     "rimraf": "^5.0.5",
     "run-script-os": "^1.1.6",
     "turbo": "^1.12.4"
+  },
+  "pnpm": {
+    "overrides": {
+      "@langchain/core": "0.3.61"
+    }
   }
 }

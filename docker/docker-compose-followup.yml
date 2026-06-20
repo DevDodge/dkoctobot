@@ -13,9 +13,16 @@ services:
   redis-followup:
     image: redis:7-alpine
     container_name: followup-redis
-    command: ["redis-server", "--maxmemory-policy", "noeviction", "--appendonly", "yes"]
+    command:
+      [
+        "redis-server",
+        "--maxmemory-policy",
+        "noeviction",
+        "--appendonly",
+        "yes",
+      ]
     ports:
-      - "6380:6379"
+      - "6381:6379"
     volumes:
       - followup_redis_data:/data
     restart: unless-stopped
@@ -25,11 +32,12 @@ services:
     container_name: followup-clickhouse
     ports:
       - "8123:8123" # HTTP
-      - "9000:9000" # native
+      - "9001:9000" # native (mapped to 9001 to avoid conflict)
     environment:
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
       CLICKHOUSE_DB: ${CLICKHOUSE_DB:-followup}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
     ulimits:
       nofile:
         soft: 262144

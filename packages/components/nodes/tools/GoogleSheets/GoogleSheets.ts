@@ -38,7 +38,7 @@ class GoogleSheets_Tools implements INode {
       label: "Connect Credential",
       name: "credential",
       type: "credential",
-      credentialNames: ["googleSheetsOAuth2"],
+      credentialNames: ["googleSheetsOAuth2", "googleSheetsServiceAccount"],
     };
     this.inputs = [
       {
@@ -349,16 +349,74 @@ class GoogleSheets_Tools implements INode {
       nodeData.credential ?? "",
       options
     );
-    credentialData = await refreshOAuth2Token(
-      nodeData.credential ?? "",
-      credentialData,
-      options
-    );
-    const accessToken = getCredentialParam(
-      "access_token",
-      credentialData,
-      nodeData
-    );
+
+    let accessToken: string;
+
+    // Check credential type by checking for serviceAccountKey field
+    if (credentialData.serviceAccountKey) {
+      // Service Account authentication using jose (Node.js v24 compatible)
+      const { SignJWT, importPKCS8 } = await import('jose');
+      const axios = (await import('axios')).default;
+
+      const serviceAccountKey = credentialData.serviceAccountKey;
+
+      // Parse JSON if it's a string
+      const keyData = typeof serviceAccountKey === 'string'
+        ? JSON.parse(serviceAccountKey)
+        : serviceAccountKey;
+
+      // Extract service account details
+      const { client_email, private_key } = keyData;
+
+      if (!client_email || !private_key) {
+        throw new Error('Service account key must contain client_email and private_key');
+      }
+
+      // Create JWT claims
+      const now = Math.floor(Date.now() / 1000);
+      const jwtClaims = {
+        iss: client_email,
+        scope: 'https://www.googleapis.com/auth/spreadsheets',
+        aud: 'https://oauth2.googleapis.com/token',
+        iat: now,
+        exp: now + 3600
+      };
+
+      // Import the private key (replace escaped newlines with actual newlines)
+      const formattedPrivateKey = private_key.replace(/\\n/g, '\n');
+      const privateKeyObj = await importPKCS8(formattedPrivateKey, 'RS256');
+
+      // Sign the JWT
+      const jwt = await new SignJWT(jwtClaims)
+        .setProtectedHeader({ alg: 'RS256', typ: 'JWT' })
+        .sign(privateKeyObj);
+
+      // Exchange JWT for access token
+      const tokenResponse = await axios.post(
+        'https://oauth2.googleapis.com/token',
+        new URLSearchParams({
+          grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+          assertion: jwt
+        }).toString(),
+        {
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        }
+      );
+
+      accessToken = tokenResponse.data.access_token;
+    } else {
+      // OAuth2 authentication (existing flow)
+      credentialData = await refreshOAuth2Token(
+        nodeData.credential ?? "",
+        credentialData,
+        options
+      );
+      accessToken = getCredentialParam(
+        "access_token",
+        credentialData,
+        nodeData
+      );
+    }
 
     if (!accessToken) {
       throw new Error("No access token found in credential");

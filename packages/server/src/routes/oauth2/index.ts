@@ -115,7 +115,9 @@ router.post('/authorize/:credentialId', async (req: Request, res: Response, next
             })
         }
 
-        const defaultRedirectUri = `${req.protocol}://${req.get('host')}/api/v1/oauth2-credential/callback`
+        // Use APP_URL from environment if available, otherwise construct from request
+        const appUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`
+        const defaultRedirectUri = `${appUrl}/api/v1/oauth2-credential/callback`
         const finalRedirectUri = redirect_uri || defaultRedirectUri
 
         const authParams = new URLSearchParams({
@@ -222,7 +224,9 @@ router.get('/callback', async (req: Request, res: Response) => {
             return res.status(400).send(errorHtml)
         }
 
-        const defaultRedirectUri = `${req.protocol}://${req.get('host')}/api/v1/oauth2-credential/callback`
+        // Use APP_URL from environment if available, otherwise construct from request
+        const appUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`
+        const defaultRedirectUri = `${appUrl}/api/v1/oauth2-credential/callback`
         const finalRedirectUri = redirect_uri || defaultRedirectUri
 
         const tokenRequestData: any = {

@@ -1424,9 +1424,15 @@ export const refreshOAuth2Token = async (
                 // Import fetch dynamically to avoid issues
                 const fetch = (await import('node-fetch')).default
 
+                // Build the refresh URL, forcing HTTP for localhost internal calls
+                let refreshUrl = options.baseURL || 'http://localhost:3000'
+                if (refreshUrl.includes('localhost') && refreshUrl.startsWith('https://')) {
+                    refreshUrl = refreshUrl.replace('https://', 'http://')
+                }
+
                 // Call the refresh API endpoint
                 const refreshResponse = await fetch(
-                    `${options.baseURL || 'http://localhost:3000'}/api/v1/oauth2-credential/refresh/${credentialId}`,
+                    `${refreshUrl}/api/v1/oauth2-credential/refresh/${credentialId}`,
                     {
                         method: 'POST',
                         headers: {

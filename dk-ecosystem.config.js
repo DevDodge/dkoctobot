@@ -6,7 +6,7 @@ module.exports = {
       name: "DK-OctoBot",
       script: "./packages/server/bin/run",
       args: "start",
-      cwd: "F:\\DK-Platform",
+      cwd: "C:\\Systems\\DK-Platform",
       interpreter: "node",
       interpreter_args: "--max-old-space-size=4096",
       node_args: "--max-old-space-size=4096",
@@ -25,9 +25,9 @@ module.exports = {
       restart_delay: 5000,
       max_memory_restart: "3G",
       // Logging
-      log_file: "F:\\DK-Platform\\logs\\dk-octobot-combined.log",
-      out_file: "F:\\DK-Platform\\logs\\dk-octobot-out.log",
-      error_file: "F:\\DK-Platform\\logs\\dk-octobot-error.log",
+      log_file: "C:\\Systems\\DK-Platform\\logs\\dk-octobot-combined.log",
+      out_file: "C:\\Systems\\DK-Platform\\logs\\dk-octobot-out.log",
+      error_file: "C:\\Systems\\DK-Platform\\logs\\dk-octobot-error.log",
       log_date_format: "YYYY-MM-DD HH:mm:ss Z",
       merge_logs: true,
       // Graceful shutdown

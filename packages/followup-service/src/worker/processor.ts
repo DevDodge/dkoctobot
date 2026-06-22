@@ -54,6 +54,25 @@ export class Worker {
     const firedAt = new Date();
     const { chatflowId, trackingId, stepOrder } = job;
 
+    // Defense 0: chatId regex filter (if configured, only process matching chatIds)
+    if (job.chatIdFilterRegex) {
+      try {
+        const regex = new RegExp(job.chatIdFilterRegex);
+        if (!regex.test(trackingId)) {
+          await this.logExcluded(job, firedAt, "chatId_regex_filter");
+          return "skipped";
+        }
+      } catch (err: any) {
+        logger.error(
+          `[Worker] Invalid regex pattern for ${chatflowId}: ${job.chatIdFilterRegex}`,
+          err
+        );
+        // If regex is invalid, skip processing to be safe
+        await this.logExcluded(job, firedAt, "invalid_regex_pattern");
+        return "skipped";
+      }
+    }
+
     // Defense 1: cancel flag
     if (await this.state.hasCancelFlag(chatflowId, trackingId)) {
       await this.logSkipped(job, firedAt, "cancelled_by_flag");
@@ -256,6 +275,24 @@ export class Worker {
       responseBody: "",
       errorMessage: `Skipped: ${reason}`,
       lastMessageAt: lastMsgTime ? new Date(lastMsgTime).toISOString() : null,
+      firedAt,
+      retryCount: 0,
+    });
+  }
+
+  private async logExcluded(
+    job: TimerJob,
+    firedAt: Date,
+    reason: string
+  ): Promise<void> {
+    await this.writeLog({
+      job,
+      status: "excluded",
+      payload: "",
+      responseStatus: null,
+      responseBody: "",
+      errorMessage: `Excluded: ${reason}`,
+      lastMessageAt: null,
       firedAt,
       retryCount: 0,
     });

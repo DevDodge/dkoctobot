@@ -54,6 +54,7 @@ export class Scheduler {
         maxMessages: config.maxMessages,
         includeSessionDetails: config.includeSessionDetails,
         maxFires: step.maxFires || 0,
+        chatIdFilterRegex: config.chatIdFilterRegex || undefined,
         sessionId,
         scheduledAt,
         fireAt,

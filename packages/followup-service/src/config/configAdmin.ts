@@ -33,13 +33,14 @@ export class ConfigAdmin {
         await client.query(
           `UPDATE follow_up_config
            SET enabled = $1, "includeSessionDetails" = $2, "maxMessages" = $3,
-               "updatedDate" = now()
-           WHERE id = $4`,
+               "chatIdFilterRegex" = $4, "updatedDate" = now()
+           WHERE id = $5`,
           [
             configData.enabled ?? existing.rows[0].enabled,
             configData.includeSessionDetails ??
               existing.rows[0].includeSessionDetails,
             configData.maxMessages ?? existing.rows[0].maxMessages,
+            configData.chatIdFilterRegex ?? existing.rows[0].chatIdFilterRegex,
             configId,
           ]
         );
@@ -48,14 +49,15 @@ export class ConfigAdmin {
         await client.query(
           `INSERT INTO follow_up_config
              (id, "chatflowId", enabled, "includeSessionDetails", "maxMessages",
-              "createdDate", "updatedDate")
-           VALUES ($1, $2, $3, $4, $5, now(), now())`,
+              "chatIdFilterRegex", "createdDate", "updatedDate")
+           VALUES ($1, $2, $3, $4, $5, $6, now(), now())`,
           [
             configId,
             chatflowId,
             configData.enabled ?? false,
             configData.includeSessionDetails ?? true,
             configData.maxMessages ?? 10,
+            configData.chatIdFilterRegex ?? null,
           ]
         );
       }

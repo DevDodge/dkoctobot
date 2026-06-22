@@ -73,6 +73,7 @@ export async function getLogsGrouped(): Promise<any[]> {
            countIf(status = 'sent') AS sent,
            countIf(status = 'failed') AS failed,
            countIf(status = 'cancelled') AS cancelled,
+           countIf(status = 'excluded') AS excluded,
            uniqExact(chatId) AS uniqueSessions,
            max(firedAt) AS lastFiredAt
     FROM follow_up_log
@@ -90,6 +91,7 @@ export async function getLogsByChatflowGroupedBySession(
             countIf(status = 'sent') AS sent,
             countIf(status = 'failed') AS failed,
             countIf(status = 'cancelled') AS cancelled,
+            countIf(status = 'excluded') AS excluded,
             max(firedAt) AS lastFiredAt,
             min(firedAt) AS firstFiredAt
      FROM follow_up_log
@@ -135,6 +137,7 @@ export async function getStats(days = 7): Promise<any> {
     `SELECT count() AS total,
             countIf(status = 'sent') AS sent,
             countIf(status = 'failed') AS failed,
+            countIf(status = 'excluded') AS excluded,
             uniqExactIf(chatId, status = 'sent') AS uniqueSessions
      FROM follow_up_log
      WHERE firedAt >= now() - INTERVAL {days:UInt32} DAY`,
@@ -147,6 +150,7 @@ export async function getStats(days = 7): Promise<any> {
     total,
     sent,
     failed: parseInt(r.failed || "0", 10),
+    excluded: parseInt(r.excluded || "0", 10),
     uniqueSessions: parseInt(r.uniqueSessions || "0", 10),
     successRate: total > 0 ? Math.round((sent / total) * 100) : 0,
     days,

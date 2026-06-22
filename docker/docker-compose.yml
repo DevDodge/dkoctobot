@@ -139,6 +139,9 @@ services:
             - HTTP_DENY_LIST=${HTTP_DENY_LIST}
             - HTTP_SECURITY_CHECK=${HTTP_SECURITY_CHECK}
             - TRUST_PROXY=${TRUST_PROXY}
+
+            # FOLLOW-UP SERVICE
+            - FOLLOWUP_SERVICE_URL=${FOLLOWUP_SERVICE_URL}
         ports:
             - '${PORT}:${PORT}'
         healthcheck:

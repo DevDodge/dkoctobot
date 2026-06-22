@@ -5,7 +5,7 @@
 
 export type IdleUnit = "minutes" | "hours" | "days";
 
-export type LogStatus = "sent" | "failed" | "cancelled" | "pending";
+export type LogStatus = "sent" | "failed" | "cancelled" | "pending" | "excluded";
 
 /** A single follow-up step (ported from FollowUpStep entity). */
 export interface FollowUpStep {
@@ -30,6 +30,7 @@ export interface FollowUpConfig {
   enabled: boolean;
   includeSessionDetails: boolean;
   maxMessages: number;
+  chatIdFilterRegex?: string | null; // Regex to filter chatIds - only matching chatIds will trigger followups
   createdDate?: string;
   updatedDate?: string;
 }
@@ -74,6 +75,7 @@ export interface TimerJob extends TimerKey {
   maxMessages: number;
   includeSessionDetails: boolean;
   maxFires: number;
+  chatIdFilterRegex?: string | null; // Regex to test chatId - if doesn't match, skip processing
   sessionId?: string;
   scheduledAt: string;
   fireAt: number;

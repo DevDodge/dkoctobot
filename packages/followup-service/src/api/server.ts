@@ -37,6 +37,25 @@ export function buildApi(ctx: ApiContext) {
     "/config",
     wrap(async (_req, res) => {
       const bundles = ctx.provider.getAllCached();
+
+      // Fetch chatflow names from Postgres
+      const chatflowIds = bundles.map(b => b.config.chatflowId);
+      const chatflowNames = new Map<string, string>();
+      if (chatflowIds.length > 0) {
+        try {
+          const pool = ctx.provider.getPool();
+          const result = await pool.query(
+            `SELECT id::text as id, name FROM chat_flow WHERE id::text = ANY($1)`,
+            [chatflowIds]
+          );
+          result.rows.forEach((row: any) => {
+            chatflowNames.set(row.id, row.name);
+          });
+        } catch (e) {
+          logger.error("Failed to fetch chatflow names:", e);
+        }
+      }
+
       const enriched = await Promise.all(
         bundles.map(async ({ config, steps }) => {
           const counts = await logsQuery.getChatflowCounts(config.chatflowId);
@@ -50,7 +69,7 @@ export function buildApi(ctx: ApiContext) {
           }
           return {
             ...config,
-            chatflowName: config.chatflowId,
+            chatflowName: chatflowNames.get(config.chatflowId) || config.chatflowId,
             stepsCount: steps.length,
             steps,
             ...counts,
@@ -149,7 +168,33 @@ export function buildApi(ctx: ApiContext) {
   router.get(
     "/logs/grouped",
     wrap(async (_req, res) => {
-      res.json(await logsQuery.getLogsGrouped());
+      const grouped = await logsQuery.getLogsGrouped();
+
+      // Fetch chatflow names from Postgres
+      const chatflowIds = grouped.map((row: any) => row.chatflowId);
+      const chatflowNames = new Map<string, string>();
+      if (chatflowIds.length > 0) {
+        try {
+          const pool = ctx.provider.getPool();
+          const result = await pool.query(
+            `SELECT id::text as id, name FROM chat_flow WHERE id::text = ANY($1)`,
+            [chatflowIds]
+          );
+          result.rows.forEach((row: any) => {
+            chatflowNames.set(row.id, row.name);
+          });
+        } catch (e) {
+          logger.error("Failed to fetch chatflow names for logs:", e);
+        }
+      }
+
+      // Add chatflowName to each row
+      const enriched = grouped.map((row: any) => ({
+        ...row,
+        chatflowName: chatflowNames.get(row.chatflowId) || row.chatflowId
+      }));
+
+      res.json(enriched);
     })
   );
 

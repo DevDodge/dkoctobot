@@ -88,7 +88,7 @@ export class ConfigProvider {
   private async queryConfigs(): Promise<FollowUpConfig[]> {
     const { rows } = await this.pool.query(
       `SELECT id, "chatflowId", enabled, "includeSessionDetails", "maxMessages",
-              "createdDate", "updatedDate" FROM follow_up_config`,
+              "chatIdFilterRegex", "createdDate", "updatedDate" FROM follow_up_config`,
     );
     return rows as FollowUpConfig[];
   }
@@ -98,7 +98,7 @@ export class ConfigProvider {
   ): Promise<FollowUpConfig | null> {
     const { rows } = await this.pool.query(
       `SELECT id, "chatflowId", enabled, "includeSessionDetails", "maxMessages",
-              "createdDate", "updatedDate" FROM follow_up_config WHERE "chatflowId" = $1 LIMIT 1`,
+              "chatIdFilterRegex", "createdDate", "updatedDate" FROM follow_up_config WHERE "chatflowId" = $1 LIMIT 1`,
       [chatflowId],
     );
     return (rows[0] as FollowUpConfig) || null;
@@ -107,7 +107,7 @@ export class ConfigProvider {
   private async querySteps(configId: string): Promise<FollowUpStep[]> {
     const { rows } = await this.pool.query(
       `SELECT id, "configId", "chatflowId", "stepOrder", "stepName", "idleTimeout",
-              "idleTimeoutUnit", "webhookUrl", "webhookHeaders", maxfires as "maxFires",
+              "idleTimeoutUnit", "webhookUrl", "webhookHeaders", "maxFires",
               "createdDate", "updatedDate"
        FROM follow_up_step WHERE "configId" = $1 ORDER BY "stepOrder" ASC`,
       [configId],

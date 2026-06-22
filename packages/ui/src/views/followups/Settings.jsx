@@ -261,6 +261,7 @@ const ConfigDialog = ({ open, chatflowId, chatflowName, onClose, onSave }) => {
     enabled: true,
     includeSessionDetails: true,
     maxMessages: 10,
+    chatIdFilterRegex: "",
   });
   const [steps, setSteps] = useState([]);
   const [isLoading, setLoading] = useState(false);
@@ -284,6 +285,7 @@ const ConfigDialog = ({ open, chatflowId, chatflowName, onClose, onSave }) => {
           enabled: true,
           includeSessionDetails: true,
           maxMessages: 10,
+          chatIdFilterRegex: "",
         });
         setSteps([]);
       }
@@ -303,6 +305,7 @@ const ConfigDialog = ({ open, chatflowId, chatflowName, onClose, onSave }) => {
           enabled: config.enabled,
           includeSessionDetails: config.includeSessionDetails,
           maxMessages: config.maxMessages,
+          chatIdFilterRegex: config.chatIdFilterRegex || null,
         },
         steps: steps.map((s) => ({
           stepName: s.stepName,
@@ -402,6 +405,20 @@ const ConfigDialog = ({ open, chatflowId, chatflowName, onClose, onSave }) => {
                   <MenuItem value={20}>20</MenuItem>
                   <MenuItem value={50}>50</MenuItem>
                 </TextField>
+                <TextField
+                  label="Chat ID Filter (Regex)"
+                  size="small"
+                  fullWidth
+                  value={config.chatIdFilterRegex || ""}
+                  onChange={(e) =>
+                    setConfig({
+                      ...config,
+                      chatIdFilterRegex: e.target.value,
+                    })
+                  }
+                  placeholder="e.g., ^user_.* (leave empty to process all chat IDs)"
+                  helperText="Optional: Only process chat IDs matching this regex pattern"
+                />
               </Stack>
             </Box>
 

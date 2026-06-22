@@ -26,6 +26,9 @@ export class FollowUpConfig {
   @Column({ default: 10 })
   maxMessages: number;
 
+  @Column({ type: "text", nullable: true })
+  chatIdFilterRegex: string;
+
   @Column({ type: "timestamp" })
   @CreateDateColumn()
   createdDate: Date;

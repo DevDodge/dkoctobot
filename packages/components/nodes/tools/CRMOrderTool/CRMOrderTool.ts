@@ -525,13 +525,18 @@ class CRMOrderToolImpl extends Tool {
         }
       }
 
-      const attributes = parsedInput.attributes;
-      if (
-        !attributes ||
-        !Array.isArray(attributes) ||
-        attributes.length === 0
-      ) {
-        return `ERROR: The "attributes" array is required and must contain at least one item with "key" and "value" fields.`;
+      let attributes = parsedInput.attributes;
+
+      // Auto-detect flat format: AI might send {"clientName":"value",...} instead of {"attributes":[...]}
+      if (!attributes || !Array.isArray(attributes) || attributes.length === 0) {
+        const flatKeys = Object.keys(parsedInput).filter(
+          k => typeof parsedInput[k] === 'string' && k !== 'input'
+        );
+        if (flatKeys.length > 0) {
+          attributes = flatKeys.map(k => ({ key: k, value: parsedInput[k] }));
+        } else {
+          return `ERROR: The "attributes" array is required and must contain at least one item with "key" and "value" fields. Received: ${JSON.stringify(parsedInput)}`;
+        }
       }
 
       // Resolve sessionId: use the value captured at init time (from options.sessionId)

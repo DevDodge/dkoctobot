@@ -66,6 +66,37 @@ export class OctobotDualChatModel
   }
 
   /**
+   * Replace the internal OpenAI client on BOTH the outer instance AND
+   * the completions sub-object (ChatOpenAI delegates _streamResponseChunks
+   * via yield* to this.completions, which has its OWN client/model).
+   */
+  private replaceClient(apiKey: string, modelName: string): void {
+    const newClient = new OpenAI({
+      apiKey,
+      baseURL: GATEWAY_BASE_URL,
+      defaultHeaders: { Authorization: `Bearer ${apiKey}` },
+    });
+
+    // Outer instance
+    // @ts-ignore
+    this.client = newClient;
+    this.model = modelName;
+    // @ts-ignore
+    this.modelName = modelName;
+
+    // Inner completions sub-object (ChatOpenAI delegates to this)
+    // @ts-ignore
+    if (this.completions) {
+      // @ts-ignore
+      this.completions.client = newClient;
+      // @ts-ignore
+      this.completions.model = modelName;
+      // @ts-ignore
+      this.completions.modelName = modelName;
+    }
+  }
+
+  /**
    * Switch the internal OpenAI client to use the backup API key and model.
    */
   private switchToBackup(): void {
@@ -75,24 +106,13 @@ export class OctobotDualChatModel
     }
 
     this.usingBackup = true;
-    const backupKeyPreview = `${this.dualConfig.backupApiKey.substring(0, 8)}...${this.dualConfig.backupApiKey.substring(this.dualConfig.backupApiKey.length - 4)}`;
+    const keyPreview = `${this.dualConfig.backupApiKey.substring(0, 8)}...${this.dualConfig.backupApiKey.substring(this.dualConfig.backupApiKey.length - 4)}`;
+    const modelForBackup = this.dualConfig.backupModel || this.dualConfig.primaryModel;
     console.log(`[OctobotDual:${this.id}] 🔄 Switching to BACKUP`);
-    console.log(`[OctobotDual:${this.id}]    - Backup API Key: ${backupKeyPreview}`);
-    console.log(`[OctobotDual:${this.id}]    - Backup Model: ${this.dualConfig.backupModel || '(same as primary)'}`);
+    console.log(`[OctobotDual:${this.id}]    - Backup API Key: ${keyPreview}`);
+    console.log(`[OctobotDual:${this.id}]    - Backup Model: ${modelForBackup}`);
 
-    // @ts-ignore — replace internal client
-    this.client = new OpenAI({
-      apiKey: this.dualConfig.backupApiKey,
-      baseURL: GATEWAY_BASE_URL,
-      defaultHeaders: {
-        Authorization: `Bearer ${this.dualConfig.backupApiKey}`,
-      },
-    });
-    if (this.dualConfig.backupModel) {
-      this.model = this.dualConfig.backupModel;
-      // @ts-ignore
-      this.modelName = this.dualConfig.backupModel;
-    }
+    this.replaceClient(this.dualConfig.backupApiKey, modelForBackup);
     console.log(`[OctobotDual:${this.id}] ✅ Switched to backup successfully`);
   }
 
@@ -101,22 +121,12 @@ export class OctobotDualChatModel
    */
   private switchToPrimary(): void {
     this.usingBackup = false;
-    const primaryKeyPreview = `${this.dualConfig.primaryApiKey.substring(0, 8)}...${this.dualConfig.primaryApiKey.substring(this.dualConfig.primaryApiKey.length - 4)}`;
+    const keyPreview = `${this.dualConfig.primaryApiKey.substring(0, 8)}...${this.dualConfig.primaryApiKey.substring(this.dualConfig.primaryApiKey.length - 4)}`;
     console.log(`[OctobotDual:${this.id}] 🔄 Switching to PRIMARY`);
-    console.log(`[OctobotDual:${this.id}]    - Primary API Key: ${primaryKeyPreview}`);
+    console.log(`[OctobotDual:${this.id}]    - Primary API Key: ${keyPreview}`);
     console.log(`[OctobotDual:${this.id}]    - Primary Model: ${this.dualConfig.primaryModel}`);
 
-    // @ts-ignore — replace internal client
-    this.client = new OpenAI({
-      apiKey: this.dualConfig.primaryApiKey,
-      baseURL: GATEWAY_BASE_URL,
-      defaultHeaders: {
-        Authorization: `Bearer ${this.dualConfig.primaryApiKey}`,
-      },
-    });
-    this.model = this.dualConfig.primaryModel;
-    // @ts-ignore
-    this.modelName = this.dualConfig.primaryModel;
+    this.replaceClient(this.dualConfig.primaryApiKey, this.dualConfig.primaryModel);
     console.log(`[OctobotDual:${this.id}] ✅ Switched to primary successfully`);
   }
 

@@ -56,7 +56,7 @@ async function fetchModelsForApiKey(
     }
 
     return models.map((m) => ({
-      label: m.display_name || m.id,
+      label: m.id,
       name: m.id,
     }));
   } catch (err: any) {

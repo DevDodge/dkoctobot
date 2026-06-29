@@ -104,34 +104,6 @@ export class OctobotDualChatModel
     this.modelName = this.dualConfig.primaryModel;
   }
 
-  /**
-   * Check if error is retriable (network, auth, rate-limit, server errors).
-   */
-  private isRetriableError(error: any): boolean {
-    if (!error) return true;
-    // Network errors
-    if (
-      error.code === "ECONNREFUSED" ||
-      error.code === "ECONNRESET" ||
-      error.code === "ETIMEDOUT" ||
-      error.code === "ENOTFOUND" ||
-      error.code === "EPIPE"
-    ) {
-      return true;
-    }
-    // HTTP status codes
-    const status = error.status || error.statusCode || error.response?.status;
-    if (status) {
-      // 401/403 = auth errors (key might be expired/invalid)
-      // 429 = rate limited
-      // 500+ = server errors
-      // 502/503/504 = gateway errors
-      return [401, 403, 429, 500, 502, 503, 504].includes(status);
-    }
-    // Treat unknown errors as retriable to be safe
-    return true;
-  }
-
   async _generate(
     messages: BaseMessage[],
     options: this["ParsedCallOptions"],
@@ -141,17 +113,12 @@ export class OctobotDualChatModel
       const result = await super._generate(messages, options, runManager);
       return result;
     } catch (error: any) {
-      if (
-        !this.usingBackup &&
-        this.dualConfig.backupApiKey &&
-        this.isRetriableError(error)
-      ) {
+      if (!this.usingBackup && this.dualConfig.backupApiKey) {
         this.switchToBackup();
         try {
           const result = await super._generate(messages, options, runManager);
           return result;
         } finally {
-          // Always switch back to primary for the next call
           this.switchToPrimary();
         }
       }
@@ -170,18 +137,12 @@ export class OctobotDualChatModel
         options,
         runManager,
       );
-      // We need to yield from the generator. If any chunk throws, we catch it.
       try {
         for await (const chunk of generator) {
           yield chunk;
         }
       } catch (error: any) {
-        // Generator threw mid-stream — try backup for a fresh stream
-        if (
-          !this.usingBackup &&
-          this.dualConfig.backupApiKey &&
-          this.isRetriableError(error)
-        ) {
+        if (!this.usingBackup && this.dualConfig.backupApiKey) {
           this.switchToBackup();
           const fallbackGen = super._streamResponseChunks(
             messages,
@@ -200,12 +161,7 @@ export class OctobotDualChatModel
         throw error;
       }
     } catch (error: any) {
-      // Initial stream setup failed — try backup
-      if (
-        !this.usingBackup &&
-        this.dualConfig.backupApiKey &&
-        this.isRetriableError(error)
-      ) {
+      if (!this.usingBackup && this.dualConfig.backupApiKey) {
         this.switchToBackup();
         try {
           const fallbackGen = super._streamResponseChunks(

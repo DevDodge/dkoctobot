@@ -53,8 +53,6 @@ export class OctobotDualChatModel
   revertToOriginalModel(): void {
     this.model = this.configuredModel;
     this.maxTokens = this.configuredMaxToken;
-    // Also revert to primary key
-    this.switchToPrimary();
   }
 
   setMultiModalOption(multiModalOption: IMultiModalOption): void {
@@ -69,12 +67,15 @@ export class OctobotDualChatModel
    * Replace the internal OpenAI client on BOTH the outer instance AND
    * the completions sub-object (ChatOpenAI delegates _streamResponseChunks
    * via yield* to this.completions, which has its OWN client/model).
+   *
+   * @param isPrimary - if true, disable retries for fast failover to backup
    */
-  private replaceClient(apiKey: string, modelName: string): void {
+  private replaceClient(apiKey: string, modelName: string, isPrimary: boolean = false): void {
     const newClient = new OpenAI({
       apiKey,
       baseURL: GATEWAY_BASE_URL,
       defaultHeaders: { Authorization: `Bearer ${apiKey}` },
+      maxRetries: isPrimary ? 0 : 2, // No retries on primary for fast failover, 2 retries on backup
     });
 
     // Outer instance
@@ -112,7 +113,7 @@ export class OctobotDualChatModel
     console.log(`[OctobotDual:${this.id}]    - Backup API Key: ${keyPreview}`);
     console.log(`[OctobotDual:${this.id}]    - Backup Model: ${modelForBackup}`);
 
-    this.replaceClient(this.dualConfig.backupApiKey, modelForBackup);
+    this.replaceClient(this.dualConfig.backupApiKey, modelForBackup, false);
     console.log(`[OctobotDual:${this.id}] ✅ Switched to backup successfully`);
   }
 
@@ -126,7 +127,7 @@ export class OctobotDualChatModel
     console.log(`[OctobotDual:${this.id}]    - Primary API Key: ${keyPreview}`);
     console.log(`[OctobotDual:${this.id}]    - Primary Model: ${this.dualConfig.primaryModel}`);
 
-    this.replaceClient(this.dualConfig.primaryApiKey, this.dualConfig.primaryModel);
+    this.replaceClient(this.dualConfig.primaryApiKey, this.dualConfig.primaryModel, true);
     console.log(`[OctobotDual:${this.id}] ✅ Switched to primary successfully`);
   }
 
@@ -136,9 +137,6 @@ export class OctobotDualChatModel
     runManager?: CallbackManagerForLLMRun,
   ): Promise<ChatResult> {
     console.log(`[OctobotDual:${this.id}] 🚀 Starting _generate (non-streaming)`);
-
-    // Always start with primary
-    this.switchToPrimary();
 
     try {
       console.log(`[OctobotDual:${this.id}] 📤 Calling PRIMARY endpoint...`);
@@ -186,9 +184,6 @@ export class OctobotDualChatModel
     console.log(`[OctobotDual:${this.id}] 🚀 Starting _streamResponseChunks (streaming)`);
     console.log(`[OctobotDual:${this.id}]    - Message count: ${messages.length}`);
     console.log(`[OctobotDual:${this.id}]    - Has backup: ${!!this.dualConfig.backupApiKey}`);
-
-    // Always start with primary
-    this.switchToPrimary();
 
     let chunkCount = 0;
     try {

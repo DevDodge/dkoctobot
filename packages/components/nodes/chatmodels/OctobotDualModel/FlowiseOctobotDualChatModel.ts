@@ -69,8 +69,17 @@ export class OctobotDualChatModel
    * Switch the internal OpenAI client to use the backup API key and model.
    */
   private switchToBackup(): void {
-    if (!this.dualConfig.backupApiKey) return;
+    if (!this.dualConfig.backupApiKey) {
+      console.log(`[OctobotDual:${this.id}] ❌ Cannot switch to backup - no backup key configured`);
+      return;
+    }
+
     this.usingBackup = true;
+    const backupKeyPreview = `${this.dualConfig.backupApiKey.substring(0, 8)}...${this.dualConfig.backupApiKey.substring(this.dualConfig.backupApiKey.length - 4)}`;
+    console.log(`[OctobotDual:${this.id}] 🔄 Switching to BACKUP`);
+    console.log(`[OctobotDual:${this.id}]    - Backup API Key: ${backupKeyPreview}`);
+    console.log(`[OctobotDual:${this.id}]    - Backup Model: ${this.dualConfig.backupModel || '(same as primary)'}`);
+
     // @ts-ignore — replace internal client
     this.client = new OpenAI({
       apiKey: this.dualConfig.backupApiKey,
@@ -84,6 +93,7 @@ export class OctobotDualChatModel
       // @ts-ignore
       this.modelName = this.dualConfig.backupModel;
     }
+    console.log(`[OctobotDual:${this.id}] ✅ Switched to backup successfully`);
   }
 
   /**
@@ -91,6 +101,11 @@ export class OctobotDualChatModel
    */
   private switchToPrimary(): void {
     this.usingBackup = false;
+    const primaryKeyPreview = `${this.dualConfig.primaryApiKey.substring(0, 8)}...${this.dualConfig.primaryApiKey.substring(this.dualConfig.primaryApiKey.length - 4)}`;
+    console.log(`[OctobotDual:${this.id}] 🔄 Switching to PRIMARY`);
+    console.log(`[OctobotDual:${this.id}]    - Primary API Key: ${primaryKeyPreview}`);
+    console.log(`[OctobotDual:${this.id}]    - Primary Model: ${this.dualConfig.primaryModel}`);
+
     // @ts-ignore — replace internal client
     this.client = new OpenAI({
       apiKey: this.dualConfig.primaryApiKey,
@@ -102,6 +117,7 @@ export class OctobotDualChatModel
     this.model = this.dualConfig.primaryModel;
     // @ts-ignore
     this.modelName = this.dualConfig.primaryModel;
+    console.log(`[OctobotDual:${this.id}] ✅ Switched to primary successfully`);
   }
 
   async _generate(
@@ -109,20 +125,46 @@ export class OctobotDualChatModel
     options: this["ParsedCallOptions"],
     runManager?: CallbackManagerForLLMRun,
   ): Promise<ChatResult> {
+    console.log(`[OctobotDual:${this.id}] 🚀 Starting _generate (non-streaming)`);
+
+    // Always start with primary
+    this.switchToPrimary();
+
     try {
+      console.log(`[OctobotDual:${this.id}] 📤 Calling PRIMARY endpoint...`);
       const result = await super._generate(messages, options, runManager);
+      console.log(`[OctobotDual:${this.id}] ✅ PRIMARY _generate completed successfully`);
       return result;
-    } catch (error: any) {
-      if (!this.usingBackup && this.dualConfig.backupApiKey) {
+    } catch (primaryError: any) {
+      console.log(`[OctobotDual:${this.id}] ❌ PRIMARY _generate failed:`);
+      console.log(`[OctobotDual:${this.id}]    - Error type: ${primaryError.constructor.name}`);
+      console.log(`[OctobotDual:${this.id}]    - Error message: ${primaryError.message}`);
+      console.log(`[OctobotDual:${this.id}]    - Error status: ${primaryError.status || 'N/A'}`);
+
+      // If primary fails and we have backup, try backup
+      if (this.dualConfig.backupApiKey) {
+        console.log(`[OctobotDual:${this.id}] 🔄 Attempting BACKUP...`);
         this.switchToBackup();
         try {
+          console.log(`[OctobotDual:${this.id}] 📤 Calling BACKUP endpoint...`);
           const result = await super._generate(messages, options, runManager);
+          console.log(`[OctobotDual:${this.id}] ✅ BACKUP _generate completed successfully`);
           return result;
+        } catch (backupError: any) {
+          console.log(`[OctobotDual:${this.id}] ❌ BACKUP _generate also failed:`);
+          console.log(`[OctobotDual:${this.id}]    - Error type: ${backupError.constructor.name}`);
+          console.log(`[OctobotDual:${this.id}]    - Error message: ${backupError.message}`);
+          console.log(`[OctobotDual:${this.id}]    - Error status: ${backupError.status || 'N/A'}`);
+          console.log(`[OctobotDual:${this.id}] 💀 Both PRIMARY and BACKUP failed - throwing error`);
+          throw backupError;
         } finally {
+          // Always revert to primary after request completes
           this.switchToPrimary();
         }
       }
-      throw error;
+      // No backup available, throw original error
+      console.log(`[OctobotDual:${this.id}] ⚠️ No backup configured - throwing PRIMARY error`);
+      throw primaryError;
     }
   }
 
@@ -131,31 +173,72 @@ export class OctobotDualChatModel
     options: this["ParsedCallOptions"],
     runManager?: CallbackManagerForLLMRun,
   ): AsyncGenerator<any> {
-    let primaryError: any;
+    console.log(`[OctobotDual:${this.id}] 🚀 Starting _streamResponseChunks (streaming)`);
+    console.log(`[OctobotDual:${this.id}]    - Message count: ${messages.length}`);
+    console.log(`[OctobotDual:${this.id}]    - Has backup: ${!!this.dualConfig.backupApiKey}`);
 
-    // ── Try primary ──────────────────────────────────────
+    // Always start with primary
+    this.switchToPrimary();
+
+    let chunkCount = 0;
     try {
+      console.log(`[OctobotDual:${this.id}] 📤 Starting PRIMARY stream...`);
+      // Try primary
       const gen = super._streamResponseChunks(messages, options, runManager);
       for await (const chunk of gen) {
+        chunkCount++;
+        if (chunkCount === 1) {
+          console.log(`[OctobotDual:${this.id}] 📨 First chunk received from PRIMARY`);
+        }
         yield chunk;
       }
-      return; // Primary succeeded
-    } catch (e) {
-      primaryError = e;
-    }
-
-    // ── Try backup (flat, no nesting) ────────────────────
-    if (this.dualConfig.backupApiKey) {
-      this.switchToBackup();
-      const gen = super._streamResponseChunks(messages, options, runManager);
-      for await (const chunk of gen) {
-        yield chunk;
+      console.log(`[OctobotDual:${this.id}] ✅ PRIMARY stream completed successfully (${chunkCount} chunks)`);
+    } catch (primaryError: any) {
+      console.log(`[OctobotDual:${this.id}] ❌ PRIMARY stream failed after ${chunkCount} chunks:`);
+      console.log(`[OctobotDual:${this.id}]    - Error type: ${primaryError.constructor.name}`);
+      console.log(`[OctobotDual:${this.id}]    - Error message: ${primaryError.message}`);
+      console.log(`[OctobotDual:${this.id}]    - Error status: ${primaryError.status || 'N/A'}`);
+      console.log(`[OctobotDual:${this.id}]    - Error code: ${primaryError.code || 'N/A'}`);
+      if (primaryError.stack) {
+        console.log(`[OctobotDual:${this.id}]    - Stack trace (first 200 chars): ${primaryError.stack.substring(0, 200)}`);
       }
-      this.switchToPrimary();
-      return; // Backup succeeded
-    }
 
-    // ── Both failed ──────────────────────────────────────
-    throw primaryError;
+      // If primary fails and we have backup, try backup
+      if (this.dualConfig.backupApiKey) {
+        console.log(`[OctobotDual:${this.id}] 🔄 Attempting BACKUP stream...`);
+        this.switchToBackup();
+
+        let backupChunkCount = 0;
+        try {
+          console.log(`[OctobotDual:${this.id}] 📤 Starting BACKUP stream...`);
+          const gen = super._streamResponseChunks(messages, options, runManager);
+          for await (const chunk of gen) {
+            backupChunkCount++;
+            if (backupChunkCount === 1) {
+              console.log(`[OctobotDual:${this.id}] 📨 First chunk received from BACKUP`);
+            }
+            yield chunk;
+          }
+          console.log(`[OctobotDual:${this.id}] ✅ BACKUP stream completed successfully (${backupChunkCount} chunks)`);
+        } catch (backupError: any) {
+          console.log(`[OctobotDual:${this.id}] ❌ BACKUP stream also failed after ${backupChunkCount} chunks:`);
+          console.log(`[OctobotDual:${this.id}]    - Error type: ${backupError.constructor.name}`);
+          console.log(`[OctobotDual:${this.id}]    - Error message: ${backupError.message}`);
+          console.log(`[OctobotDual:${this.id}]    - Error status: ${backupError.status || 'N/A'}`);
+          console.log(`[OctobotDual:${this.id}]    - Error code: ${backupError.code || 'N/A'}`);
+          if (backupError.stack) {
+            console.log(`[OctobotDual:${this.id}]    - Stack trace (first 200 chars): ${backupError.stack.substring(0, 200)}`);
+          }
+          console.log(`[OctobotDual:${this.id}] 💀 Both PRIMARY and BACKUP streams failed - throwing error`);
+          throw backupError;
+        } finally {
+          // Always revert to primary after request completes
+          this.switchToPrimary();
+        }
+      } else {
+        console.log(`[OctobotDual:${this.id}] ⚠️ No backup configured - throwing PRIMARY error`);
+        throw primaryError;
+      }
+    }
   }
 }

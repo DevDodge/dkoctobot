@@ -131,53 +131,31 @@ export class OctobotDualChatModel
     options: this["ParsedCallOptions"],
     runManager?: CallbackManagerForLLMRun,
   ): AsyncGenerator<any> {
+    let primaryError: any;
+
+    // ── Try primary ──────────────────────────────────────
     try {
-      const generator = super._streamResponseChunks(
-        messages,
-        options,
-        runManager,
-      );
-      try {
-        for await (const chunk of generator) {
-          yield chunk;
-        }
-      } catch (error: any) {
-        if (!this.usingBackup && this.dualConfig.backupApiKey) {
-          this.switchToBackup();
-          const fallbackGen = super._streamResponseChunks(
-            messages,
-            options,
-            runManager,
-          );
-          try {
-            for await (const chunk of fallbackGen) {
-              yield chunk;
-            }
-          } finally {
-            this.switchToPrimary();
-          }
-          return;
-        }
-        throw error;
+      const gen = super._streamResponseChunks(messages, options, runManager);
+      for await (const chunk of gen) {
+        yield chunk;
       }
-    } catch (error: any) {
-      if (!this.usingBackup && this.dualConfig.backupApiKey) {
-        this.switchToBackup();
-        try {
-          const fallbackGen = super._streamResponseChunks(
-            messages,
-            options,
-            runManager,
-          );
-          for await (const chunk of fallbackGen) {
-            yield chunk;
-          }
-        } finally {
-          this.switchToPrimary();
-        }
-        return;
-      }
-      throw error;
+      return; // Primary succeeded
+    } catch (e) {
+      primaryError = e;
     }
+
+    // ── Try backup (flat, no nesting) ────────────────────
+    if (this.dualConfig.backupApiKey) {
+      this.switchToBackup();
+      const gen = super._streamResponseChunks(messages, options, runManager);
+      for await (const chunk of gen) {
+        yield chunk;
+      }
+      this.switchToPrimary();
+      return; // Backup succeeded
+    }
+
+    // ── Both failed ──────────────────────────────────────
+    throw primaryError;
   }
 }

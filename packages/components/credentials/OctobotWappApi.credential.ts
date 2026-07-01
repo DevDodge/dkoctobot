@@ -10,22 +10,22 @@ class OctobotWappApi implements INodeCredential {
     constructor() {
         this.label = 'OctobotWapp API'
         this.name = 'octobotWappApi'
-        this.version = 1.0
-        this.description = 'OctobotWapp WhatsApp API credentials for sending messages'
+        this.version = 2.0
+        this.description = 'OctobotWapp WhatsApp API credentials — connects to dk.whatsdeveloper.com'
         this.inputs = [
+            {
+                label: 'Device UUID',
+                name: 'deviceUuid',
+                type: 'password',
+                description: 'Your device unique identifier (X-Device-UUID)',
+                placeholder: 'e.g., 11666fa0-2cbb-4b1f-b6ba-29b63fd7ed51'
+            },
             {
                 label: 'API Token',
                 name: 'apiToken',
                 type: 'password',
-                description: 'Your OctobotWapp API authentication token',
+                description: 'Your API authentication token (X-API-Token)',
                 placeholder: 'Enter your API token'
-            },
-            {
-                label: 'Device UUID',
-                name: 'deviceUuid',
-                type: 'string',
-                description: 'Your device unique identifier',
-                placeholder: 'e.g., 11666fa0-2cbb-4b1f-b6ba-29b63fd7ed51'
             },
             {
                 label: 'Device Name',
@@ -39,8 +39,8 @@ class OctobotWappApi implements INodeCredential {
                 label: 'API URL',
                 name: 'apiUrl',
                 type: 'string',
-                description: 'API endpoint URL (optional, defaults to https://api.zentramsg.com/v1/messages)',
-                placeholder: 'https://api.zentramsg.com/v1/messages',
+                description: 'API endpoint URL (optional)',
+                placeholder: 'https://dk.whatsdeveloper.com/api/v1',
                 optional: true
             }
         ]

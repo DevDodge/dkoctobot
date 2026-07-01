@@ -5,7 +5,7 @@ import { TOOL_ARGS_PREFIX, formatToolError } from '../../../src/agents'
 
 const BASE_URL = 'https://dk.whatsdeveloper.com/api/v1'
 
-export interface WhatsDeveloperConfig {
+export interface OctobotWappConfig {
     deviceUuid: string
     apiToken: string
     defaultRecipients?: string
@@ -13,7 +13,7 @@ export interface WhatsDeveloperConfig {
 
 // ─── Base Tool ───────────────────────────────────────────────────────────────
 
-class BaseWhatsDeveloperTool extends DynamicStructuredTool {
+class BaseOctobotWappTool extends DynamicStructuredTool {
     protected deviceUuid: string = ''
     protected apiToken: string = ''
     protected defaultRecipients: string = ''
@@ -54,7 +54,7 @@ class BaseWhatsDeveloperTool extends DynamicStructuredTool {
         const data = await response.text()
 
         if (!response.ok) {
-            throw new Error(`WhatsDeveloper API Error ${response.status}: ${response.statusText} - ${data}`)
+            throw new Error(`OctobotWapp API Error ${response.status}: ${response.statusText} - ${data}`)
         }
 
         return data + TOOL_ARGS_PREFIX + JSON.stringify(params)
@@ -69,49 +69,69 @@ class BaseWhatsDeveloperTool extends DynamicStructuredTool {
         }
         return aiProvidedTo
     }
+
+    /**
+     * Normalize phone numbers — group IDs pass through unchanged, phone numbers get "2" prefix
+     */
+    normalizeRecipient(input: string): string {
+        return input
+            .split(',')
+            .map((s) => {
+                const trimmed = s.trim()
+                // Group IDs — pass through unchanged
+                if (trimmed.includes('@g.us')) return trimmed
+                // Already has 2 prefix — keep as-is
+                if (trimmed.startsWith('2')) return trimmed
+                // Starts with 0 — replace with 2
+                if (trimmed.startsWith('0')) return '2' + trimmed.slice(1)
+                // Prepend 2
+                return '2' + trimmed
+            })
+            .join(',')
+    }
 }
 
 // ─── Messaging Schemas ───────────────────────────────────────────────────────
 
 const SendTextSchema = z.object({
-    to: z.string().describe('Phone number(s). Comma-separated for bulk sending.'),
+    to: z.string().describe('Phone number(s) — MUST start with "2" prefix (e.g., "201234567890", NOT "01234567890"). Group IDs must be used EXACTLY as-is (e.g., "120363407543489715@g.us"). Comma-separated for bulk sending.'),
     message: z.string().describe('Message content. Supports spintax like {Hello|Hi|Hey}.')
 })
 
 const SendImageSchema = z.object({
-    to: z.string().describe('Recipient phone number'),
+    to: z.string().describe('Phone number — MUST start with "2" prefix (e.g., "201234567890"). Group IDs use exactly as-is (e.g., "120363407543489715@g.us").'),
     imageUrl: z.string().describe('URL of the image to send'),
     caption: z.string().optional().describe('Image caption')
 })
 
 const SendDocumentSchema = z.object({
-    to: z.string().describe('Recipient phone number'),
+    to: z.string().describe('Phone number — MUST start with "2" prefix. Group IDs use exactly as-is.'),
     documentUrl: z.string().describe('URL of the document to send'),
     filename: z.string().optional().describe('Filename for the document'),
     caption: z.string().optional().describe('Document caption')
 })
 
 const SendAudioSchema = z.object({
-    to: z.string().describe('Recipient phone number'),
+    to: z.string().describe('Phone number — MUST start with "2" prefix. Group IDs use exactly as-is.'),
     audioUrl: z.string().describe('URL of the audio to send'),
     ptt: z.boolean().optional().default(false).describe('Send as voice note (Push-To-Talk)')
 })
 
 const SendVideoSchema = z.object({
-    to: z.string().describe('Recipient phone number'),
+    to: z.string().describe('Phone number — MUST start with "2" prefix. Group IDs use exactly as-is.'),
     videoUrl: z.string().describe('URL of the video to send'),
     caption: z.string().optional().describe('Video caption')
 })
 
 const SendLocationSchema = z.object({
-    to: z.string().describe('Recipient phone number'),
+    to: z.string().describe('Phone number — MUST start with "2" prefix. Group IDs use exactly as-is.'),
     latitude: z.number().describe('Latitude coordinate'),
     longitude: z.number().describe('Longitude coordinate'),
     description: z.string().optional().describe('Location description')
 })
 
 const SendContactSchema = z.object({
-    to: z.string().describe('Recipient phone number'),
+    to: z.string().describe('Phone number — MUST start with "2" prefix. Group IDs use exactly as-is.'),
     contactName: z.string().describe('Contact name to share'),
     contactNumber: z.string().describe('Contact phone number to share')
 })
@@ -144,10 +164,10 @@ const SetChatLabelsSchema = z.object({
 
 // ─── Messaging Tools ─────────────────────────────────────────────────────────
 
-class SendTextTool extends BaseWhatsDeveloperTool {
+class SendTextTool extends BaseOctobotWappTool {
     constructor(args: any) {
         super({
-            name: 'whatsapp_send_text',
+            name: 'octobot_send_text',
             description: 'Send a text message via WhatsApp to one or multiple recipients. Supports spintax for message variation.',
             schema: SendTextSchema,
             baseUrl: '',
@@ -159,7 +179,8 @@ class SendTextTool extends BaseWhatsDeveloperTool {
 
     async _call(arg: any): Promise<string> {
         try {
-            const to = this.resolveRecipient(arg.to)
+            const rawTo = this.resolveRecipient(arg.to)
+            const to = this.normalizeRecipient(rawTo)
             return await this.makeRequest({
                 endpoint: 'messages/send-text',
                 method: 'POST',
@@ -172,10 +193,10 @@ class SendTextTool extends BaseWhatsDeveloperTool {
     }
 }
 
-class SendImageTool extends BaseWhatsDeveloperTool {
+class SendImageTool extends BaseOctobotWappTool {
     constructor(args: any) {
         super({
-            name: 'whatsapp_send_image',
+            name: 'octobot_send_image',
             description: 'Send an image message via WhatsApp with an optional caption.',
             schema: SendImageSchema,
             baseUrl: '',
@@ -187,7 +208,8 @@ class SendImageTool extends BaseWhatsDeveloperTool {
 
     async _call(arg: any): Promise<string> {
         try {
-            const to = this.resolveRecipient(arg.to)
+            const rawTo = this.resolveRecipient(arg.to)
+            const to = this.normalizeRecipient(rawTo)
             const body: any = { to, imageUrl: arg.imageUrl }
             if (arg.caption) body.caption = arg.caption
             return await this.makeRequest({
@@ -202,10 +224,10 @@ class SendImageTool extends BaseWhatsDeveloperTool {
     }
 }
 
-class SendDocumentTool extends BaseWhatsDeveloperTool {
+class SendDocumentTool extends BaseOctobotWappTool {
     constructor(args: any) {
         super({
-            name: 'whatsapp_send_document',
+            name: 'octobot_send_document',
             description: 'Send a document/file attachment via WhatsApp.',
             schema: SendDocumentSchema,
             baseUrl: '',
@@ -217,7 +239,8 @@ class SendDocumentTool extends BaseWhatsDeveloperTool {
 
     async _call(arg: any): Promise<string> {
         try {
-            const to = this.resolveRecipient(arg.to)
+            const rawTo = this.resolveRecipient(arg.to)
+            const to = this.normalizeRecipient(rawTo)
             const body: any = { to, documentUrl: arg.documentUrl }
             if (arg.filename) body.filename = arg.filename
             if (arg.caption) body.caption = arg.caption
@@ -233,10 +256,10 @@ class SendDocumentTool extends BaseWhatsDeveloperTool {
     }
 }
 
-class SendAudioTool extends BaseWhatsDeveloperTool {
+class SendAudioTool extends BaseOctobotWappTool {
     constructor(args: any) {
         super({
-            name: 'whatsapp_send_audio',
+            name: 'octobot_send_audio',
             description: 'Send an audio message via WhatsApp. Can be sent as a voice note.',
             schema: SendAudioSchema,
             baseUrl: '',
@@ -248,7 +271,8 @@ class SendAudioTool extends BaseWhatsDeveloperTool {
 
     async _call(arg: any): Promise<string> {
         try {
-            const to = this.resolveRecipient(arg.to)
+            const rawTo = this.resolveRecipient(arg.to)
+            const to = this.normalizeRecipient(rawTo)
             const body: any = { to, audioUrl: arg.audioUrl }
             if (arg.ptt !== undefined) body.ptt = arg.ptt
             return await this.makeRequest({
@@ -263,10 +287,10 @@ class SendAudioTool extends BaseWhatsDeveloperTool {
     }
 }
 
-class SendVideoTool extends BaseWhatsDeveloperTool {
+class SendVideoTool extends BaseOctobotWappTool {
     constructor(args: any) {
         super({
-            name: 'whatsapp_send_video',
+            name: 'octobot_send_video',
             description: 'Send a video message via WhatsApp with an optional caption.',
             schema: SendVideoSchema,
             baseUrl: '',
@@ -278,7 +302,8 @@ class SendVideoTool extends BaseWhatsDeveloperTool {
 
     async _call(arg: any): Promise<string> {
         try {
-            const to = this.resolveRecipient(arg.to)
+            const rawTo = this.resolveRecipient(arg.to)
+            const to = this.normalizeRecipient(rawTo)
             const body: any = { to, videoUrl: arg.videoUrl }
             if (arg.caption) body.caption = arg.caption
             return await this.makeRequest({
@@ -293,10 +318,10 @@ class SendVideoTool extends BaseWhatsDeveloperTool {
     }
 }
 
-class SendLocationTool extends BaseWhatsDeveloperTool {
+class SendLocationTool extends BaseOctobotWappTool {
     constructor(args: any) {
         super({
-            name: 'whatsapp_send_location',
+            name: 'octobot_send_location',
             description: 'Send a location pin via WhatsApp with coordinates.',
             schema: SendLocationSchema,
             baseUrl: '',
@@ -308,7 +333,8 @@ class SendLocationTool extends BaseWhatsDeveloperTool {
 
     async _call(arg: any): Promise<string> {
         try {
-            const to = this.resolveRecipient(arg.to)
+            const rawTo = this.resolveRecipient(arg.to)
+            const to = this.normalizeRecipient(rawTo)
             const body: any = { to, latitude: arg.latitude, longitude: arg.longitude }
             if (arg.description) body.description = arg.description
             return await this.makeRequest({
@@ -323,10 +349,10 @@ class SendLocationTool extends BaseWhatsDeveloperTool {
     }
 }
 
-class SendContactTool extends BaseWhatsDeveloperTool {
+class SendContactTool extends BaseOctobotWappTool {
     constructor(args: any) {
         super({
-            name: 'whatsapp_send_contact',
+            name: 'octobot_send_contact',
             description: 'Send a contact card via WhatsApp.',
             schema: SendContactSchema,
             baseUrl: '',
@@ -338,7 +364,8 @@ class SendContactTool extends BaseWhatsDeveloperTool {
 
     async _call(arg: any): Promise<string> {
         try {
-            const to = this.resolveRecipient(arg.to)
+            const rawTo = this.resolveRecipient(arg.to)
+            const to = this.normalizeRecipient(rawTo)
             return await this.makeRequest({
                 endpoint: 'messages/send-contact',
                 method: 'POST',
@@ -351,10 +378,10 @@ class SendContactTool extends BaseWhatsDeveloperTool {
     }
 }
 
-class CheckNumberTool extends BaseWhatsDeveloperTool {
+class CheckNumberTool extends BaseOctobotWappTool {
     constructor(args: any) {
         super({
-            name: 'whatsapp_check_number',
+            name: 'octobot_check_number',
             description: 'Check if a phone number is registered on WhatsApp.',
             schema: CheckNumberSchema,
             baseUrl: '',
@@ -379,10 +406,10 @@ class CheckNumberTool extends BaseWhatsDeveloperTool {
 
 // ─── Label Tools ─────────────────────────────────────────────────────────────
 
-class GetLabelsTool extends BaseWhatsDeveloperTool {
+class GetLabelsTool extends BaseOctobotWappTool {
     constructor(args: any) {
         super({
-            name: 'whatsapp_get_labels',
+            name: 'octobot_get_labels',
             description: 'Get all WhatsApp Business labels.',
             schema: EmptySchema,
             baseUrl: '',
@@ -401,10 +428,10 @@ class GetLabelsTool extends BaseWhatsDeveloperTool {
     }
 }
 
-class GetLabelByIdTool extends BaseWhatsDeveloperTool {
+class GetLabelByIdTool extends BaseOctobotWappTool {
     constructor(args: any) {
         super({
-            name: 'whatsapp_get_label_by_id',
+            name: 'octobot_get_label_by_id',
             description: 'Get a WhatsApp Business label by its ID.',
             schema: LabelIdSchema,
             baseUrl: '',
@@ -423,10 +450,10 @@ class GetLabelByIdTool extends BaseWhatsDeveloperTool {
     }
 }
 
-class GetChatsByLabelTool extends BaseWhatsDeveloperTool {
+class GetChatsByLabelTool extends BaseOctobotWappTool {
     constructor(args: any) {
         super({
-            name: 'whatsapp_get_chats_by_label',
+            name: 'octobot_get_chats_by_label',
             description: 'Get all chats assigned to a specific WhatsApp Business label.',
             schema: LabelIdSchema,
             baseUrl: '',
@@ -445,10 +472,10 @@ class GetChatsByLabelTool extends BaseWhatsDeveloperTool {
     }
 }
 
-class GetChatLabelsTool extends BaseWhatsDeveloperTool {
+class GetChatLabelsTool extends BaseOctobotWappTool {
     constructor(args: any) {
         super({
-            name: 'whatsapp_get_chat_labels',
+            name: 'octobot_get_chat_labels',
             description: 'Get all labels assigned to a specific chat by phone number.',
             schema: PhoneNumberSchema,
             baseUrl: '',
@@ -467,10 +494,10 @@ class GetChatLabelsTool extends BaseWhatsDeveloperTool {
     }
 }
 
-class AssignLabelsTool extends BaseWhatsDeveloperTool {
+class AssignLabelsTool extends BaseOctobotWappTool {
     constructor(args: any) {
         super({
-            name: 'whatsapp_assign_labels',
+            name: 'octobot_assign_labels',
             description: 'Assign WhatsApp Business labels to one or more chats.',
             schema: AssignRemoveLabelsSchema,
             baseUrl: '',
@@ -496,10 +523,10 @@ class AssignLabelsTool extends BaseWhatsDeveloperTool {
     }
 }
 
-class RemoveLabelsTool extends BaseWhatsDeveloperTool {
+class RemoveLabelsTool extends BaseOctobotWappTool {
     constructor(args: any) {
         super({
-            name: 'whatsapp_remove_labels',
+            name: 'octobot_remove_labels',
             description: 'Remove WhatsApp Business labels from one or more chats.',
             schema: AssignRemoveLabelsSchema,
             baseUrl: '',
@@ -525,10 +552,10 @@ class RemoveLabelsTool extends BaseWhatsDeveloperTool {
     }
 }
 
-class SetChatLabelsTool extends BaseWhatsDeveloperTool {
+class SetChatLabelsTool extends BaseOctobotWappTool {
     constructor(args: any) {
         super({
-            name: 'whatsapp_set_chat_labels',
+            name: 'octobot_set_chat_labels',
             description: 'Replace all labels on a chat with the specified labels. Send empty labelIds to remove all labels.',
             schema: SetChatLabelsSchema,
             baseUrl: '',
@@ -560,7 +587,7 @@ class SetChatLabelsTool extends BaseWhatsDeveloperTool {
 
 // ─── Factory ─────────────────────────────────────────────────────────────────
 
-export const createWhatsDeveloperTools = (args: {
+export const createOctobotWappTools = (args: {
     actions: string[]
     deviceUuid: string
     apiToken: string

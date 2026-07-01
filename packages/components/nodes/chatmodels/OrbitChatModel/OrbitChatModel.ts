@@ -8,7 +8,6 @@ import {
   IMultiModalOption,
   INode,
   INodeData,
-  INodeOptionsValue,
   INodeParams,
 } from "../../../src/Interface";
 import {
@@ -16,55 +15,9 @@ import {
   getCredentialData,
   getCredentialParam,
 } from "../../../src/utils";
-import {
-  OctobotDualChatModel,
-  DualKeyConfig,
-} from "./FlowiseOctobotDualChatModel";
+import { OrbitChatModel } from "./OrbitChatModelBase";
 
-const GATEWAY_BASE_URL = "https://aipilotads.com/api/v1";
-
-/**
- * Fetch models from the Gateway for a given API key.
- */
-async function fetchModelsForApiKey(
-  apiKey: string,
-  emptyLabel: string,
-): Promise<INodeOptionsValue[]> {
-  if (!apiKey) {
-    return [{ label: `⚠️ ${emptyLabel}`, name: "" }];
-  }
-
-  try {
-    const response = await fetch(`${GATEWAY_BASE_URL}/models`, {
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      signal: AbortSignal.timeout(10000),
-    });
-
-    if (!response.ok) {
-      return [{ label: `⚠️ Auth failed (${response.status})`, name: "" }];
-    }
-
-    const json = await response.json();
-    const models: Array<{ id: string; display_name?: string }> =
-      json.data ?? [];
-
-    if (models.length === 0) {
-      return [{ label: "No models available for this key", name: "" }];
-    }
-
-    return models.map((m) => ({
-      label: m.id,
-      name: m.id,
-    }));
-  } catch (err: any) {
-    return [{ label: `⚠️ ${err.message}`, name: "" }];
-  }
-}
-
-class OctobotDualModel_ChatModels implements INode {
+class OrbitChatModel_ChatModels implements INode {
   label: string;
   name: string;
   version: number;
@@ -77,20 +30,20 @@ class OctobotDualModel_ChatModels implements INode {
   inputs: INodeParams[];
 
   constructor() {
-    this.label = "Octobot Dual Model";
-    this.name = "octobotDualModel";
+    this.label = "OctoModel";
+    this.name = "octoModel";
     this.version = 1.0;
-    this.type = "OctobotDualModel";
-    this.icon = "octobot-dual.svg";
+    this.type = "OrbitChatModel";
+    this.icon = "orbit.svg";
     this.category = "Chat Models";
     this.description =
-      "Chat model with dual API key failover — primary + backup keys with automatic fallback on error. Each key fetches its own model list independently.";
+      "Chat model for any OpenAI-compatible API endpoint — type your own Base URL and Model ID";
     this.baseClasses = [this.type, ...getBaseClasses(LangchainChatOpenAI)];
     this.credential = {
       label: "Connect Credential",
       name: "credential",
       type: "credential",
-      credentialNames: ["octobotDualApi"],
+      credentialNames: ["orbitApi"],
     };
     this.inputs = [
       {
@@ -100,23 +53,18 @@ class OctobotDualModel_ChatModels implements INode {
         optional: true,
       },
       {
-        label: "Primary Model",
-        name: "primaryModel",
-        type: "asyncOptions",
-        loadMethod: "listPrimaryModels",
-        refresh: true,
-        description:
-          "Select primary model — models are fetched using your Primary API Key",
+        label: "Base URL",
+        name: "baseURL",
+        type: "string",
+        placeholder: "https://api.orbit-provider.com/v1",
+        description: "OpenAI-compatible API base URL (e.g. https://api.orbit-provider.com/v1)",
       },
       {
-        label: "Backup Model",
-        name: "backupModel",
-        type: "asyncOptions",
-        loadMethod: "listBackupModels",
-        refresh: true,
-        optional: true,
-        description:
-          "Select backup/fallback model — models are fetched using your Backup API Key. Leave empty if you only want a single key.",
+        label: "Model ID",
+        name: "modelName",
+        type: "string",
+        placeholder: "claude-opus-4-8",
+        description: "Model identifier your provider expects (e.g. claude-opus-4-8, gpt-4o)",
       },
       {
         label: "Temperature",
@@ -198,64 +146,14 @@ class OctobotDualModel_ChatModels implements INode {
     ];
   }
 
-  //@ts-ignore
-  loadMethods = {
-    /**
-     * Fetch models using the primary API key from the credential.
-     */
-    async listPrimaryModels(
-      nodeData: INodeData,
-      options: ICommonObject,
-    ): Promise<INodeOptionsValue[]> {
-      const credentialData = await getCredentialData(
-        nodeData.credential ?? "",
-        options,
-      );
-      const primaryKey = getCredentialParam(
-        "octobotPrimaryApiKey",
-        credentialData,
-        nodeData,
-      );
-      return fetchModelsForApiKey(
-        primaryKey,
-        "Add primary API key in credential",
-      );
-    },
-
-    /**
-     * Fetch models using the backup API key from the credential.
-     */
-    async listBackupModels(
-      nodeData: INodeData,
-      options: ICommonObject,
-    ): Promise<INodeOptionsValue[]> {
-      const credentialData = await getCredentialData(
-        nodeData.credential ?? "",
-        options,
-      );
-      const backupKey = getCredentialParam(
-        "octobotBackupApiKey",
-        credentialData,
-        nodeData,
-      );
-      if (!backupKey) {
-        return [{ label: "No backup key configured", name: "" }];
-      }
-      return fetchModelsForApiKey(
-        backupKey,
-        "Add backup API key in credential",
-      );
-    },
-  };
-
   async init(
     nodeData: INodeData,
     _: string,
-    options: ICommonObject,
+    options: ICommonObject
   ): Promise<any> {
+    const baseURL = nodeData.inputs?.baseURL as string;
+    const modelName = nodeData.inputs?.modelName as string;
     const temperature = nodeData.inputs?.temperature as string;
-    const primaryModel = nodeData.inputs?.primaryModel as string;
-    const backupModel = (nodeData.inputs?.backupModel as string) || null;
     const maxTokens = nodeData.inputs?.maxTokens as string;
     const topP = nodeData.inputs?.topP as string;
     const frequencyPenalty = nodeData.inputs?.frequencyPenalty as string;
@@ -272,29 +170,31 @@ class OctobotDualModel_ChatModels implements INode {
 
     const credentialData = await getCredentialData(
       nodeData.credential ?? "",
-      options,
+      options
     );
-    const primaryApiKey = getCredentialParam(
-      "octobotPrimaryApiKey",
+    const apiKey = getCredentialParam(
+      "orbitApiKey",
       credentialData,
-      nodeData,
+      nodeData
     );
-    const backupApiKey =
-      getCredentialParam("octobotBackupApiKey", credentialData, nodeData) ||
-      null;
+
+    if (!baseURL) {
+      throw new Error("Base URL is required");
+    }
+
+    if (!modelName) {
+      throw new Error("Model ID is required");
+    }
 
     const obj: ChatOpenAIFields = {
       temperature: temperature ? parseFloat(temperature) : 0.7,
-      model: primaryModel,
-      modelName: primaryModel,
-      openAIApiKey: primaryApiKey,
-      apiKey: primaryApiKey,
+      model: modelName,
+      modelName,
+      openAIApiKey: apiKey ?? "sk-",
+      apiKey: apiKey ?? "sk-",
       streaming: streaming ?? true,
       configuration: {
-        baseURL: GATEWAY_BASE_URL,
-        defaultHeaders: {
-          Authorization: `Bearer ${primaryApiKey}`,
-        },
+        baseURL,
       },
     };
 
@@ -305,13 +205,6 @@ class OctobotDualModel_ChatModels implements INode {
     if (timeout) obj.timeout = parseInt(timeout, 10);
     if (cache) obj.cache = cache;
 
-    const dualConfig: DualKeyConfig = {
-      primaryApiKey,
-      backupApiKey,
-      primaryModel: primaryModel || "",
-      backupModel,
-    };
-
     const multiModalOption: IMultiModalOption = {
       image: {
         allowImageUploads: allowImageUploads ?? false,
@@ -319,10 +212,10 @@ class OctobotDualModel_ChatModels implements INode {
       },
     };
 
-    const model = new OctobotDualChatModel(nodeData.id, obj, dualConfig);
+    const model = new OrbitChatModel(nodeData.id, obj);
     model.setMultiModalOption(multiModalOption);
     return model;
   }
 }
 
-module.exports = { nodeClass: OctobotDualModel_ChatModels };
+module.exports = { nodeClass: OrbitChatModel_ChatModels };

@@ -159,7 +159,6 @@ class OrbitChatModel_ChatModels implements INode {
     const frequencyPenalty = nodeData.inputs?.frequencyPenalty as string;
     const presencePenalty = nodeData.inputs?.presencePenalty as string;
     const timeout = nodeData.inputs?.timeout as string;
-    const streaming = nodeData.inputs?.streaming as boolean;
     const cache = nodeData.inputs?.cache as BaseCache;
     const allowImageUploads = nodeData.inputs?.allowImageUploads as boolean;
     const imageResolution = nodeData.inputs?.imageResolution as string;
@@ -192,7 +191,9 @@ class OrbitChatModel_ChatModels implements INode {
       modelName,
       openAIApiKey: apiKey ?? "sk-",
       apiKey: apiKey ?? "sk-",
-      streaming: streaming ?? true,
+      streaming: false,
+      disableStreaming: true,
+      streamUsage: false,
       configuration: {
         baseURL,
       },

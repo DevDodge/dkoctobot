@@ -261,7 +261,6 @@ class OctobotDualModel_ChatModels implements INode {
     const frequencyPenalty = nodeData.inputs?.frequencyPenalty as string;
     const presencePenalty = nodeData.inputs?.presencePenalty as string;
     const timeout = nodeData.inputs?.timeout as string;
-    const streaming = nodeData.inputs?.streaming as boolean;
     const cache = nodeData.inputs?.cache as BaseCache;
     const allowImageUploads = nodeData.inputs?.allowImageUploads as boolean;
     const imageResolution = nodeData.inputs?.imageResolution as string;
@@ -289,7 +288,9 @@ class OctobotDualModel_ChatModels implements INode {
       modelName: primaryModel,
       openAIApiKey: primaryApiKey,
       apiKey: primaryApiKey,
-      streaming: streaming ?? true,
+      streaming: false,
+      disableStreaming: true,
+      streamUsage: false,
       configuration: {
         baseURL: GATEWAY_BASE_URL,
         defaultHeaders: {

@@ -2,9 +2,10 @@ import {
   ChatOpenAI as LangchainChatOpenAI,
   ChatOpenAIFields,
 } from "@langchain/openai";
-import { AIMessage, BaseMessage } from "@langchain/core/messages";
-import { ChatResult } from "@langchain/core/outputs";
+import { AIMessage, AIMessageChunk, BaseMessage } from "@langchain/core/messages";
+import { ChatGenerationChunk, ChatResult } from "@langchain/core/outputs";
 import { CallbackManagerForLLMRun } from "@langchain/core/callbacks/manager";
+import { ChatGeneration } from "@langchain/core/outputs";
 import { IMultiModalOption, IVisionChatModal } from "../../../src";
 
 export class OrbitChatModel
@@ -379,11 +380,67 @@ export class OrbitChatModel
             );
           }
         }
+
+        // --- Bridge: emit content as synthetic streaming tokens ----------
+        // When shouldStreamResponse=true, CustomChainHandler listens for
+        // handleLLMNewToken events. Since we force non-streaming, those
+        // events never fire and the UI never sees the final answer.
+        // We simulate streaming by emitting the full content as tokens.
+        if (runManager && typeof message.content === "string" && message.content) {
+          console.log(
+            `[OrbitChatModel DEBUG] 🔄 Bridging: emitting synthetic tokens to runManager (${message.content.length} chars)`
+          );
+          await this._emitSyntheticTokens(runManager, message.content, generation);
+        }
       }
 
       return result;
     } finally {
       this.streaming = originalStreaming;
+    }
+  }
+
+  /**
+   * Emit the final content as synthetic streaming tokens.
+   *
+   * When the upstream agent runs in streaming mode (shouldStreamResponse=true),
+   * it attaches a CustomChainHandler that listens for handleLLMNewToken events.
+   * Since we force non-streaming, those events never fire and the UI never
+   * sees the final answer. This bridge simulates streaming by emitting the
+   * complete content as a sequence of tokens.
+   */
+  private async _emitSyntheticTokens(
+    runManager: CallbackManagerForLLMRun,
+    content: string,
+    generation: ChatGeneration
+  ): Promise<void> {
+    const CHUNK_SIZE = 20;
+    try {
+      // Emit the content in small chunks to simulate normal streaming
+      for (let i = 0; i < content.length; i += CHUNK_SIZE) {
+        const token = content.substring(i, i + CHUNK_SIZE);
+        // Build a lightweight chunk so handlers that expect `chunk.message` don't crash
+        const chunk = new ChatGenerationChunk({
+          message: new AIMessageChunk({ content: token }),
+          text: token,
+        });
+        // Pass `undefined` for runId and tags — the handler only needs the content
+        await runManager.handleLLMNewToken(
+          token,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          { chunk }
+        );
+      }
+    } catch {
+      // Best effort — if handleLLMNewToken isn't available or throws, that's OK.
+      // The tool calling result is already captured in `generation.message`.
+      console.log(
+        `[OrbitChatModel DEBUG] ⚠️ handleLLMNewToken failed — UI may not stream, ` +
+          `but tool calls were processed`
+      );
     }
   }
 

@@ -37,7 +37,7 @@ async function main(): Promise<void> {
 
   // Pipeline
   const scheduler = new Scheduler(state, timers, provider);
-  const consumer = new IngestConsumer(state, scheduler);
+  const consumer = new IngestConsumer(state, scheduler, provider);
   const worker = new Worker(state, circuitBreaker, rateLimiter);
   const poller = new Poller(timers, worker);
 

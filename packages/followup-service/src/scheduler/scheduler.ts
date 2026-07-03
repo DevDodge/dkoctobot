@@ -29,6 +29,26 @@ export class Scheduler {
       return;
     }
     const { config, steps } = bundle;
+
+    // Early filter: skip scheduling if chatIdFilterRegex is set and trackingId doesn't match
+    if (config.chatIdFilterRegex) {
+      try {
+        const filterRegex = new RegExp(config.chatIdFilterRegex);
+        if (!filterRegex.test(trackingId)) {
+          logger.debug(
+            `Skipped ${chatflowId}:${trackingId} — does not match chatIdFilterRegex`
+          );
+          return;
+        }
+      } catch (err: any) {
+        logger.error(
+          `[Scheduler] Invalid chatIdFilterRegex for ${chatflowId}: ${config.chatIdFilterRegex}`,
+          err
+        );
+        return;
+      }
+    }
+
     const now = Date.now();
     const scheduledAt = new Date(now).toISOString();
 

@@ -2,6 +2,7 @@ import { Redis } from "ioredis";
 import { getBlockingRedis, getRedis } from "../redis/client";
 import { StateStore } from "../redis/stateStore";
 import { Scheduler } from "../scheduler/scheduler";
+import { ConfigProvider } from "../config/configProvider";
 import { env } from "../config/env";
 import { logger } from "../utils/logger";
 import { MessageEvent } from "../domain/types";
@@ -24,7 +25,11 @@ export class IngestConsumer {
   _lag = 0;
   _lastEventTs = 0;
 
-  constructor(private state: StateStore, private scheduler: Scheduler) {
+  constructor(
+    private state: StateStore,
+    private scheduler: Scheduler,
+    private config: ConfigProvider
+  ) {
     this.blocking = getBlockingRedis();
     this.control = getRedis();
   }
@@ -131,6 +136,27 @@ export class IngestConsumer {
     if (!ev.chatflowId) return;
     const trackingId = ev.sessionId || ev.chatId;
     if (!trackingId) return;
+
+    // Early filter: if chatIdFilterRegex is configured, completely ignore non-matching sessions.
+    // This prevents non-matching sessions from being cached, scheduled, or appearing in Pending.
+    const bundle = await this.config.getConfig(ev.chatflowId);
+    if (bundle?.config.chatIdFilterRegex) {
+      try {
+        const filterRegex = new RegExp(bundle.config.chatIdFilterRegex);
+        if (!filterRegex.test(trackingId)) {
+          logger.debug(
+            `[Consumer] Ignored ${ev.chatflowId}:${trackingId} — does not match chatIdFilterRegex`
+          );
+          return;
+        }
+      } catch (err: any) {
+        logger.error(
+          `[Consumer] Invalid chatIdFilterRegex for ${ev.chatflowId}: ${bundle.config.chatIdFilterRegex}`,
+          err
+        );
+        return;
+      }
+    }
 
     const isUser = ev.role === "userMessage";
 

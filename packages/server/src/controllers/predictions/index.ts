@@ -16,13 +16,6 @@ import { publishFollowUpEvent } from "../../utils/followUpPublisher";
 // Default (false) publishes lightweight events to the standalone follow-up service.
 const FOLLOWUP_LEGACY = process.env.FOLLOWUP_LEGACY === "true";
 
-// Per-chatflow concurrency tracking to prevent server freeze under burst traffic
-const activePredictions = new Map<string, number>();
-const MAX_CONCURRENT_PER_CHATFLOW = parseInt(
-  process.env.MAX_CONCURRENT_PER_CHATFLOW || "5"
-);
-const MAX_TOTAL_CONCURRENT = parseInt(process.env.MAX_TOTAL_CONCURRENT || "30");
-let totalActive = 0;
 
 // Follow-up service singleton (lazy init)
 let followUpService: FollowUpService | null = null;
@@ -111,29 +104,6 @@ async function scheduleFollowUpIfEnabled(
   }
 }
 
-function acquireSlot(chatflowId: string): boolean {
-  const currentForFlow = activePredictions.get(chatflowId) || 0;
-  if (
-    currentForFlow >= MAX_CONCURRENT_PER_CHATFLOW ||
-    totalActive >= MAX_TOTAL_CONCURRENT
-  ) {
-    logger.warn(
-      `[server]: Concurrency limit hit for chatflow ${chatflowId} (flow: ${currentForFlow}/${MAX_CONCURRENT_PER_CHATFLOW}, total: ${totalActive}/${MAX_TOTAL_CONCURRENT})`
-    );
-    return false;
-  }
-  activePredictions.set(chatflowId, currentForFlow + 1);
-  totalActive++;
-  return true;
-}
-
-function releaseSlot(chatflowId: string): void {
-  const updated = (activePredictions.get(chatflowId) || 1) - 1;
-  if (updated <= 0) activePredictions.delete(chatflowId);
-  else activePredictions.set(chatflowId, updated);
-  totalActive--;
-}
-
 // Send input message and get prediction result (External)
 const createPrediction = async (
   req: Request,
@@ -141,7 +111,6 @@ const createPrediction = async (
   next: NextFunction
 ) => {
   const chatflowId = req.params?.id;
-  let slotAcquired = false;
   try {
     if (typeof req.params === "undefined" || !chatflowId) {
       throw new InternalFlowiseError(
@@ -155,15 +124,6 @@ const createPrediction = async (
         `Error: predictionsController.createPrediction - body not provided!`
       );
     }
-
-    // Check concurrency limits before doing any heavy work
-    if (!acquireSlot(chatflowId)) {
-      return res.status(429).json({
-        error:
-          "Server busy processing other requests for this chatflow, please retry shortly",
-      });
-    }
-    slotAcquired = true;
 
     const workspaceId = req.user?.activeWorkspaceId;
 
@@ -290,9 +250,6 @@ const createPrediction = async (
   } catch (error) {
     next(error);
   } finally {
-    if (slotAcquired && chatflowId) {
-      releaseSlot(chatflowId);
-    }
   }
 };
 

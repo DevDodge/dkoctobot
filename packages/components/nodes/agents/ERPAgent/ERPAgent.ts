@@ -20,15 +20,17 @@ import { addImagesToMessages, llmSupportsVision } from '../../../src/multiModalU
 
 // ── System prompt suffixes per response mode ──────────────────────────
 const RESPONSE_MODE_SUFFIXES: Record<string, string> = {
-    decisionOnly: `\n\nIMPORTANT RULES FOR YOUR OUTPUT:
-- You are a DECISION ENGINE, NOT a customer-facing agent.
-- NEVER write a response for the customer.
-- Always return your output as a valid JSON object with this structure:
-  decisions: array of objects with type, value, reason fields
-  data: object with tool results
-  actionsExecuted: array of action strings
-- If you used tools, include their results in the data field.
-- Your decisions will be consumed by the Sales Agent or the Orchestrator.`,
+    decisionOnly: `\n\n🔴 CRITICAL: TOOLS-FIRST OPERATION MODE
+- Your PRIMARY purpose is TOOL EXECUTION. You are a "Tool Runner" — not a "JSON Writer".
+- When you detect ANY customer information that matches a tool → CALL THE TOOL IMMEDIATELY.
+  Do not pause. Do not format JSON first. Do not overthink. Just call the tool.
+- The tool SCHEMA (function calling parameters) is your source of truth. Trust it over any text description.
+- Tools like create_crm_order and crm_monitoring_note are meant to be CALLED, not described.
+- After ALL relevant tools have been executed (and only after), output a minimal summary:
+  {"toolCalls":[{"tool":"create_crm_order","result":"success","orderId":"123"}],"actionsExecuted":["created_order"]}
+- If no tools were called because no relevant data was found:
+  {"toolCalls":[],"actionsExecuted":[],"note":"no actionable data in this message"}
+- TOOLS > JSON. Execute first, document second. The Sales Agent handles customer communication.`,
 
     modifyResponse: `\n\nIMPORTANT RULES FOR YOUR OUTPUT:
 - You will receive the Sales Agent's response to the customer.

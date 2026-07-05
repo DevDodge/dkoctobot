@@ -1,4 +1,5 @@
-import { Tool } from "@langchain/core/tools";
+import { StructuredTool } from "@langchain/core/tools";
+import { z } from "zod";
 import {
   ICommonObject,
   INode,
@@ -10,13 +11,99 @@ import {
   getBaseClasses,
   convertMultiOptionsToStringArray,
 } from "../../../src/utils";
-import { TOOL_ARGS_PREFIX } from "../../../src/agents";
+import { TOOL_ARGS_PREFIX, formatToolError } from "../../../src/agents";
 
 // Placeholder that indicates "not yet generated"
 const TOOL_DESC_PLACEHOLDER = `⚠️ Click refresh on "Get Key Mapping" above, then copy the generated prompt here.
 
 This field must contain the exact key names from your CRM client.
 Each client has different column keys — do NOT use generic names like "name" or "phone".`;
+
+// ── Smart Alias Map — fuzzy matches common field names to CRM keys ──
+const FIELD_ALIAS_MAP: Record<string, string[]> = {
+  clientName: [
+    "name", "customer_name", "fullName", "full_name", "client_name",
+    "الاسم", "اسم", "اسم العميل", "العميل", "customer", "client",
+  ],
+  clientPhone: [
+    "phone", "mobile", "tel", "telephone", "contact", "phoneNumber",
+    "رقم", "موبايل", "تليفون", "هاتف", "رقم الموبايل", "رقم الهاتف",
+    "رقم التواصل", "جوال", "contact_number", "phone_number", "mobile_number",
+  ],
+  sessionId: [
+    "session", "session_id", "sessionid", "chatId", "chat_id", "chatid",
+    "معرف", "الجلسة", "معرف الجلسة",
+  ],
+  orderDetails: [
+    "details", "order", "product", "description", "items", "order_detail",
+    "تفاصيل", "الاوردر", "المنتج", "تفاصيل الاوردر", "الطلب",
+    "order_description", "what", "item", "service", "package",
+  ],
+  orderPrice: [
+    "price", "total", "amount", "cost", "total_price", "order_total",
+    "سعر", "المبلغ", "الاجمالي", "السعر", "سعر الاوردر", "التكلفة",
+    "totalPrice", "grand_total", "sum",
+  ],
+  orderStatus: [
+    "status", "حالة", "الحالة", "order_status", "حالة الاوردر",
+  ],
+  governorate: [
+    "governorate", "محافظة", "city", "region", "مدينة", "منطقة",
+    "govern", "province", "state",
+  ],
+  address: [
+    "address", "location", "fullAddress", "full_address", "street",
+    "عنوان", "مكان", "العنوان", "عنوان الشحن", "shipping_address",
+  ],
+  email: [
+    "email", "mail", "e_mail", "بريد", "الايميل", "البريد",
+    "البريد الإلكتروني", "الايميل الالكتروني",
+  ],
+  quantity: [
+    "quantity", "qty", "count", "amount", "كمية", "الكمية", "عدد", "qty",
+  ],
+};
+
+/**
+ * Normalize keys by fuzzy-matching common field names to CRM column keys.
+ * Also handles Arabic ↔ English equivalences.
+ */
+function normalizeAttributeKeys(
+  attributes: { key: string; value: string }[],
+  _columns?: any[]
+): { key: string; value: string }[] {
+  return attributes.map((attr) => {
+    const lowerKey = attr.key.toLowerCase().trim();
+
+    // Already a known CRM key? Skip normalization
+    for (const knownKey of Object.keys(FIELD_ALIAS_MAP)) {
+      if (lowerKey === knownKey.toLowerCase()) {
+        return attr;
+      }
+    }
+
+    // Check alias map
+    for (const [knownKey, aliases] of Object.entries(FIELD_ALIAS_MAP)) {
+      for (const alias of aliases) {
+        if (lowerKey === alias.toLowerCase()) {
+          return { key: knownKey, value: attr.value };
+        }
+      }
+    }
+
+    // Check if any alias is a substring of the key (and vice versa)
+    for (const [knownKey, aliases] of Object.entries(FIELD_ALIAS_MAP)) {
+      for (const alias of aliases) {
+        if (lowerKey.includes(alias.toLowerCase()) || alias.toLowerCase().includes(lowerKey)) {
+          return { key: knownKey, value: attr.value };
+        }
+      }
+    }
+
+    // No match found — keep original key (CRM may add it dynamically)
+    return attr;
+  });
+}
 
 class CRMOrderTool_Tools implements INode {
   label: string;
@@ -32,13 +119,18 @@ class CRMOrderTool_Tools implements INode {
   constructor() {
     this.label = "CRM Order Tool";
     this.name = "crmOrderTool";
-    this.version = 1.0;
+    this.version = 2.0;
     this.type = "CRMOrderTool";
     this.icon = "crm-order.svg";
     this.category = "AppCity";
     this.description =
-      "Create or update orders in the CRM system via API key integration. Used by ERP Agent.";
-    this.baseClasses = [this.type, "Tool", ...getBaseClasses(Tool)];
+      "Create or update orders in the CRM system via API key integration. Uses dynamic schema from CRM columns — works automatically with any client configuration.";
+    this.baseClasses = [
+      this.type,
+      "StructuredTool",
+      "Tool",
+      ...getBaseClasses(StructuredTool),
+    ];
     this.inputs = [
       {
         label: "CRM Base URL",
@@ -118,7 +210,7 @@ class CRMOrderTool_Tools implements INode {
         rows: 6,
         default: TOOL_DESC_PLACEHOLDER,
         description:
-          'Paste the generated prompt from "Get Key Mapping" here. Click the ↗️ expand button for a full-screen editor. This text tells the agent which exact keys to use.',
+          'Paste the generated prompt from "Get Key Mapping" here. Click the ↗️ expand button for a full-screen editor. Leave empty for auto-generation from CRM.',
         optional: true,
         additionalParams: true,
       },
@@ -276,6 +368,13 @@ ${fieldList}
           description: erpPromptSnippet,
         });
 
+        // Schema info for structured tool
+        items.push({
+          label: `📐 Dynamic Schema Active — ${columns.length} fields auto-detected from CRM`,
+          name: "schema_info",
+          description: `The tool uses a dynamic Zod schema built from CRM columns. The AI agent will see these fields via function calling: ${columns.map((c: any) => c.key_name).join(", ")}`,
+        });
+
         // Connection info
         items.push({
           label: `✅ ${result.client} (${result.brand}) — ${columns.length} keys loaded`,
@@ -346,7 +445,26 @@ ${fieldList}
       );
     }
 
-    const tools: Tool[] = [];
+    // ── Fetch CRM columns for dynamic schema building ──
+    let columns: any[] = [];
+    try {
+      const columnsUrl = `${crmBaseUrl}/api/integration/columns`;
+      const colResponse = await fetch(columnsUrl, {
+        method: "GET",
+        headers: { "Content-Type": "application/json", "X-API-Key": apiKey },
+      });
+      if (colResponse.ok) {
+        const colResult = (await colResponse.json()) as any;
+        if (colResult.success && colResult.columns?.length > 0) {
+          columns = colResult.columns;
+        }
+      }
+    } catch {
+      // Non-fatal: the tool can still work without columns (no schema validation)
+      console.warn("[CRMOrderTool] Could not fetch columns from CRM. Schema will be minimal.");
+    }
+
+    const tools: StructuredTool[] = [];
 
     // If 'createOrder' is enabled
     if (actions.includes("createOrder")) {
@@ -354,7 +472,7 @@ ${fieldList}
         (nodeData.inputs?.toolName as string) || "create_crm_order";
       let toolDescription = (nodeData.inputs?.toolDescription as string) || "";
 
-      if (!toolDescription || toolDescription.includes("⚠️")) {
+      if (!toolDescription || isPlaceholder(toolDescription)) {
         toolDescription = await getOnTheFlyDescription(
           crmBaseUrl,
           apiKey,
@@ -372,6 +490,7 @@ ${fieldList}
           action: "create",
           useFlowSessionId,
           resolvedSessionId,
+          columns,
         })
       );
     }
@@ -404,6 +523,7 @@ ${fieldList}
           action: "update",
           useFlowSessionId,
           resolvedSessionId,
+          columns,
         })
       );
     }
@@ -412,6 +532,26 @@ ${fieldList}
   }
 }
 
+// ── Helpers ─────────────────────────────────────────────────────────
+
+/**
+ * Check if a tool description is still a placeholder (not yet configured).
+ */
+function isPlaceholder(desc: string): boolean {
+  if (!desc || desc.trim().length === 0) return true;
+  const placeholderPatterns = [
+    "⚠️",
+    "Click refresh",
+    "copy the generated",
+    "generated prompt here",
+    "enter api key first",
+  ];
+  return placeholderPatterns.some((p) => desc.toLowerCase().includes(p.toLowerCase()));
+}
+
+/**
+ * Fetch CRM columns and auto-generate a tool description on the fly.
+ */
 async function getOnTheFlyDescription(
   crmBaseUrl: string,
   apiKey: string,
@@ -465,15 +605,18 @@ You MUST use these EXACT key names. Do not translate or rename them.`;
       }
     }
   } catch {
-    // Fallback
+    // Fallback — return a minimal description
   }
 
+  // Minimal fallback description
   if (actionType === "create") {
-    return 'Create a new order in the CRM system. Input must be a JSON string with an "attributes" array containing "key" and "value" pairs.';
+    return "Create a new order in the CRM system. Provide any known customer information — all fields are optional. The system will automatically map your input to the correct CRM fields.";
   } else {
-    return 'Update an existing order in the CRM system via sessionId. Input must be a JSON string with an "attributes" array containing "key" and "value" pairs to be modified.';
+    return "Update an existing order in the CRM system. Provide the sessionId and any fields to update. All fields are optional — only specified fields will be changed.";
   }
 }
+
+// ── Tool Implementation Config ──────────────────────────────────────
 
 interface CRMOrderToolConfig {
   crmBaseUrl: string;
@@ -483,17 +626,102 @@ interface CRMOrderToolConfig {
   action: "create" | "update";
   useFlowSessionId: boolean;
   resolvedSessionId: string;
+  columns: any[];
 }
 
+// ── Dynamic Schema Builder ──────────────────────────────────────────
+
+/**
+ * Build a Zod schema dynamically from CRM column definitions.
+ * Every field is optional — the LLM sends only what it knows.
+ * Number fields accept both numbers and numeric strings.
+ */
+function buildDynamicSchema(columns: any[]): z.ZodObject<any> {
+  if (!columns || columns.length === 0) {
+    // Minimal fallback: accept any string key-value pairs
+    return z.object({
+      clientName: z.string().optional().describe("Customer's full name"),
+      clientPhone: z.string().optional().describe("Customer's phone number"),
+      orderDetails: z.string().optional().describe("Order details — what the customer wants"),
+      orderPrice: z
+        .union([z.number(), z.string().transform((v) => Number(v))])
+        .optional()
+        .describe("Order total price"),
+      orderStatus: z.string().optional().describe("Order status — use \"جديد\" as default"),
+      sessionId: z.string().optional().describe("Session identifier — auto-injected, can be omitted"),
+      governorate: z.string().optional().describe("Customer's governorate/city"),
+      address: z.string().optional().describe("Full delivery address"),
+      email: z.string().optional().describe("Customer's email address"),
+      quantity: z
+        .union([z.number(), z.string().transform((v) => Number(v))])
+        .optional()
+        .describe("Quantity of items ordered"),
+    }).passthrough(); // .passthrough() allows unknown keys
+  }
+
+  const shape: Record<string, z.ZodTypeAny> = {};
+
+  for (const col of columns) {
+    const desc = col.display_name || col.key_name || "";
+    const opts = col.options
+      ? ` (allowed: ${typeof col.options === "string" ? col.options : JSON.stringify(col.options)})`
+      : "";
+
+    switch (col.type) {
+      case "number":
+        shape[col.key_name] = z
+          .union([
+            z.number(),
+            z.string().transform((v) => {
+              const n = Number(v);
+              if (isNaN(n)) return v; // keep as string if not parseable
+              return n;
+            }),
+          ])
+          .optional()
+          .describe(desc + opts);
+        break;
+
+      case "boolean":
+        shape[col.key_name] = z
+          .union([
+            z.boolean(),
+            z
+              .string()
+              .transform((v) =>
+                v === "true" || v === "1" || v === "yes" ? true : false
+              ),
+          ])
+          .optional()
+          .describe(desc + opts);
+        break;
+
+      case "select":
+        shape[col.key_name] = z.string().optional().describe(desc + opts);
+        break;
+
+      default: // text, date, dropdown, or unknown
+        shape[col.key_name] = z.string().optional().describe(desc + opts);
+    }
+  }
+
+  return z.object(shape).passthrough(); // Allow extra/unknown keys
+}
+
+// ── Structured Tool Implementation ──────────────────────────────────
+
 // @ts-ignore
-class CRMOrderToolImpl extends Tool {
+class CRMOrderToolImpl extends StructuredTool {
   name: string;
   description: string;
+  schema: z.ZodObject<any>;
+
   private crmBaseUrl: string;
   private apiKey: string;
   private action: "create" | "update";
   private useFlowSessionId: boolean;
   private resolvedSessionId: string;
+  private columns: any[];
 
   constructor(config: CRMOrderToolConfig) {
     super();
@@ -504,80 +732,91 @@ class CRMOrderToolImpl extends Tool {
     this.action = config.action;
     this.useFlowSessionId = config.useFlowSessionId;
     this.resolvedSessionId = config.resolvedSessionId;
+    this.columns = config.columns || [];
+
+    // 🔥 Build the Zod schema dynamically from CRM columns
+    this.schema = buildDynamicSchema(this.columns);
   }
 
   // @ts-ignore
   async _call(
-    input: string,
+    arg: z.infer<typeof this.schema>,
     _runManager?: any,
-    _config?: any
+    _config?: any,
+    flowConfig?: {
+      sessionId?: string;
+      chatId?: string;
+      input?: string;
+      state?: any;
+    }
   ): Promise<string> {
     try {
-      let parsedInput: any;
-      try {
-        parsedInput = JSON.parse(input);
-      } catch {
-        const jsonMatch = input.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          parsedInput = JSON.parse(jsonMatch[0]);
-        } else {
-          return `ERROR: Invalid input format. Please provide a valid JSON string with an "attributes" array.`;
-        }
-      }
+      // ── 1. Convert Zod-validated object to attributes array ──
+      let attributes = Object.entries(arg)
+        .filter(([_, v]) => v !== undefined && v !== null && v !== "")
+        .map(([key, value]) => ({
+          key,
+          value: String(value),
+        }));
 
-      let attributes = parsedInput.attributes;
+      // ── 2. Auto-inject sessionId ──
+      // Priority: flowConfig (runtime from AgentExecutor) > resolvedSessionId (init time)
+      const effectiveSessionId =
+        flowConfig?.sessionId ||
+        flowConfig?.chatId ||
+        this.resolvedSessionId ||
+        "";
 
-      // Auto-detect flat format: AI might send {"clientName":"value",...} instead of {"attributes":[...]}
-      if (!attributes || !Array.isArray(attributes) || attributes.length === 0) {
-        const flatKeys = Object.keys(parsedInput).filter(
-          k => typeof parsedInput[k] === 'string' && k !== 'input'
+      if (effectiveSessionId) {
+        const hasSessionId = attributes.some(
+          (a) =>
+            a.key.toLowerCase() === "sessionid" ||
+            a.key.toLowerCase() === "session_id" ||
+            a.key.toLowerCase() === "session id"
         );
-        if (flatKeys.length > 0) {
-          attributes = flatKeys.map(k => ({ key: k, value: parsedInput[k] }));
-        } else {
-          return `ERROR: The "attributes" array is required and must contain at least one item with "key" and "value" fields. Received: ${JSON.stringify(parsedInput)}`;
+        if (!hasSessionId) {
+          attributes.push({ key: "sessionId", value: effectiveSessionId });
         }
       }
 
-      // Resolve sessionId: use the value captured at init time (from options.sessionId)
-      // This is the reliable approach because LangChain's Tool.call() does NOT
-      // forward the 4th flowConfig argument to _call (it only passes 3 args:
-      // parsed input, runManager, and RunnableConfig).
-      const sessionIdVal =
-        this.useFlowSessionId && this.resolvedSessionId
-          ? this.resolvedSessionId
-          : undefined;
+      // ── 3. Smart fuzzy key matching ──
+      // Normalize common field name aliases to CRM column keys
+      attributes = normalizeAttributeKeys(attributes, this.columns);
 
-      if (sessionIdVal) {
-        const sessionIdx = attributes.findIndex(
-          (a: any) => a.key === "sessionId"
+      // ── 4. Validate we have at least something ──
+      const nonSessionAttrs = attributes.filter(
+        (a) => a.key !== "sessionId"
+      );
+      if (nonSessionAttrs.length === 0) {
+        return formatToolError(
+          "No order data provided. Please provide at least customer name and phone number.",
+          { provided: attributes }
         );
-        if (sessionIdx > -1) {
-          attributes[sessionIdx].value = sessionIdVal;
-        } else {
-          attributes.push({ key: "sessionId", value: sessionIdVal });
-        }
       }
 
-      // Construct payload
+      // ── 5. Construct payload and send to CRM ──
       const payload: any = {
         action: this.action,
         attributes,
       };
 
-      if (sessionIdVal) {
-        payload.sessionId = sessionIdVal;
+      if (effectiveSessionId) {
+        payload.sessionId = effectiveSessionId;
       }
 
       console.info(
-        `[CRMOrderTool] action=${this.action} sessionId=${
-          sessionIdVal || "(none)"
-        } attrs=${attributes.length}`
+        `[CRMOrderTool v2] action=${this.action} sessionId=${
+          effectiveSessionId || "(none)"
+        } attrs=${attributes.length} keys=${attributes
+          .map((a) => a.key)
+          .join(", ")}`
       );
 
-      // Build the actual input representation to show in Used Tools UI
-      const actualToolInput = { input: JSON.stringify({ attributes }) };
-      const toolArgsSuffix = TOOL_ARGS_PREFIX + JSON.stringify(actualToolInput);
+      const actualToolInput = {
+        input: JSON.stringify({ attributes }),
+      };
+      const toolArgsSuffix =
+        TOOL_ARGS_PREFIX + JSON.stringify(actualToolInput);
 
       // Send to CRM
       const url = `${this.crmBaseUrl}/api/integration/orders`;
@@ -593,23 +832,29 @@ class CRMOrderToolImpl extends Tool {
       const result = (await response.json()) as any;
 
       if (!response.ok) {
-        return `ERROR: Failed to ${this.action} order. Status: ${
-          response.status
-        }. Message: ${
-          result.message || "Unknown error"
-        }. Please inform the customer that there was a technical issue and try again.${toolArgsSuffix}`;
+        return formatToolError(
+          `Failed to ${this.action} order. Status: ${response.status}. Message: ${
+            result.message || "Unknown error"
+          }. Please inform the customer that there was a technical issue and try again.`,
+          payload
+        );
       }
 
       if (result.success) {
-        const actionStr = this.action === "update" ? "updated" : "created";
-        return `SUCCESS: Order ${actionStr} successfully!\nOrder ID: #${result.order_id}\nClient: ${result.client}\nBrand: ${result.brand}\n\nPlease confirm to the customer that their order has been ${actionStr} with order number #${result.order_id}.${toolArgsSuffix}`;
+        const actionStr =
+          this.action === "update" ? "updated" : "created";
+        return `Order ${actionStr} successfully!\nOrder ID: #${result.order_id}\nClient: ${result.client}\nBrand: ${result.brand}\n\nPlease confirm to the customer that their order has been ${actionStr} with order number #${result.order_id}.${toolArgsSuffix}`;
       } else {
-        return `ERROR: ${
-          result.message || `Failed to ${this.action} order`
-        }. Please inform the customer about this issue.${toolArgsSuffix}`;
+        return formatToolError(
+          `${result.message || `Failed to ${this.action} order`}. Please inform the customer about this issue.`,
+          payload
+        );
       }
     } catch (error: any) {
-      return `ERROR: Failed to connect to CRM at ${this.crmBaseUrl}: ${error.message}. Please inform the customer that there is a temporary connection issue.`;
+      return formatToolError(
+        `Failed to connect to CRM at ${this.crmBaseUrl}: ${error.message}. Please inform the customer that there is a temporary connection issue.`,
+        {}
+      );
     }
   }
 }

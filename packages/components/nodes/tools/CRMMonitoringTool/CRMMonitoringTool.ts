@@ -1,4 +1,5 @@
-import { Tool } from "@langchain/core/tools";
+import { StructuredTool } from "@langchain/core/tools";
+import { z } from "zod";
 import { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import {
   INode,
@@ -10,7 +11,7 @@ import {
   getBaseClasses,
   convertMultiOptionsToStringArray,
 } from "../../../src/utils";
-import { TOOL_ARGS_PREFIX } from "../../../src/agents";
+import { TOOL_ARGS_PREFIX, formatToolError } from "../../../src/agents";
 
 class CRMMonitoringTool_Tools implements INode {
   label: string;
@@ -26,13 +27,18 @@ class CRMMonitoringTool_Tools implements INode {
   constructor() {
     this.label = "CRM Monitoring Tool";
     this.name = "crmMonitoringTool";
-    this.version = 1.0;
+    this.version = 2.0;
     this.type = "CRMMonitoringTool";
     this.icon = "crm-monitoring.svg";
     this.category = "AppCity";
     this.description =
-      "Dynamic monitoring node to extract metadata, sentiment and alerts for any business type.";
-    this.baseClasses = [this.type, "Tool", ...getBaseClasses(Tool)];
+      "Dynamic monitoring node to extract metadata, sentiment and alerts for any business type. Uses structured input via function calling.";
+    this.baseClasses = [
+      this.type,
+      "StructuredTool",
+      "Tool",
+      ...getBaseClasses(StructuredTool),
+    ];
     this.inputs = [
       {
         label: "Chat Model",
@@ -123,12 +129,31 @@ interface ToolConfig {
   resolvedSessionId: string;
 }
 
-class CRMMonitoringToolImpl extends Tool {
+// ── Structured Input Schema ─────────────────────────────────────────
+// The LLM sends { message, previousContext } directly via function calling.
+// No JSON parsing needed — the framework handles it.
+
+const MonitoringInputSchema = z.object({
+  message: z
+    .string()
+    .describe(
+      "The customer's latest message to analyze. Extract new information, sentiment, and check alert rules."
+    ),
+  previousContext: z
+    .string()
+    .optional()
+    .describe(
+      "Optional: Brief summary of the conversation so far to provide context for analysis."
+    ),
+});
+
+class CRMMonitoringToolImpl extends StructuredTool {
   name = "crm_monitoring_note";
-  description = `Silently records key milestones and user parameters to CRM dashboard.
-Input is the customer's last message.
-Format: {"message": "<customer raw message>"}
-Call after EVERY user turn that provides new information.`;
+  description =
+    "Analyzes customer messages and records key milestones, extracted data, sentiment, and alerts to the CRM dashboard. Call this after EVERY user turn that contains new information.";
+
+  // 🔥 StructuredTool with Zod schema — LLM calls this via function calling
+  schema = MonitoringInputSchema;
 
   private crmBaseUrl: string;
   private apiKey: string;
@@ -151,16 +176,23 @@ Call after EVERY user turn that provides new information.`;
     this.resolvedSessionId = config.resolvedSessionId;
   }
 
-  async _call(input: string): Promise<string> {
+  // @ts-ignore
+  async _call(
+    arg: z.infer<typeof MonitoringInputSchema>,
+    _runManager?: any,
+    _config?: any,
+    flowConfig?: {
+      sessionId?: string;
+      chatId?: string;
+      input?: string;
+      state?: any;
+    }
+  ): Promise<string> {
     try {
-      let message: string;
-      try {
-        const parsed = JSON.parse(input);
-        message = parsed.message || parsed.input || input;
-      } catch {
-        message = input;
-      }
+      const message = arg.message;
+      const previousContext = arg.previousContext || "";
 
+      // ── Build the analysis prompt dynamically ──
       const keysSchema = this.extractionKeys
         .map((k) => {
           const opts = k.options ? `, options: [${k.options}]` : "";
@@ -176,7 +208,8 @@ Call after EVERY user turn that provides new information.`;
         })
         .join("\n");
 
-      const systemPrompt = `${this.analysisInstructions}
+      // Build context-aware system prompt
+      let systemPrompt = `${this.analysisInstructions}
 
 [Extraction Keys to Find]:
 ${keysSchema || "None"}
@@ -184,9 +217,14 @@ ${keysSchema || "None"}
 [Sentiment Analysis Enabled]: ${this.enableSentiment ? "Yes" : "No"}
 
 [Business Custom Alert Rules]:
-${rulesSchema || "None"}
+${rulesSchema || "None"}`;
 
-From the customer's message, extract information strictly adhering to the configured extraction keys.
+      // If previous context is provided, include it
+      if (previousContext) {
+        systemPrompt += `\n\n[Conversation Context So Far]:\n${previousContext}`;
+      }
+
+      systemPrompt += `\n\nFrom the customer's message, extract information strictly adhering to the configured extraction keys.
 Return a clean, raw JSON output without any markdown fence or text formatting.
 
 Output structure:
@@ -228,11 +266,20 @@ Output structure:
           alert_reason = parsed.alert_reason || "";
         }
       } catch {
-        note = message;
+        // If JSON parsing fails, use the raw content as note
+        note = content || message;
       }
 
+      // ── Resolve session ID ──
+      const effectiveSessionId =
+        flowConfig?.sessionId ||
+        flowConfig?.chatId ||
+        this.resolvedSessionId ||
+        "";
+
+      // ── Send to CRM ──
       const payload = {
-        sessionId: this.resolvedSessionId,
+        sessionId: effectiveSessionId,
         note,
         keys,
         sentiment,
@@ -256,13 +303,22 @@ Output structure:
       const result = await res.json();
 
       if (!res.ok) {
-        const errMsg = `Monitoring failed: ${result.message || res.status}`;
-        return errMsg + TOOL_ARGS_PREFIX + JSON.stringify(payload);
+        return formatToolError(
+          `Monitoring failed: ${result.message || res.status}`,
+          payload
+        );
       }
 
-      return `Monitoring indexed.` + TOOL_ARGS_PREFIX + JSON.stringify(payload);
+      return (
+        `Monitoring indexed — sentiment: ${sentiment}, alert: ${alert_level}` +
+        TOOL_ARGS_PREFIX +
+        JSON.stringify(payload)
+      );
     } catch (error: any) {
-      return `Monitoring Tool system error: ${error.message}`;
+      return formatToolError(
+        `Monitoring Tool system error: ${error.message}`,
+        {}
+      );
     }
   }
 }

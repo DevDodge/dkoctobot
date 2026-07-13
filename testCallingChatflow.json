@@ -1202,7 +1202,7 @@
       "data": {
         "id": "appCityAgent_0",
         "label": "AppCity Agent",
-        "version": 1,
+        "version": 1.1,
         "name": "appCityAgent",
         "type": "AgentExecutor",
         "baseClasses": [
@@ -1347,7 +1347,7 @@
       "data": {
         "id": "erpAgent_0",
         "label": "ERP Agent",
-        "version": 1,
+        "version": 1.1,
         "name": "erpAgent",
         "type": "ERPAgentExecutor",
         "baseClasses": [
@@ -1669,7 +1669,7 @@
       "data": {
         "id": "erpAgentPrompt_0",
         "label": "ERP Agent Prompt",
-        "version": 1,
+        "version": 1.1,
         "name": "erpAgentPrompt",
         "type": "ChatPromptTemplate",
         "baseClasses": [

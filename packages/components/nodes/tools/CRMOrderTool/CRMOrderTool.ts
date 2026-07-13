@@ -52,8 +52,8 @@ const FIELD_ALIAS_MAP: Record<string, string[]> = {
     "govern", "province", "state",
   ],
   address: [
-    "address", "location", "fullAddress", "full_address", "street",
-    "عنوان", "مكان", "العنوان", "عنوان الشحن", "shipping_address",
+    "address", "clientAddress", "client_address", "location", "fullAddress", "full_address", "street",
+    "عنوان", "مكان", "العنوان", "عنوان الشحن", "shipping_address", "delivery_address", "deliveryAddress",
   ],
   email: [
     "email", "mail", "e_mail", "بريد", "الايميل", "البريد",
@@ -288,6 +288,7 @@ class CRMOrderTool_Tools implements INode {
           return JSON.stringify(o);
         };
         const keyLines = columns
+          .filter((col: any) => col.key_name.toLowerCase() !== "sessionid" && col.key_name.toLowerCase() !== "session_id")
           .map((col: any) => {
             const optsStr = fmtOpts(col.options);
             const opts = optsStr ? ` (options: ${optsStr})` : "";
@@ -302,12 +303,12 @@ class CRMOrderTool_Tools implements INode {
 IMPORTANT: Do NOT call this tool unless the customer explicitly confirms the order.
 Always verify all details with the customer first.
 
-Input MUST be a valid JSON string with this EXACT structure:
-{
-  "attributes": [
+Call this tool with an "attributes" parameter — an array of key-value objects:
+attributes: [
 ${keyLines}
-  ]
-}
+]
+
+Do NOT include sessionId in attributes — the system injects it automatically.
 
 You MUST use these EXACT key names. Do not translate or rename them.`;
 
@@ -315,12 +316,12 @@ You MUST use these EXACT key names. Do not translate or rename them.`;
 
 IMPORTANT: This tool updates only the keys specified in the attributes array. All other non-specified keys will remain untouched.
 
-Input MUST be a valid JSON string with this EXACT structure:
-{
-  "attributes": [
+Call this tool with an "attributes" parameter — an array of key-value objects:
+attributes: [
 ${keyLines}
-  ]
-}
+]
+
+Do NOT include sessionId in attributes — the system injects it automatically.
 
 You MUST use these EXACT key names. Do not translate or rename them.`;
 
@@ -567,6 +568,7 @@ async function getOnTheFlyDescription(
       const result = (await response.json()) as any;
       if (result.success && result.columns?.length > 0) {
         const keyLines = result.columns
+          .filter((col: any) => col.key_name.toLowerCase() !== "sessionid" && col.key_name.toLowerCase() !== "session_id")
           .map((col: any) => {
             const opts = col.options ? ` (options: ${col.options})` : "";
             return `    { "key": "${col.key_name}", "value": "<${
@@ -580,25 +582,25 @@ async function getOnTheFlyDescription(
 
 IMPORTANT: Do NOT call this tool unless the customer explicitly confirms the order.
 
-Input MUST be a valid JSON string with this EXACT structure:
-{
-  "attributes": [
+Call this tool with an "attributes" parameter — an array of key-value objects:
+attributes: [
 ${keyLines}
-  ]
-}
+]
+
+Do NOT include sessionId in attributes — the system injects it automatically.
 
 You MUST use these EXACT key names. Do not translate or rename them.`;
         } else {
           return `Update an existing order in the CRM system for ${result.client} (${result.brand}).
 
-IMPORTANT: This tool updates only the keys specified in the attributes array. All other non-specified keys will remain untouched.
+IMPORTANT: This tool updates only the keys specified. All other fields will remain untouched.
 
-Input MUST be a valid JSON string with this EXACT structure:
-{
-  "attributes": [
+Call this tool with an "attributes" parameter — an array of key-value objects:
+attributes: [
 ${keyLines}
-  ]
-}
+]
+
+Do NOT include sessionId in attributes — the system injects it automatically.
 
 You MUST use these EXACT key names. Do not translate or rename them.`;
         }
@@ -637,9 +639,22 @@ interface CRMOrderToolConfig {
  * Number fields accept both numbers and numeric strings.
  */
 function buildDynamicSchema(columns: any[]): z.ZodObject<any> {
+  // All schemas include an optional "attributes" array for the LLM to send key-value pairs
+  // directly (matching the tool description format). Flat fields also accepted via .passthrough().
+  const attributesField: any = z
+    .array(
+      z.object({
+        key: z.string().describe("CRM column key name"),
+        value: z.string().describe("CR column value"),
+      })
+    )
+    .optional()
+    .describe("Array of key-value pairs representing CRM order fields");
+
   if (!columns || columns.length === 0) {
-    // Minimal fallback: accept any string key-value pairs
+    // Minimal fallback: accept flat fields + attributes array
     return z.object({
+      attributes: attributesField,
       clientName: z.string().optional().describe("Customer's full name"),
       clientPhone: z.string().optional().describe("Customer's phone number"),
       orderDetails: z.string().optional().describe("Order details — what the customer wants"),
@@ -650,7 +665,8 @@ function buildDynamicSchema(columns: any[]): z.ZodObject<any> {
       orderStatus: z.string().optional().describe("Order status — use \"جديد\" as default"),
       sessionId: z.string().optional().describe("Session identifier — auto-injected, can be omitted"),
       governorate: z.string().optional().describe("Customer's governorate/city"),
-      address: z.string().optional().describe("Full delivery address"),
+      clientAddress: z.string().optional().describe("Full delivery address"),
+      address: z.string().optional().describe("Full delivery address (alias)"),
       email: z.string().optional().describe("Customer's email address"),
       quantity: z
         .union([z.number(), z.string().transform((v) => Number(v))])
@@ -660,6 +676,9 @@ function buildDynamicSchema(columns: any[]): z.ZodObject<any> {
   }
 
   const shape: Record<string, z.ZodTypeAny> = {};
+
+  // Always add the attributes array field — matches the tool description format
+  shape["attributes"] = attributesField;
 
   for (const col of columns) {
     const desc = col.display_name || col.key_name || "";
@@ -751,32 +770,70 @@ class CRMOrderToolImpl extends StructuredTool {
     }
   ): Promise<string> {
     try {
-      // ── 1. Convert Zod-validated object to attributes array ──
-      let attributes = Object.entries(arg)
-        .filter(([_, v]) => v !== undefined && v !== null && v !== "")
+      // ── 1. Build attributes array from arg (supports both formats) ──
+      // Format A: LLM sent { attributes: [{key, value}, ...] } — use directly
+      // Format B: LLM sent flat fields { clientName: "...", clientPhone: "..." } — convert
+      let attributes: { key: string; value: string }[] = [];
+
+      const argAny = arg as any;
+
+      if (
+        argAny.attributes &&
+        Array.isArray(argAny.attributes) &&
+        argAny.attributes.length > 0
+      ) {
+        // Format A: LLM used the "attributes" array as described in the tool prompt
+        attributes = argAny.attributes.map((item: any) => ({
+          key: String(item.key || ""),
+          value: String(item.value || ""),
+        })).filter((a: any) => a.key !== "");
+      }
+
+      // Also collect any flat fields (Format B) — merge with attributes array
+      const flatAttrs = Object.entries(arg)
+        .filter(
+          ([k, v]) =>
+            k !== "attributes" && // skip the attributes key itself
+            v !== undefined &&
+            v !== null &&
+            v !== ""
+        )
         .map(([key, value]) => ({
           key,
           value: String(value),
         }));
 
-      // ── 2. Auto-inject sessionId ──
-      // Priority: flowConfig (runtime from AgentExecutor) > resolvedSessionId (init time)
+      // Merge: flat fields take lower priority than explicit attributes array
+      const existingKeys = new Set(attributes.map((a) => a.key.toLowerCase()));
+      for (const fa of flatAttrs) {
+        if (!existingKeys.has(fa.key.toLowerCase())) {
+          attributes.push(fa);
+          existingKeys.add(fa.key.toLowerCase());
+        }
+      }
+
+      // ── 2. ALWAYS override sessionId with the REAL chat session ID ──
+      // The LLM may hallucinate a fake sessionId — we ignore it completely.
+      // The real sessionId comes from the AgentExecutor's flow config (runtime)
+      // or from the node's init options (resolved at startup).
       const effectiveSessionId =
         flowConfig?.sessionId ||
         flowConfig?.chatId ||
         this.resolvedSessionId ||
         "";
 
+      // Strip ANY sessionId attribute the LLM sent — we use our own
+      attributes = attributes.filter(
+        (a) =>
+          a.key.toLowerCase() !== "sessionid" &&
+          a.key.toLowerCase() !== "session_id" &&
+          a.key.toLowerCase() !== "session id" &&
+          a.key.toLowerCase() !== "session"
+      );
+
+      // Hard-inject the real session ID
       if (effectiveSessionId) {
-        const hasSessionId = attributes.some(
-          (a) =>
-            a.key.toLowerCase() === "sessionid" ||
-            a.key.toLowerCase() === "session_id" ||
-            a.key.toLowerCase() === "session id"
-        );
-        if (!hasSessionId) {
-          attributes.push({ key: "sessionId", value: effectiveSessionId });
-        }
+        attributes.push({ key: "sessionId", value: effectiveSessionId });
       }
 
       // ── 3. Smart fuzzy key matching ──

@@ -1,0 +1,321 @@
+[
+  {
+    "id": "ea45f83f-98a7-48f2-b743-b6fdba35a27c",
+    "source": "UI",
+    "sessionId": "ea45f83f-98a7-48f2-b743-b6fdba35a27c",
+    "memoryType": "Buffer Memory",
+    "email": null,
+    "messages": [
+      {
+        "content": "مساء الخير",
+        "role": "user",
+        "time": "2026-07-05T02:37:48.384Z"
+      },
+      {
+        "content": "مساء النور! أهلاً بيكي يا قمر في فيلورا. نورتيني. 😊\n\nأنا معاكي، قوليلي إيه اللي شاغل بالك؟ بتدوري على حاجة معينة للعناية ببشرتك، ولا حابة تعرفي تفاصيل أكتر عن منتجاتنا والفوائد اللي ممكن تستفيدي منها؟ أنا هنا عشان أساعدك تختاري اللي يناسبك.",
+        "role": "bot",
+        "time": "2026-07-05T02:37:55.316Z",
+        "usedTools": [
+          {
+            "tool": "crm_monitoring_note",
+            "toolInput": {
+              "sessionId": "ea45f83f-98a7-48f2-b743-b6fdba35a27c",
+              "note": "العميل قام بإلقاء التحية وبدء المحادثة.",
+              "keys": {},
+              "sentiment": "neutral",
+              "alertLevel": "none",
+              "alertReason": "",
+              "keyDefinitions": [
+                {
+                  "key": "clientName",
+                  "display": "أسم العميل",
+                  "type": "text",
+                  "options": "",
+                  "actions": "",
+                  "id": 1
+                },
+                {
+                  "key": "clientPhone",
+                  "display": "رقم الهاتف",
+                  "type": "text",
+                  "options": "",
+                  "actions": "",
+                  "id": 2
+                },
+                {
+                  "key": "totalPrice",
+                  "display": "سعر الاوردر",
+                  "type": "number",
+                  "options": "",
+                  "actions": "",
+                  "id": 3
+                },
+                {
+                  "key": "productInterest",
+                  "display": "المنتج المهتم به",
+                  "type": "text",
+                  "options": "",
+                  "actions": "",
+                  "id": 4
+                },
+                {
+                  "key": "skinType",
+                  "display": "نوع البشرة",
+                  "type": "text",
+                  "options": "",
+                  "actions": "",
+                  "id": 5
+                },
+                {
+                  "key": "orderType",
+                  "display": "نوع الاوردر",
+                  "type": "text",
+                  "options": "",
+                  "actions": "",
+                  "id": 6
+                }
+              ]
+            },
+            "toolOutput": "Monitoring indexed — sentiment: neutral, alert: none"
+          }
+        ]
+      },
+      {
+        "content": "عايزه تشيز كيك",
+        "role": "user",
+        "time": "2026-07-05T02:38:03.781Z"
+      },
+      {
+        "content": "يا أهلاً بيكي! اختيارك للـ \"تشيز كيك\" ممتاز، ريحتها بجد دافية وحلوة جداً وكل اللي بيجربها بيحبها. 🍰✨\n\nدي صورة المنتج عشان تكوني عارفاه: https://files.octobot.it.com/2820.jpg\n\nعشان أقدر أتمم لك الطلب، محتاجة منك بس **اسمك، رقم تليفونك، وعنوانك بالتفصيل**.\n\nوقوليلي حابة تطلبي عبوة واحدة، ولا حابة تستفيدي من عروضنا على أكتر من عبوة عشان توصلي لأفضل نتيجة تفتيح وترطيب؟ (عندنا عرض الـ 4 عبوات بيكون فيه شحن مجاني وهدية بكيني باتر كمان).\n\nأنا معاكي، أول ما تبعتيلي البيانات هسجل طلبك فوراً وهيتواصلوا معاكي من فريق المتابعة.",
+        "role": "bot",
+        "time": "2026-07-05T02:38:13.985Z",
+        "usedTools": [
+          {
+            "tool": "crm_monitoring_note",
+            "toolInput": {
+              "sessionId": "ea45f83f-98a7-48f2-b743-b6fdba35a27c",
+              "note": "أبدت العميله رغبتها في طلب منتج تشيز كيك دون تحديد تفاصيل إضافية.",
+              "keys": {
+                "productInterest": "تشيز كيك"
+              },
+              "sentiment": "positive",
+              "alertLevel": "none",
+              "alertReason": "",
+              "keyDefinitions": [
+                {
+                  "key": "clientName",
+                  "display": "أسم العميل",
+                  "type": "text",
+                  "options": "",
+                  "actions": "",
+                  "id": 1
+                },
+                {
+                  "key": "clientPhone",
+                  "display": "رقم الهاتف",
+                  "type": "text",
+                  "options": "",
+                  "actions": "",
+                  "id": 2
+                },
+                {
+                  "key": "totalPrice",
+                  "display": "سعر الاوردر",
+                  "type": "number",
+                  "options": "",
+                  "actions": "",
+                  "id": 3
+                },
+                {
+                  "key": "productInterest",
+                  "display": "المنتج المهتم به",
+                  "type": "text",
+                  "options": "",
+                  "actions": "",
+                  "id": 4
+                },
+                {
+                  "key": "skinType",
+                  "display": "نوع البشرة",
+                  "type": "text",
+                  "options": "",
+                  "actions": "",
+                  "id": 5
+                },
+                {
+                  "key": "orderType",
+                  "display": "نوع الاوردر",
+                  "type": "text",
+                  "options": "",
+                  "actions": "",
+                  "id": 6
+                }
+              ]
+            },
+            "toolOutput": "Monitoring indexed — sentiment: positive, alert: none"
+          }
+        ]
+      },
+      {
+        "content": "هاخد عبوه",
+        "role": "user",
+        "time": "2026-07-05T02:38:26.866Z"
+      },
+      {
+        "content": "تمام يا قمر، اختيار موفق! عبوة الـ \"تشيز كيك\" الواحدة سعرها 270 جنيه، ومصاريف الشحن 60 جنيه.\n\nعشان أسجلك الطلب، محتاجة منك بس:\n1. اسمك الكريم.\n2. رقم تليفونك (عشان فريق التوصيل يتواصل معاكي).\n3. عنوانك بالتفصيل.\n\nأول ما تبعتيهم، هسجل الطلب فوراً وهأكدلك كل التفاصيل. 😊",
+        "role": "bot",
+        "time": "2026-07-05T02:38:34.527Z",
+        "usedTools": [
+          {
+            "tool": "crm_monitoring_note",
+            "toolInput": {
+              "sessionId": "ea45f83f-98a7-48f2-b743-b6fdba35a27c",
+              "note": "أبدى العميل رغبته في إتمام عملية شراء لعبوة واحدة من المنتج.",
+              "keys": {
+                "orderType": "شراء"
+              },
+              "sentiment": "neutral",
+              "alertLevel": "none",
+              "alertReason": "",
+              "keyDefinitions": [
+                {
+                  "key": "clientName",
+                  "display": "أسم العميل",
+                  "type": "text",
+                  "options": "",
+                  "actions": "",
+                  "id": 1
+                },
+                {
+                  "key": "clientPhone",
+                  "display": "رقم الهاتف",
+                  "type": "text",
+                  "options": "",
+                  "actions": "",
+                  "id": 2
+                },
+                {
+                  "key": "totalPrice",
+                  "display": "سعر الاوردر",
+                  "type": "number",
+                  "options": "",
+                  "actions": "",
+                  "id": 3
+                },
+                {
+                  "key": "productInterest",
+                  "display": "المنتج المهتم به",
+                  "type": "text",
+                  "options": "",
+                  "actions": "",
+                  "id": 4
+                },
+                {
+                  "key": "skinType",
+                  "display": "نوع البشرة",
+                  "type": "text",
+                  "options": "",
+                  "actions": "",
+                  "id": 5
+                },
+                {
+                  "key": "orderType",
+                  "display": "نوع الاوردر",
+                  "type": "text",
+                  "options": "",
+                  "actions": "",
+                  "id": 6
+                }
+              ]
+            },
+            "toolOutput": "Monitoring indexed — sentiment: neutral, alert: none"
+          }
+        ]
+      },
+      {
+        "content": "منار 01118181818 الوراق ميدان الجمهوريه عمارة ٢٣",
+        "role": "user",
+        "time": "2026-07-05T02:38:38.242Z"
+      },
+      {
+        "content": "تمام يا منار، تسلمي يا قمر! بياناتك وصلتني ومعاكي عبوة \"تشيز كيك\" اللي اخترتيها.\n\nتم تسجيل طلبك بنجاح، وفريق المتابعة هيتواصل معاكي قريب جداً لتأكيد ميعاد التوصيل. 🍰✨\n\nشكراً لثقتك في فيلورا!",
+        "role": "bot",
+        "time": "2026-07-05T02:38:50.833Z",
+        "usedTools": [
+          {
+            "tool": "crm_monitoring_note",
+            "toolInput": {
+              "sessionId": "ea45f83f-98a7-48f2-b743-b6fdba35a27c",
+              "note": "قام العميل بتزويد بيانات التواصل والعنوان الخاص به لإتمام عملية الشراء.",
+              "keys": {
+                "clientName": "منار",
+                "clientPhone": "01118181818"
+              },
+              "sentiment": "neutral",
+              "alertLevel": "none",
+              "alertReason": "",
+              "keyDefinitions": [
+                {
+                  "key": "clientName",
+                  "display": "أسم العميل",
+                  "type": "text",
+                  "options": "",
+                  "actions": "",
+                  "id": 1
+                },
+                {
+                  "key": "clientPhone",
+                  "display": "رقم الهاتف",
+                  "type": "text",
+                  "options": "",
+                  "actions": "",
+                  "id": 2
+                },
+                {
+                  "key": "totalPrice",
+                  "display": "سعر الاوردر",
+                  "type": "number",
+                  "options": "",
+                  "actions": "",
+                  "id": 3
+                },
+                {
+                  "key": "productInterest",
+                  "display": "المنتج المهتم به",
+                  "type": "text",
+                  "options": "",
+                  "actions": "",
+                  "id": 4
+                },
+                {
+                  "key": "skinType",
+                  "display": "نوع البشرة",
+                  "type": "text",
+                  "options": "",
+                  "actions": "",
+                  "id": 5
+                },
+                {
+                  "key": "orderType",
+                  "display": "نوع الاوردر",
+                  "type": "text",
+                  "options": "",
+                  "actions": "",
+                  "id": 6
+                }
+              ]
+            },
+            "toolOutput": "Monitoring indexed — sentiment: neutral, alert: none"
+          },
+          {
+            "tool": "Validate_Phone_Number",
+            "toolInput": {
+              "phoneNumber": "01118181818"
+            },
+            "toolOutput": "{\"isValid\":true,\"phoneType\":\"mobile\",\"cleanedPhone\":\"01118181818\",\"whatsappPhone\":\"201118181818\",\"reason\":\"\"}"
+          }
+        ]
+      }
+    ]
+  }
+]

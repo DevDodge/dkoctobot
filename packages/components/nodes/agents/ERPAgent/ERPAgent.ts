@@ -26,10 +26,11 @@ const RESPONSE_MODE_SUFFIXES: Record<string, string> = {
   Do not pause. Do not format JSON first. Do not overthink. Just call the tool.
 - The tool SCHEMA (function calling parameters) is your source of truth. Trust it over any text description.
 - Tools like create_crm_order and crm_monitoring_note are meant to be CALLED, not described.
-- After ALL relevant tools have been executed (and only after), output a minimal summary:
-  {"toolCalls":[{"tool":"create_crm_order","result":"success","orderId":"123"}],"actionsExecuted":["created_order"]}
-- If no tools were called because no relevant data was found:
-  {"toolCalls":[],"actionsExecuted":[],"note":"no actionable data in this message"}
+- After ALL relevant tools have been executed (and only after), output a minimal summary as JSON:
+  toolCalls array with tool name, result status, and orderId; actionsExecuted array of action names
+  Example: toolCalls: [(tool: create_crm_order, result: success, orderId: 123)], actionsExecuted: [created_order]
+- If no tools were called because no relevant data was found, output:
+  toolCalls: [], actionsExecuted: [], note: "no actionable data in this message"
 - TOOLS > JSON. Execute first, document second. The Sales Agent handles customer communication.`,
 
     modifyResponse: `\n\nIMPORTANT RULES FOR YOUR OUTPUT:

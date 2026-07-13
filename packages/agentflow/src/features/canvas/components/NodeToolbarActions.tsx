@@ -34,7 +34,7 @@ function NodeToolbarActionsComponent({ nodeId, nodeName, isVisible, onInfoClick 
     // When `false`, the toolbar is force-hidden; when `undefined`, it falls back to ReactFlow's
     // internal hover logic. We want force-show (true) or default behavior (undefined), never force-hide.
     return (
-        <StyledNodeToolbar position={Position.Top} offset={5} align='end' isVisible={isVisible || undefined}>
+        <StyledNodeToolbar position={Position.Top} offset={5} align='center' isVisible={isVisible || undefined}>
             <ButtonGroup sx={{ gap: 1 }} variant='outlined' aria-label='Node actions'>
                 {nodeName !== 'startAgentflow' && (
                     <IconButton
@@ -49,17 +49,19 @@ function NodeToolbarActionsComponent({ nodeId, nodeName, isVisible, onInfoClick 
                         <IconCopy size={20} />
                     </IconButton>
                 )}
-                <IconButton
-                    size='small'
-                    title='Edit'
-                    onClick={handleEditClick}
-                    sx={{
-                        color: isDarkMode ? 'white' : theme.palette.grey[600],
-                        '&:hover': { color: theme.palette.primary.main }
-                    }}
-                >
-                    <IconEdit size={20} />
-                </IconButton>
+                {nodeName !== 'stickyNoteAgentflow' && (
+                    <IconButton
+                        size='small'
+                        title='Edit'
+                        onClick={handleEditClick}
+                        sx={{
+                            color: isDarkMode ? 'white' : 'inherit',
+                            '&:hover': { color: theme.palette.primary.main }
+                        }}
+                    >
+                        <IconEdit size={20} />
+                    </IconButton>
+                )}
                 <IconButton
                     size='small'
                     title='Delete'

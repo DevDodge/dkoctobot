@@ -106,11 +106,6 @@
 *.smime
 *.vsix
 
-## IIS config (local deployment)
-web.config
-start-flowise.bat
-ecosystem.config.js
-
 # =============================================================================
 # Proprietary paths (should never exist in OSS)
 # =============================================================================
@@ -120,5 +115,8 @@ extensions/
 apps/*/
 !apps/oss-app/
 
-# Local config overrides
-# (package.json and pnpm-workspace.yaml must be tracked)
+# Claude - session/user specific files
+.claude/plans/
+.claude/settings.local.json
+.claude/agent-memory/*
+

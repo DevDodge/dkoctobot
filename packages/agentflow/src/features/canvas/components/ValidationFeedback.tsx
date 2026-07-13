@@ -6,9 +6,12 @@ import { IconChecklist, IconExclamationCircle, IconX } from '@tabler/icons-react
 
 import validateEmptyImage from '@/assets/images/validate_empty.svg'
 import { getAgentflowIcon } from '@/core/node-config'
-import type { FlowEdge, FlowNode, NodeData, ValidationError } from '@/core/types'
+import { tokens } from '@/core/theme/tokens'
+import type { FlowEdge, FlowNode, NodeDataSchema, ValidationError } from '@/core/types'
 import { applyValidationErrorsToNodes, validateFlow } from '@/core/validation'
 import { useConfigContext } from '@/infrastructure/store'
+
+const validationColor = tokens.colors.border.validation
 
 /** Validation result grouped by node */
 interface NodeValidationResult {
@@ -21,7 +24,7 @@ interface NodeValidationResult {
 export interface ValidationFeedbackProps {
     nodes: FlowNode[]
     edges: FlowEdge[]
-    availableNodes?: NodeData[]
+    availableNodes?: NodeDataSchema[]
     setNodes: React.Dispatch<React.SetStateAction<FlowNode[]>>
 }
 
@@ -141,7 +144,7 @@ function ValidationFeedbackComponent({ nodes, edges, availableNodes, setNodes }:
     return (
         <>
             <ClickAwayListener onClickAway={handleClose}>
-                <div ref={containerRef} style={{ position: 'absolute', right: 20, top: 20, zIndex: 1001 }}>
+                <div ref={containerRef} style={{ position: 'relative' }}>
                     <Fab
                         size='small'
                         aria-label='validation'
@@ -168,11 +171,11 @@ function ValidationFeedbackComponent({ nodes, edges, availableNodes, setNodes }:
                                 right: 0,
                                 mt: 1.5,
                                 width: 400,
-                                zIndex: 1200
+                                zIndex: tokens.zIndex.canvasPanel
                             }}
                         >
                             <Box sx={{ p: 2 }}>
-                                <Typography variant='h6' sx={{ mt: 1, mb: 2, fontWeight: 600 }}>
+                                <Typography variant='h6' sx={{ mt: 1, mb: 2, fontWeight: tokens.typography.fontWeight.semibold }}>
                                     Checklist ({results.reduce((sum, r) => sum + r.issues.length, 0)})
                                 </Typography>
 
@@ -187,12 +190,14 @@ function ValidationFeedbackComponent({ nodes, edges, availableNodes, setNodes }:
                                                     mb: 2,
                                                     backgroundColor: isDarkMode ? theme.palette.background.paper : theme.palette.grey[50],
                                                     borderRadius: '8px',
-                                                    border: `1px solid ${alpha('#FFB938', isDarkMode ? 0.3 : 0.5)}`
+                                                    border: `1px solid ${alpha(validationColor, isDarkMode ? 0.3 : 0.5)}`
                                                 }}
                                             >
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                                                     {getNodeIcon(item)}
-                                                    <Typography sx={{ fontWeight: 500 }}>{item.label || item.name}</Typography>
+                                                    <Typography sx={{ fontWeight: tokens.typography.fontWeight.medium }}>
+                                                        {item.label || item.name}
+                                                    </Typography>
                                                 </Box>
 
                                                 {item.issues.map((issue, issueIndex) => (
@@ -202,7 +207,9 @@ function ValidationFeedbackComponent({ nodes, edges, availableNodes, setNodes }:
                                                             pt: 1.5,
                                                             px: 2,
                                                             pb: issueIndex === item.issues.length - 1 ? 1.5 : 0.5,
-                                                            backgroundColor: isDarkMode ? darken('#FFB938', 0.85) : lighten('#FFB938', 0.9),
+                                                            backgroundColor: isDarkMode
+                                                                ? darken(validationColor, 0.85)
+                                                                : lighten(validationColor, 0.9),
                                                             display: 'flex',
                                                             alignItems: 'center',
                                                             gap: 1.5,
@@ -213,7 +220,7 @@ function ValidationFeedbackComponent({ nodes, edges, availableNodes, setNodes }:
                                                         }}
                                                     >
                                                         <IconExclamationCircle
-                                                            color='#FFB938'
+                                                            color={validationColor}
                                                             size={20}
                                                             style={{ minWidth: 20, flexShrink: 0 }}
                                                         />
@@ -230,7 +237,11 @@ function ValidationFeedbackComponent({ nodes, edges, availableNodes, setNodes }:
                                                 alt='Illustration of a checklist with no items, indicating no issues found'
                                             />
                                             {hasValidated ? (
-                                                <Typography variant='body2' color='success.main' sx={{ mt: 2, fontWeight: 500 }}>
+                                                <Typography
+                                                    variant='body2'
+                                                    color='success.main'
+                                                    sx={{ mt: 2, fontWeight: tokens.typography.fontWeight.medium }}
+                                                >
                                                     No issues found in your flow!
                                                 </Typography>
                                             ) : (

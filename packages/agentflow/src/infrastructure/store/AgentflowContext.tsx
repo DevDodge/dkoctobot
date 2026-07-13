@@ -1,10 +1,24 @@
-import { createContext, Dispatch, ReactNode, useCallback, useContext, useReducer, useRef } from 'react'
+import { createContext, Dispatch, ReactNode, useCallback, useContext, useMemo, useReducer, useRef } from 'react'
 import type { ReactFlowInstance } from 'reactflow'
 
 import { cloneDeep } from 'lodash'
 
-import type { AgentflowAction, AgentflowState, FlowConfig, FlowData, FlowEdge, FlowNode, InputParam, NodeData } from '@/core/types'
-import { getUniqueNodeId } from '@/core/utils'
+import { getDefaultValueForType } from '@/core/primitives'
+import type {
+    AgentflowAction,
+    AgentflowState,
+    ExecutionStatus,
+    FlowConfig,
+    FlowData,
+    FlowDataCallback,
+    FlowEdge,
+    FlowExecutionState,
+    FlowNode,
+    InputParam,
+    NodeData,
+    NodeDataSchema
+} from '@/core/types'
+import { getDefinedStateKeys, getUniqueNodeId, isNodeOutdated, upgradeNodeData } from '@/core/utils'
 
 import { agentflowReducer, initialState, normalizeNodes } from './agentflowReducer'
 
@@ -56,13 +70,15 @@ export interface AgentflowContextValue {
     // Node operations
     deleteNode: (nodeId: string) => void
     duplicateNode: (nodeId: string, distance?: number) => void
-    updateNodeData: (nodeId: string, data: Partial<FlowNode['data']>) => void
+    updateNodeData: (nodeId: string, data: Partial<FlowNode['data']>, edges?: FlowEdge[]) => void
 
     // Edge operations
     deleteEdge: (edgeId: string) => void
 
     // Flow operations
     getFlowData: () => FlowData
+    /** Return all unique state keys defined via `updateFlowState` across all nodes. */
+    getFlowStateKeys: () => string[]
     reset: () => void
 
     //Dialog operations
@@ -71,6 +87,20 @@ export interface AgentflowContextValue {
 
     // Register ReactFlow local state setters
     registerLocalStateSetters: (setLocalNodes: NodesSetter, setLocalEdges: EdgesSetter) => void
+
+    // Register onFlowChange callback (called by AgentflowCanvas)
+    registerOnFlowChange: (callback: FlowDataCallback | undefined) => void
+
+    // Execution operations
+    executionState: FlowExecutionState | null
+    startExecution: (executionId: string) => void
+    setNodeExecutionStatus: (nodeId: string, status: ExecutionStatus, error?: string) => void
+    clearExecutionState: () => void
+
+    // Version operations
+    setComponentNodes: (nodes: NodeDataSchema[]) => void
+    hasOutdatedNodes: boolean
+    syncNodes: () => void
 }
 
 const AgentflowContext = createContext<AgentflowContextValue | null>(null)
@@ -83,8 +113,8 @@ interface AgentflowStateProviderProps {
 export function AgentflowStateProvider({ children, initialFlow }: AgentflowStateProviderProps) {
     const [state, dispatch] = useReducer(agentflowReducer, {
         ...initialState,
-        nodes: normalizeNodes(initialFlow?.nodes || []),
-        edges: initialFlow?.edges || []
+        nodes: normalizeNodes(Array.isArray(initialFlow?.nodes) ? initialFlow.nodes : []),
+        edges: Array.isArray(initialFlow?.edges) ? initialFlow.edges : []
     })
 
     // Store ReactFlow local state setters in refs which are populated by AgentflowCanvas
@@ -94,6 +124,13 @@ export function AgentflowStateProvider({ children, initialFlow }: AgentflowState
     const registerLocalStateSetters = useCallback((setLocalNodes: NodesSetter, setLocalEdges: EdgesSetter) => {
         localNodesSetterRef.current = setLocalNodes
         localEdgesSetterRef.current = setLocalEdges
+    }, [])
+
+    // Store onFlowChange callback ref (registered by AgentflowCanvas)
+    const onFlowChangeRef = useRef<FlowDataCallback | undefined>(undefined)
+
+    const registerOnFlowChange = useCallback((callback: FlowDataCallback | undefined) => {
+        onFlowChangeRef.current = callback
     }, [])
 
     // Helper function to synchronize state updates between context and ReactFlow
@@ -150,11 +187,28 @@ export function AgentflowStateProvider({ children, initialFlow }: AgentflowState
     // Node operations
     const deleteNode = useCallback(
         (nodeId: string) => {
-            const newNodes = state.nodes.filter((node) => node.id !== nodeId)
-            const newEdges = state.edges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId)
+            const toDelete = new Set<string>([nodeId])
+            const collectDescendants = (parentId: string) => {
+                state.nodes
+                    .filter((n) => n.parentNode === parentId)
+                    .forEach((child) => {
+                        toDelete.add(child.id)
+                        collectDescendants(child.id)
+                    })
+            }
+            collectDescendants(nodeId)
+
+            const newNodes = state.nodes.filter((node) => !toDelete.has(node.id))
+            const newEdges = state.edges.filter((edge) => !toDelete.has(edge.source) && !toDelete.has(edge.target))
             syncStateUpdate({ nodes: newNodes, edges: newEdges })
+
+            // Notify parent of flow change so the deletion is persisted
+            if (onFlowChangeRef.current) {
+                const viewport = state.reactFlowInstance?.getViewport() || { x: 0, y: 0, zoom: 1 }
+                onFlowChangeRef.current({ nodes: newNodes, edges: newEdges, viewport })
+            }
         },
-        [state.nodes, state.edges, syncStateUpdate]
+        [state.nodes, state.edges, state.reactFlowInstance, syncStateUpdate]
     )
 
     const duplicateNode = useCallback(
@@ -184,33 +238,40 @@ export function AgentflowStateProvider({ children, initialFlow }: AgentflowState
             }
 
             // Update IDs in all anchor arrays to match new node ID
-            updateAnchorIds(newNode.data.inputs, nodeId, newNodeId)
+            updateAnchorIds(newNode.data.inputParams, nodeId, newNodeId)
             updateAnchorIds(newNode.data.inputAnchors, nodeId, newNodeId)
             updateAnchorIds(newNode.data.outputAnchors, nodeId, newNodeId)
 
             // Clear connected input values by resetting to defaults
-            if (newNode.data.inputValues) {
-                for (const inputName in newNode.data.inputValues) {
-                    const value = newNode.data.inputValues[inputName]
+            if (newNode.data.inputs) {
+                for (const inputName in newNode.data.inputs) {
+                    const value = newNode.data.inputs[inputName]
 
                     if (isConnectionString(value)) {
                         // Reset string connections to parameter default
-                        const inputParam = newNode.data.inputs?.find((p) => p.name === inputName)
-                        newNode.data.inputValues[inputName] = inputParam?.default ?? ''
+                        const inputParam = newNode.data.inputParams?.find((p) => p.name === inputName)
+                        newNode.data.inputs[inputName] = inputParam ? getDefaultValueForType(inputParam) : ''
                     } else if (Array.isArray(value)) {
                         // Filter out connection strings from arrays
-                        newNode.data.inputValues[inputName] = value.filter((item) => !isConnectionString(item))
+                        newNode.data.inputs[inputName] = value.filter((item) => !isConnectionString(item))
                     }
                 }
             }
 
-            syncStateUpdate({ nodes: [...state.nodes, newNode] })
+            const newNodes = [...state.nodes, newNode]
+            syncStateUpdate({ nodes: newNodes })
+
+            // Notify parent of flow change so the duplication is persisted
+            if (onFlowChangeRef.current) {
+                const viewport = state.reactFlowInstance?.getViewport() || { x: 0, y: 0, zoom: 1 }
+                onFlowChangeRef.current({ nodes: normalizeNodes(newNodes), edges: state.edges, viewport })
+            }
         },
-        [state.nodes, syncStateUpdate]
+        [state.nodes, state.edges, state.reactFlowInstance, syncStateUpdate]
     )
 
     const updateNodeData = useCallback(
-        (nodeId: string, data: Partial<FlowNode['data']>) => {
+        (nodeId: string, data: Partial<FlowNode['data']>, edges?: FlowEdge[]) => {
             const newNodes = state.nodes.map((node) => {
                 if (node.id === nodeId) {
                     return {
@@ -221,9 +282,16 @@ export function AgentflowStateProvider({ children, initialFlow }: AgentflowState
                 return node
             })
 
-            syncStateUpdate({ nodes: newNodes })
+            const effectiveEdges = edges ?? state.edges
+            syncStateUpdate({ nodes: newNodes, ...(edges !== undefined && { edges }) })
+
+            // Notify parent of flow change (e.g. node data edits from EditNodeDialog)
+            if (onFlowChangeRef.current) {
+                const viewport = state.reactFlowInstance?.getViewport() || { x: 0, y: 0, zoom: 1 }
+                onFlowChangeRef.current({ nodes: newNodes, edges: effectiveEdges, viewport })
+            }
         },
-        [state.nodes, syncStateUpdate]
+        [state.nodes, state.edges, state.reactFlowInstance, syncStateUpdate]
     )
 
     // Edge operations
@@ -231,8 +299,14 @@ export function AgentflowStateProvider({ children, initialFlow }: AgentflowState
         (edgeId: string) => {
             const newEdges = state.edges.filter((edge) => edge.id !== edgeId)
             syncStateUpdate({ edges: newEdges })
+
+            // Notify parent of flow change so the deletion is persisted
+            if (onFlowChangeRef.current) {
+                const viewport = state.reactFlowInstance?.getViewport() || { x: 0, y: 0, zoom: 1 }
+                onFlowChangeRef.current({ nodes: state.nodes, edges: newEdges, viewport })
+            }
         },
-        [state.edges, syncStateUpdate]
+        [state.nodes, state.edges, state.reactFlowInstance, syncStateUpdate]
     )
 
     // Dialog operations
@@ -265,10 +339,69 @@ export function AgentflowStateProvider({ children, initialFlow }: AgentflowState
         }
     }, [state.nodes, state.edges, state.reactFlowInstance])
 
+    // Flow state keys
+    const getFlowStateKeys = useCallback((): string[] => {
+        return getDefinedStateKeys(state.nodes)
+    }, [state.nodes])
+
     // Reset
     const reset = useCallback(() => {
         dispatch({ type: 'RESET' })
     }, [])
+
+    // Execution operations
+    const startExecution = useCallback((executionId: string) => {
+        dispatch({ type: 'START_EXECUTION', payload: executionId })
+    }, [])
+
+    const setNodeExecutionStatus = useCallback((nodeId: string, status: ExecutionStatus, error?: string) => {
+        dispatch({ type: 'SET_NODE_EXECUTION_STATUS', nodeId, status, error })
+    }, [])
+
+    const clearExecutionState = useCallback(() => {
+        dispatch({ type: 'CLEAR_EXECUTION_STATE' })
+    }, [])
+
+    // Version operations
+    const setComponentNodes = useCallback((nodes: NodeDataSchema[]) => {
+        dispatch({ type: 'SET_COMPONENT_NODES', payload: nodes })
+    }, [])
+
+    const hasOutdatedNodes = useMemo(
+        () =>
+            state.nodes.some((node) => {
+                const cn = state.componentNodes.find((c) => c.name === node.data.name)
+                return cn ? isNodeOutdated(node.data, cn) : false
+            }),
+        [state.nodes, state.componentNodes]
+    )
+
+    const syncNodes = useCallback(() => {
+        const clonedNodes = cloneDeep(state.nodes)
+        const clonedEdges = cloneDeep(state.edges)
+        const componentMap = new Map(state.componentNodes.map((c) => [c.name, c]))
+        const upgradedNodeIds = new Set<string>()
+
+        for (let i = 0; i < clonedNodes.length; i++) {
+            const node = clonedNodes[i]
+            const cn = componentMap.get(node.data.name)
+            if (cn && isNodeOutdated(node.data, cn)) {
+                node.data = upgradeNodeData(cn, node.data)
+                upgradedNodeIds.add(node.id)
+            }
+        }
+
+        if (upgradedNodeIds.size === 0) return
+
+        const newEdges = clonedEdges.filter((edge) => (upgradedNodeIds.has(edge.target) ? edge.targetHandle === edge.target : true))
+
+        syncStateUpdate({ nodes: clonedNodes, edges: newEdges })
+
+        if (onFlowChangeRef.current) {
+            const viewport = state.reactFlowInstance?.getViewport() || { x: 0, y: 0, zoom: 1 }
+            onFlowChangeRef.current({ nodes: clonedNodes, edges: newEdges, viewport })
+        }
+    }, [state.nodes, state.edges, state.componentNodes, state.reactFlowInstance, syncStateUpdate])
 
     const value: AgentflowContextValue = {
         state,
@@ -287,8 +420,17 @@ export function AgentflowStateProvider({ children, initialFlow }: AgentflowState
         openEditDialog,
         closeEditDialog,
         getFlowData,
+        getFlowStateKeys,
         reset,
-        registerLocalStateSetters
+        registerLocalStateSetters,
+        registerOnFlowChange,
+        executionState: state.executionState,
+        startExecution,
+        setNodeExecutionStatus,
+        clearExecutionState,
+        setComponentNodes,
+        hasOutdatedNodes,
+        syncNodes
     }
 
     return <AgentflowContext.Provider value={value}>{children}</AgentflowContext.Provider>

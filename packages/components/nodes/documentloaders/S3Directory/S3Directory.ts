@@ -1,6 +1,7 @@
 import { ICommonObject, INode, INodeData, INodeOptionsValue, INodeOutputsValue, INodeParams } from '../../../src/Interface'
 import { handleDocumentLoaderDocuments, handleDocumentLoaderMetadata, handleDocumentLoaderOutput } from '../../../src/utils'
 import { getAWSCredentialConfig } from '../../../src/awsToolsUtils'
+import { getSafeFilePath } from '../../../src/validator'
 import { S3Client, GetObjectCommand, S3ClientConfig, ListObjectsV2Command, ListObjectsV2Output } from '@aws-sdk/client-s3'
 import { getRegions, MODEL_TYPE } from '../../../src/modelLoader'
 import { Readable } from 'node:stream'
@@ -8,12 +9,12 @@ import * as fsDefault from 'node:fs'
 import * as path from 'node:path'
 import * as os from 'node:os'
 
-import { DirectoryLoader } from 'langchain/document_loaders/fs/directory'
-import { JSONLoader } from 'langchain/document_loaders/fs/json'
+import { DirectoryLoader } from '@langchain/classic/document_loaders/fs/directory'
+import { JSONLoader } from '@langchain/classic/document_loaders/fs/json'
 import { PDFLoader } from '@langchain/community/document_loaders/fs/pdf'
 import { DocxLoader } from '@langchain/community/document_loaders/fs/docx'
-import { TextLoader } from 'langchain/document_loaders/fs/text'
-import { TextSplitter } from 'langchain/text_splitter'
+import { TextLoader } from '@langchain/classic/document_loaders/fs/text'
+import { TextSplitter } from '@langchain/textsplitters'
 import { CSVLoader } from '../Csv/CsvLoader'
 import { LoadOfSheet } from '../MicrosoftExcel/ExcelLoader'
 import { PowerpointLoader } from '../MicrosoftPowerpoint/PowerpointLoader'
@@ -188,7 +189,7 @@ class S3_DocumentLoaders implements INode {
 
             await Promise.all(
                 keys.map(async (key) => {
-                    const filePath = path.join(tempDir, key)
+                    const filePath = getSafeFilePath(tempDir, key)
                     try {
                         const response = await s3Client.send(
                             new GetObjectCommand({

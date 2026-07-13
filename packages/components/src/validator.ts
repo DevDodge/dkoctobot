@@ -1,4 +1,5 @@
 import path from 'path'
+import sanitize from 'sanitize-filename'
 import { getUserHome, isAllowedUploadMimeType, mapMimeTypeToExt } from './utils'
 
 /**
@@ -13,13 +14,17 @@ export const isValidUUID = (uuid: string): boolean => {
 }
 
 /**
- * Validates if a string is a valid URL
- * @param {string} url The string to validate
- * @returns {boolean} True if valid URL, false otherwise
+ * Validates if a string is a valid URL safe for interpolation into JS code.
+ * Rejects hash fragments (the exploit entry point), non-http(s) protocols,
+ * and characters that can break out of JS string literals — double quotes,
+ * single quotes, backticks (template literals), backslashes, and newlines.
  */
 export const isValidURL = (url: string): boolean => {
     try {
-        new URL(url)
+        const parsed = new URL(url)
+        if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false
+        if (parsed.hash) return false
+        if (/["'`\\\n\r\t]/.test(url)) return false
         return true
     } catch {
         return false
@@ -32,17 +37,28 @@ export const isValidURL = (url: string): boolean => {
  * @returns {boolean} True if path traversal detected, false otherwise
  */
 export const isPathTraversal = (path: string): boolean => {
-    // Check for common path traversal patterns
+    // PATH_TRAVERSAL_SAFETY defaults to true; must be explicitly set to 'false' to disable
+    if (process.env.PATH_TRAVERSAL_SAFETY === 'false') {
+        return false
+    }
+
+    // Normalize %2e → . before checking for .. to catch mixed-encoding bypasses
+    // e.g. .%2e/, %2e./, %2e%2e all become ../
+    if (/\.\./.test(path.replace(/%2e/gi, '.'))) {
+        return true
+    }
+
     const dangerousPatterns = [
-        '..', // Directory traversal
-        '/', // Root directory
-        '\\', // Windows root directory
-        '%2e', // URL encoded .
-        '%2f', // URL encoded /
-        '%5c' // URL encoded \
+        /%2f/i, // URL encoded /
+        /%5c/i, // URL encoded \ (Windows path)
+        /\0/, // Null bytes
+        /%00/i, // URL encoded null byte
+        /^\s*[a-zA-Z]:[/\\]/, // Windows absolute paths (C:\, C:/) with optional leading whitespace
+        /^\\\\[^\\]/, // UNC paths (\\server\)
+        /^\// // Absolute Unix paths (/etc, /data, /root, etc.)
     ]
 
-    return dangerousPatterns.some((pattern) => path.toLowerCase().includes(pattern))
+    return dangerousPatterns.some((pattern) => pattern.test(path))
 }
 
 /**
@@ -51,6 +67,10 @@ export const isPathTraversal = (path: string): boolean => {
  * @returns {boolean} True if path traversal detected, false otherwise
  */
 export const isUnsafeFilePath = (filePath: string): boolean => {
+    if (process.env.PATH_TRAVERSAL_SAFETY === 'false') {
+        return false
+    }
+
     if (!filePath || typeof filePath !== 'string') {
         return true
     }
@@ -190,6 +210,14 @@ const getAllowedVectorStoreBaseDirs = (): string[] => {
  * @throws {Error} If path validation fails or path is outside allowed directories
  */
 export const validateVectorStorePath = (userProvidedPath: string | undefined): string => {
+    if (process.env.PATH_TRAVERSAL_SAFETY === 'false') {
+        if (!userProvidedPath || userProvidedPath.trim() === '') {
+            return path.join(getUserHome(), '.flowise', 'vectorstore')
+        }
+        const bypassPath = userProvidedPath.trim()
+        return path.isAbsolute(bypassPath) ? bypassPath : path.resolve(path.join(getUserHome(), '.flowise', bypassPath))
+    }
+
     // If no path provided, use default secure location
     if (!userProvidedPath || userProvidedPath.trim() === '') {
         return path.join(getUserHome(), '.flowise', 'vectorstore')
@@ -243,12 +271,8 @@ export const validateVectorStorePath = (userProvidedPath: string | undefined): s
     // Check if resolved path is within allowed directories
     const allowedDirs = getAllowedVectorStoreBaseDirs()
     const isWithinAllowedDir = allowedDirs.some((allowedDir) => {
-        // Normalize both paths for comparison
-        const normalizedResolved = path.normalize(resolvedPath)
-        const normalizedAllowed = path.normalize(allowedDir)
-
-        // Check if resolved path starts with allowed directory
-        // Add path separator to avoid partial matches (e.g., /home/user/.flowise vs /home/user/.flowise2)
+        const normalizedResolved = normalizePlatformPath(resolvedPath)
+        const normalizedAllowed = normalizePlatformPath(allowedDir)
         return normalizedResolved === normalizedAllowed || normalizedResolved.startsWith(normalizedAllowed + path.sep)
     })
 
@@ -256,6 +280,153 @@ export const validateVectorStorePath = (userProvidedPath: string | undefined): s
         throw new Error(
             `Invalid path: path must be within allowed directories (${allowedDirs.join(', ')}). ` + `Attempted path: ${resolvedPath}`
         )
+    }
+
+    return resolvedPath
+}
+
+const getAllowedSQLiteBaseDirs = (): string[] => {
+    const dirs = [path.join(getUserHome(), '.flowise')]
+    if (process.env.DATABASE_PATH) {
+        dirs.push(path.resolve(process.env.DATABASE_PATH))
+    }
+    return dirs
+}
+
+const normalizePlatformPath = (p: string): string => {
+    const n = path.normalize(p)
+    return process.platform === 'win32' ? n.toLowerCase() : n
+}
+
+const isPathWithinAllowedSQLiteDirs = (resolvedPath: string, allowedDirs: string[]): boolean => {
+    const normalizedResolved = normalizePlatformPath(resolvedPath)
+    return allowedDirs.some((allowedDir) => {
+        const normalizedAllowed = normalizePlatformPath(allowedDir)
+        return normalizedResolved === normalizedAllowed || normalizedResolved.startsWith(normalizedAllowed + path.sep)
+    })
+}
+
+/**
+ * Validates and sanitizes a SQLite database file path to prevent path traversal
+ * and arbitrary file write attacks.
+ *
+ * Relative paths are resolved within ~/.flowise/. Absolute paths must fall inside
+ * ~/.flowise/ or DATABASE_PATH when set. Set PATH_TRAVERSAL_SAFETY=false to bypass all checks (not recommended).
+ *
+ * @param {string | undefined} userProvidedPath - File path supplied by the user in the node config
+ * @returns {string} A validated, absolute path within an allowed base directory
+ * @throws {Error} If the path is missing, contains traversal patterns, or is outside allowed directories
+ */
+export const validateSQLitePath = (userProvidedPath: string | undefined): string => {
+    const allowedDirs = getAllowedSQLiteBaseDirs()
+    const defaultDir = allowedDirs[0]
+
+    if (process.env.PATH_TRAVERSAL_SAFETY === 'false') {
+        if (!userProvidedPath || userProvidedPath.trim() === '') {
+            return path.join(defaultDir, 'database.sqlite')
+        }
+        const bypassPath = userProvidedPath.trim()
+        return path.isAbsolute(bypassPath) ? bypassPath : path.resolve(path.join(defaultDir, bypassPath))
+    }
+
+    if (!userProvidedPath || userProvidedPath.trim() === '') {
+        throw new Error('Invalid SQLite path: database path is required')
+    }
+
+    const basePath = userProvidedPath.trim()
+
+    if (basePath.includes('..')) throw new Error('Invalid SQLite path: path traversal attempt detected')
+    if (basePath.toLowerCase().includes('%2e') || basePath.toLowerCase().includes('%2f') || basePath.toLowerCase().includes('%5c'))
+        throw new Error('Invalid SQLite path: encoded path traversal attempt detected')
+    // eslint-disable-next-line no-control-regex
+    if (/\0/.test(basePath) || /[\x00-\x1f]/.test(basePath))
+        throw new Error('Invalid SQLite path: null bytes or control characters detected')
+    if (/^[a-zA-Z]:\\/.test(basePath)) throw new Error('Invalid SQLite path: Windows absolute paths are not allowed')
+    if (/^\\\\[^\\]/.test(basePath)) throw new Error('Invalid SQLite path: UNC paths are not allowed')
+    if (/^\\\\\?\\/.test(basePath)) throw new Error('Invalid SQLite path: extended-length paths are not allowed')
+
+    const resolvedPath = path.isAbsolute(basePath) ? path.resolve(basePath) : path.resolve(path.join(defaultDir, basePath))
+
+    if (resolvedPath.includes('..')) throw new Error('Invalid SQLite path: path traversal detected in resolved path')
+
+    if (!isPathWithinAllowedSQLiteDirs(resolvedPath, allowedDirs)) {
+        throw new Error(
+            `Invalid SQLite path: path must be within allowed directories (${allowedDirs.join(', ')}). Attempted path: ${resolvedPath}`
+        )
+    }
+
+    return resolvedPath
+}
+
+/**
+ * Sanitize a file name to prevent path traversal attacks.
+ * Strips common storage prefixes, extracts the basename, runs it through
+ * the `sanitize-filename` package, and rejects anything that still looks unsafe.
+ *
+ * @param {string} name The file name to sanitize
+ */
+export const sanitizeFileName = (name: string): string => {
+    if (!name || typeof name !== 'string') {
+        throw new Error('Invalid file name: name is required')
+    }
+    // Strip the FILE-STORAGE:: prefix if present
+    let stripped = name.replace(/^FILE-STORAGE::/, '')
+    // Decode percent-encoded traversal sequences before basename extraction
+    try {
+        stripped = decodeURIComponent(stripped)
+    } catch (_) {
+        // If decoding fails the raw string is fine — basename will still strip dirs
+    }
+    // Normalize backslashes to forward slashes so path.basename works on all
+    // platforms (on Linux, path.basename does not treat \ as a separator)
+    stripped = stripped.replace(/\\/g, '/')
+    // Extract only the base filename — removes all directory components
+    let baseName = path.basename(stripped)
+    // Run through sanitize-filename to strip OS-reserved chars, control chars, etc.
+    baseName = sanitize(baseName)
+    // Remove leading dots to prevent hidden files or relative path references
+    baseName = baseName.replace(/^\.+/, '')
+    if (!baseName || isUnsafeFilePath(baseName)) {
+        throw new Error(`Invalid or unsafe file name: ${name}`)
+    }
+    return baseName
+}
+
+/**
+ * Safely resolve an untrusted relative key/filename to an absolute path inside a
+ * trusted base directory, guaranteeing the result cannot escape that directory.
+ *
+ * @param {string} baseDir The trusted base directory (e.g. a freshly created temp dir)
+ * @param {string} key The untrusted relative key or filename
+ * @returns {string} A validated absolute path guaranteed to be within baseDir
+ * @throws {Error} If key is missing/invalid or the resolved path escapes baseDir
+ */
+export const getSafeFilePath = (baseDir: string, key: string): string => {
+    if (!key || typeof key !== 'string') {
+        throw new Error('Invalid file path: key is required and must be a string')
+    }
+
+    let decodedKey = key
+    try {
+        decodedKey = decodeURIComponent(key)
+    } catch {
+        // malformed percent-encoding — keep the raw key; resolve/relative handle it safely
+    }
+
+    if (decodedKey.includes('\0')) {
+        throw new Error(`Invalid file path: null byte detected in "${key}"`)
+    }
+
+    const resolvedBase = path.resolve(baseDir)
+    const resolvedPath = path.resolve(resolvedBase, decodedKey)
+
+    if (process.env.PATH_TRAVERSAL_SAFETY === 'false') {
+        return resolvedPath
+    }
+
+    const relative = path.relative(resolvedBase, resolvedPath)
+    if (relative === '' || relative === '..' || relative.startsWith('..' + path.sep) || path.isAbsolute(relative)) {
+        throw new Error(`Invalid file path: path traversal attempt detected in "${key}"`)
     }
 
     return resolvedPath

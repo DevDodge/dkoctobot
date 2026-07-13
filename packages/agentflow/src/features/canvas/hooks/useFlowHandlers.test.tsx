@@ -4,7 +4,7 @@ import { makeFlowEdge, makeFlowNode, makeNodeData } from '@test-utils/factories'
 import { act, renderHook } from '@testing-library/react'
 
 import { isValidConnectionAgentflowV2 } from '@/core'
-import type { FlowEdge, FlowNode, NodeData } from '@/core/types'
+import type { FlowData, FlowEdge, FlowNode, NodeData } from '@/core/types'
 import { checkNodePlacementConstraints } from '@/core/validation'
 
 import { useFlowHandlers } from './useFlowHandlers'
@@ -120,6 +120,56 @@ describe('useFlowHandlers', () => {
             expect(onFlowChange).not.toHaveBeenCalled()
         })
 
+        it('should compute numeric edgeLabel for conditionAgentflow source', () => {
+            nodes = [makeFlowNode('c', { data: { id: 'c', name: 'conditionAgentflow', label: 'Condition' } }), makeFlowNode('b')]
+            const { result } = renderUseFlowHandlers()
+
+            act(() => {
+                result.current.handleConnect({ source: 'c', target: 'b', sourceHandle: 'c-output-2', targetHandle: null })
+            })
+
+            expect(onFlowChange).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    edges: expect.arrayContaining([expect.objectContaining({ data: expect.objectContaining({ edgeLabel: '2' }) })])
+                })
+            )
+        })
+
+        it('should compute numeric edgeLabel for conditionAgentAgentflow source', () => {
+            nodes = [
+                makeFlowNode('ca', { data: { id: 'ca', name: 'conditionAgentAgentflow', label: 'Condition Agent' } }),
+                makeFlowNode('b')
+            ]
+            const { result } = renderUseFlowHandlers()
+
+            act(() => {
+                result.current.handleConnect({ source: 'ca', target: 'b', sourceHandle: 'ca-output-1', targetHandle: null })
+            })
+
+            expect(onFlowChange).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    edges: expect.arrayContaining([expect.objectContaining({ data: expect.objectContaining({ edgeLabel: '1' }) })])
+                })
+            )
+        })
+
+        it('should compute proceed/reject edgeLabel for humanInputAgentflow source', () => {
+            nodes = [makeFlowNode('h', { data: { id: 'h', name: 'humanInputAgentflow', label: 'Human Input' } }), makeFlowNode('b')]
+            const { result } = renderUseFlowHandlers()
+
+            act(() => {
+                result.current.handleConnect({ source: 'h', target: 'b', sourceHandle: 'h-output-0', targetHandle: null })
+            })
+
+            expect(onFlowChange).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    edges: expect.arrayContaining([
+                        expect.objectContaining({ data: expect.objectContaining({ edgeLabel: 'proceed', isHumanInput: true }) })
+                    ])
+                })
+            )
+        })
+
         it('should not call onFlowChange when source or target is missing', () => {
             const { result } = renderUseFlowHandlers()
 
@@ -129,6 +179,44 @@ describe('useFlowHandlers', () => {
 
             expect(onFlowChange).not.toHaveBeenCalled()
             expect(mockSetDirty).not.toHaveBeenCalled()
+        })
+
+        it('should set zIndex on edge when both nodes share the same parentNode', () => {
+            nodes = [makeFlowNode('child_a', { parentNode: 'iter_0' }), makeFlowNode('child_b', { parentNode: 'iter_0' })]
+            const { result } = renderUseFlowHandlers()
+
+            act(() => {
+                result.current.handleConnect({ source: 'child_a', target: 'child_b', sourceHandle: null, targetHandle: null })
+            })
+
+            expect(onFlowChange).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    edges: expect.arrayContaining([expect.objectContaining({ zIndex: 9999 })])
+                })
+            )
+        })
+
+        it('should not set zIndex when nodes have different parents', () => {
+            nodes = [makeFlowNode('child_a', { parentNode: 'iter_0' }), makeFlowNode('child_b', { parentNode: 'iter_1' })]
+            const { result } = renderUseFlowHandlers()
+
+            act(() => {
+                result.current.handleConnect({ source: 'child_a', target: 'child_b', sourceHandle: null, targetHandle: null })
+            })
+
+            const edge = (onFlowChange.mock.calls[0][0] as FlowData).edges[0]
+            expect(edge.zIndex).toBeUndefined()
+        })
+
+        it('should not set zIndex when nodes are not inside any iteration group', () => {
+            const { result } = renderUseFlowHandlers()
+
+            act(() => {
+                result.current.handleConnect({ source: 'a', target: 'b', sourceHandle: null, targetHandle: null })
+            })
+
+            const edge = (onFlowChange.mock.calls[0][0] as FlowData).edges[0]
+            expect(edge.zIndex).toBeUndefined()
         })
     })
 

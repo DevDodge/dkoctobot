@@ -55,22 +55,60 @@ function getHttpDenyList(): string[] {
  * @throws Error if IP is in deny list
  */
 export function isDeniedIP(ip: string, denyList: string[]): void {
-    const parsedIp = ipaddr.parse(ip)
+    let parsedIp = ipaddr.parse(ip)
+
+    // Normalize IPv4-mapped IPv6 addresses to IPv4 before checking
+    // This prevents bypass of IPv4 deny list rules via ::ffff:x.x.x.x addresses
+    if (parsedIp.kind() === 'ipv6') {
+        const ipv6Addr = parsedIp as ipaddr.IPv6
+        if (ipv6Addr.isIPv4MappedAddress()) {
+            parsedIp = ipv6Addr.toIPv4Address()
+        }
+    }
+
     for (const entry of denyList) {
         if (entry.includes('/')) {
             try {
-                const [range, _] = entry.split('/')
-                const parsedRange = ipaddr.parse(range)
+                const [rangeAddr, mask] = ipaddr.parseCIDR(entry)
+                let parsedRange = rangeAddr
+                let adjustedMask = mask
+
+                // Also normalize deny list entries
+                if (parsedRange.kind() === 'ipv6' && (parsedRange as ipaddr.IPv6).isIPv4MappedAddress()) {
+                    if (mask < 96) continue // malformed IPv4-mapped CIDR — skip
+                    parsedRange = (parsedRange as ipaddr.IPv6).toIPv4Address()
+                    adjustedMask -= 96
+                }
+
                 if (parsedIp.kind() === parsedRange.kind()) {
-                    if (parsedIp.match(ipaddr.parseCIDR(entry))) {
+                    if (parsedIp.match(parsedRange, adjustedMask)) {
                         throw new Error('Access to this host is denied by policy.')
                     }
                 }
             } catch (error) {
                 throw new Error(`isDeniedIP: ${error}`)
             }
-        } else if (ip === entry) {
-            throw new Error('Access to this host is denied by policy.')
+        } else {
+            // Try to parse and normalize the deny list entry for consistent comparison
+            // This handles non-canonical IPv6 addresses (e.g., FE80::1, 2001:0DB8::1)
+            if (ipaddr.isValid(entry)) {
+                let parsedEntry = ipaddr.parse(entry)
+
+                // Normalize IPv4-mapped IPv6 entries
+                if (parsedEntry.kind() === 'ipv6' && (parsedEntry as ipaddr.IPv6).isIPv4MappedAddress()) {
+                    parsedEntry = (parsedEntry as ipaddr.IPv6).toIPv4Address()
+                }
+
+                // Compare normalized forms
+                if (parsedIp.toString() === parsedEntry.toString()) {
+                    throw new Error('Access to this host is denied by policy.')
+                }
+            } else {
+                // Not a valid IP - compare as-is (e.g., hostname like "localhost")
+                if (parsedIp.toString() === entry) {
+                    throw new Error('Access to this host is denied by policy.')
+                }
+            }
         }
     }
 }
@@ -84,7 +122,11 @@ export async function checkDenyList(url: string): Promise<void> {
     const httpDenyList = getHttpDenyList()
 
     const urlObj = new URL(url)
-    const hostname = urlObj.hostname
+    let hostname = urlObj.hostname
+    // Strip IPv6 brackets if present
+    if (hostname.startsWith('[') && hostname.endsWith(']')) {
+        hostname = hostname.slice(1, -1)
+    }
 
     if (ipaddr.isValid(hostname)) {
         isDeniedIP(hostname, httpDenyList)
@@ -97,24 +139,42 @@ export async function checkDenyList(url: string): Promise<void> {
 }
 
 /**
+ * Optional TLS options for secureAxiosRequest (e.g. custom CA for mutual TLS or private CAs).
+ */
+export interface SecureRequestAgentOptions {
+    ca?: string | string[] | Buffer
+}
+
+/**
  * Makes a secure HTTP request that validates all URLs in redirect chains against the deny list
- * @param config - Axios request configuration
+ * @param config - Axios request configuration (httpsAgent/httpAgent are ignored; use agentOptions for custom CA)
  * @param maxRedirects - Maximum number of redirects to follow (default: 5)
+ * @param agentOptions - Optional TLS options (e.g. { ca } for custom CA PEM)
  * @returns Promise<AxiosResponse>
  * @throws Error if any URL in the redirect chain is denied
  */
-export async function secureAxiosRequest(config: AxiosRequestConfig, maxRedirects: number = 5): Promise<AxiosResponse> {
+export async function secureAxiosRequest(
+    config: AxiosRequestConfig,
+    maxRedirects: number = 5,
+    agentOptions?: SecureRequestAgentOptions
+): Promise<AxiosResponse> {
     let currentUrl = config.url
     if (!currentUrl) {
         throw new Error('secureAxiosRequest: url is required')
     }
 
     let redirects = 0
-    let currentConfig = { ...config, maxRedirects: 0, validateStatus: () => true } // Disable automatic redirects, accept all status codes
+    let currentConfig: AxiosRequestConfig = {
+        ...config,
+        maxRedirects: 0,
+        validateStatus: () => true,
+        httpsAgent: undefined,
+        httpAgent: undefined
+    } // Disable automatic redirects; agents set per-request below
 
     while (redirects <= maxRedirects) {
         const target = await resolveAndValidate(currentUrl)
-        const agent = createPinnedAgent(target)
+        const agent = createPinnedAgent(target, agentOptions)
 
         currentConfig = {
             ...currentConfig,
@@ -168,17 +228,23 @@ export async function secureAxiosRequest(config: AxiosRequestConfig, maxRedirect
  * @param url - URL to fetch
  * @param init - Fetch request options
  * @param maxRedirects - Maximum number of redirects to follow (default: 5)
+ * @param agentOptions - Optional TLS options (e.g. { ca } for custom CA PEM)
  * @returns Promise<Response>
  * @throws Error if any URL in the redirect chain is denied
  */
-export async function secureFetch(url: string, init?: RequestInit, maxRedirects: number = 5): Promise<Response> {
+export async function secureFetch(
+    url: string,
+    init?: RequestInit,
+    maxRedirects: number = 5,
+    agentOptions?: SecureRequestAgentOptions
+): Promise<Response> {
     let currentUrl = url
     let redirectCount = 0
     let currentInit = { ...init, redirect: 'manual' as const } // Disable automatic redirects
 
     while (redirectCount <= maxRedirects) {
         const resolved = await resolveAndValidate(currentUrl)
-        const agent = createPinnedAgent(resolved)
+        const agent = createPinnedAgent(resolved, agentOptions)
 
         const response = await fetch(currentUrl, { ...currentInit, agent: () => agent })
 
@@ -230,12 +296,15 @@ async function resolveAndValidate(url: string): Promise<ResolvedTarget> {
     const denyList = getHttpDenyList()
 
     const u = new URL(url)
-    const hostname = u.hostname
+    let hostname = u.hostname
+    // Strip IPv6 brackets if present
+    if (hostname.startsWith('[') && hostname.endsWith(']')) {
+        hostname = hostname.slice(1, -1)
+    }
     const protocol: 'http' | 'https' = u.protocol === 'https:' ? 'https' : 'http'
 
     if (ipaddr.isValid(hostname)) {
         isDeniedIP(hostname, denyList)
-
         return {
             hostname,
             ip: hostname,
@@ -263,12 +332,13 @@ async function resolveAndValidate(url: string): Promise<ResolvedTarget> {
     }
 }
 
-function createPinnedAgent(target: ResolvedTarget): http.Agent | https.Agent {
+function createPinnedAgent(target: ResolvedTarget, options?: { ca?: string | string[] | Buffer }): http.Agent | https.Agent {
     const Agent = target.protocol === 'https' ? https.Agent : http.Agent
 
     return new Agent({
         lookup: (_host, _opts, cb) => {
             cb(null, target.ip, target.family)
-        }
+        },
+        ...options
     })
 }

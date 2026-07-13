@@ -2,7 +2,8 @@ import { useCallback, useRef } from 'react'
 import { addEdge, applyEdgeChanges, applyNodeChanges, Connection, EdgeChange, Node, NodeChange } from 'reactflow'
 
 import { getNodeColor, getUniqueNodeId, getUniqueNodeLabel, initNode, isValidConnectionAgentflowV2, resolveNodeType } from '@/core'
-import type { FlowDataCallback, FlowEdge, FlowNode, NodeData } from '@/core/types'
+import { tokens } from '@/core/theme/tokens'
+import type { FlowDataCallback, FlowEdge, FlowNode, NodeDataSchema } from '@/core/types'
 import { checkNodePlacementConstraints } from '@/core/validation'
 import { useAgentflowContext } from '@/infrastructure/store'
 
@@ -14,7 +15,7 @@ interface UseFlowHandlersProps {
     onNodesChange: (changes: NodeChange[]) => void
     onEdgesChange: (changes: EdgeChange[]) => void
     onFlowChange?: FlowDataCallback
-    availableNodes: NodeData[]
+    availableNodes: NodeDataSchema[]
     onConstraintViolation?: (message: string) => void
 }
 
@@ -56,15 +57,34 @@ export function useFlowHandlers({
             const sourceNode = nodes.find((n) => n.id === params.source)
             const targetNode = nodes.find((n) => n.id === params.target)
 
-            const sourceColor = getNodeColor(sourceNode?.data?.name || '')
+            const sourceName = sourceNode?.data?.name || ''
+            const sourceColor = getNodeColor(sourceName)
             const targetColor = getNodeColor(targetNode?.data?.name || '')
+
+            // Compute edge label for nodes with dynamic output ports
+            let edgeLabel: string | undefined
+            if (sourceName === 'conditionAgentflow' || sourceName === 'conditionAgentAgentflow') {
+                const raw = params.sourceHandle?.split('-').pop() || '0'
+                edgeLabel = (isNaN(Number(raw)) ? 0 : raw).toString()
+            }
+            if (sourceName === 'humanInputAgentflow') {
+                const raw = params.sourceHandle?.split('-').pop() || '0'
+                edgeLabel = raw === '0' ? 'proceed' : 'reject'
+            }
+
+            const sourceParent = sourceNode?.parentNode
+            const targetParent = targetNode?.parentNode
+            const isWithinIterationNode = sourceParent && targetParent && sourceParent === targetParent
 
             const newEdge = {
                 ...params,
                 type: 'agentflowEdge',
+                ...(isWithinIterationNode && { zIndex: tokens.zIndex.iterationEdge }),
                 data: {
                     sourceColor,
-                    targetColor
+                    targetColor,
+                    edgeLabel,
+                    isHumanInput: sourceName === 'humanInputAgentflow'
                 }
             }
             // Use functional updater to avoid stale edge state from rapid sequential connections

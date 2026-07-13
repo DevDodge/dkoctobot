@@ -422,6 +422,9 @@ export interface IVisionChatModal {
     multiModalOption: IMultiModalOption
     configuredMaxToken?: number
     setMultiModalOption(multiModalOption: IMultiModalOption): void
+    setVisionModel?(): void
+    revertToOriginalModel?(): void
+    getModelParams?(): Record<string, any>
 }
 
 export interface IStateWithMessages extends ICommonObject {

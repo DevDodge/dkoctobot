@@ -130,7 +130,7 @@ interface IExecuteNodeParams {
     graph: INodeDirectedGraph
     reversedGraph: INodeDirectedGraph
     incomingInput: IncomingAgentflowInput
-    chatflow: ChatFlow
+    chatflow: ChatFlow | any
     chatId: string
     sessionId: string
     apiMessageId: string
@@ -1287,7 +1287,7 @@ const executeNode = async ({
                 const iterationChatflow = {
                     ...chatflow,
                     flowData: JSON.stringify(iterationFlowData)
-                }
+                } as ChatFlow
 
                 // Initialize array to collect results from iterations
                 const iterationResults: string[] = []

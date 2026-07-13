@@ -686,7 +686,7 @@ const clearWebhookSecret = async (chatflowId: string, workspaceId: string): Prom
         const repo = appServer.AppDataSource.getRepository(ChatFlow)
         const chatflow = await repo.findOne({ where: { id: chatflowId, workspaceId } })
         if (!chatflow) throw new InternalFlowiseError(StatusCodes.NOT_FOUND, `Chatflow ${chatflowId} not found`)
-        chatflow.webhookSecret = null
+        chatflow.webhookSecret = ''
         chatflow.webhookSecretConfigured = false
         await repo.save(chatflow)
     } catch (error) {

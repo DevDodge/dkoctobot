@@ -37,7 +37,7 @@ const DEFAULT_APPLICATIONS = `### 1. Product Search
 - **When to use**: Customer confirms they want to place an order OR order data is detected in the conversation
 - **Required fields before creating**: Customer name (clientName), Phone number (clientPhone)
 - **Workflow**: Extract data from conversation → Execute tool IMMEDIATELY (NO confirmation needed) → Log result
-- **Input format**: JSON with "attributes" array: [{ "key": "field_name", "value": "field_value" }]
+- **Input format**: JSON with "attributes" array: [[ "key": "field_name", "value": "field_value" ]]
 - **On success**: Log the order ID returned
 - **On error**: Log the error details
 - **CRITICAL**: DO NOT wait for confirmation. DO NOT ask the customer. EXECUTE THE TOOL AS SOON AS YOU HAVE name + phone.`

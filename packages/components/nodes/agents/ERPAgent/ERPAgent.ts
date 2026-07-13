@@ -20,18 +20,28 @@ import { addImagesToMessages, llmSupportsVision } from '../../../src/multiModalU
 
 // ── System prompt suffixes per response mode ──────────────────────────
 const RESPONSE_MODE_SUFFIXES: Record<string, string> = {
-    decisionOnly: `\n\n🔴 CRITICAL: TOOLS-FIRST OPERATION MODE
-- Your PRIMARY purpose is TOOL EXECUTION. You are a "Tool Runner" — not a "JSON Writer".
-- When you detect ANY customer information that matches a tool → CALL THE TOOL IMMEDIATELY.
-  Do not pause. Do not format JSON first. Do not overthink. Just call the tool.
-- The tool SCHEMA (function calling parameters) is your source of truth. Trust it over any text description.
-- Tools like create_crm_order and crm_monitoring_note are meant to be CALLED, not described.
-- After ALL relevant tools have been executed (and only after), output a minimal summary as JSON:
-  toolCalls array with tool name, result status, and orderId; actionsExecuted array of action names
-  Example: toolCalls: [(tool: create_crm_order, result: success, orderId: 123)], actionsExecuted: [created_order]
-- If no tools were called because no relevant data was found, output:
-  toolCalls: [], actionsExecuted: [], note: "no actionable data in this message"
-- TOOLS > JSON. Execute first, document second. The Sales Agent handles customer communication.`,
+    decisionOnly: `\n\n## 🔴 CRITICAL: TOOLS-FIRST AUTOMATIC EXECUTION MODE
+
+You are an AUTOMATIC execution engine. Your ONLY purpose is to detect orders and execute tools IMMEDIATELY.
+
+### CORE RULES — NO EXCEPTIONS:
+1. **DETECT → EXECUTE** — The moment you detect a customer order with name + phone, CALL create_crm_order IMMEDIATELY. Do NOT pause. Do NOT ask for confirmation. Do NOT summarize. Just CALL THE TOOL.
+
+2. **NO CONFIRMATION EVER** — You are in "decisionOnly" mode. You CANNOT ask the customer anything. You CANNOT wait for approval. You CANNOT output confirmation questions. Your ONLY output path is through tools.
+
+3. **DATA EXTRACTION** — Extract all fields from the input message. If a field is missing, use sensible defaults:
+   - Missing status → "جديد"
+   - Missing governorate → extract from address or use empty string
+   - Missing backup size → leave empty
+   - Missing orderTotalPrice → calculate from basePrice + shippingPrice
+
+4. **EXECUTE ALL MATCHING TOOLS** — If you see data for create_crm_order → call it. If monitoring_note is available → call it. Call EVERY relevant tool.
+
+5. **AFTER ALL TOOLS EXECUTE** — Output a minimal JSON summary:
+   - {"toolCalls": [{"tool": "create_crm_order", "result": "success", "orderId": 123}], "actionsExecuted": ["created_order"]}
+   - If NO tools were called (no actionable data): {"toolCalls": [], "actionsExecuted": [], "note": "no actionable data detected"}
+
+6. **TOOLS > TEXT** — You are a TOOL RUNNER first, not a writer. The Sales Agent handles customer communication. Your value is in EXECUTING tools, not writing responses.`,
 
     modifyResponse: `\n\nIMPORTANT RULES FOR YOUR OUTPUT:
 - You will receive the Sales Agent's response to the customer.
@@ -62,7 +72,7 @@ class ERPAgent_Agents implements INode {
     constructor(fields?: { sessionId?: string }) {
         this.label = 'ERP Agent'
         this.name = 'erpAgent'
-        this.version = 1.0
+        this.version = 1.1
         this.type = 'ERPAgentExecutor'
         this.category = 'AppCity'
         this.icon = 'erpAgent.svg'
@@ -234,9 +244,26 @@ const prepareERPAgent = async (
     let promptVariables = {}
     const chatPromptTemplate = nodeData.inputs?.chatPromptTemplate as ChatPromptTemplate
     if (chatPromptTemplate && chatPromptTemplate.promptMessages.length) {
-        const humanPrompt = chatPromptTemplate.promptMessages[chatPromptTemplate.promptMessages.length - 1]
+        // 🔧 FIX: Inject modeSuffix into the first SystemMessagePromptTemplate
+        // Previously the modeSuffix was appended to systemMessage but then
+        // the entire prompt was replaced by chatPromptTemplate, discarding it.
+        // Now we find the first SystemMessage and inject the modeSuffix into it.
+        const modifiedMessages = chatPromptTemplate.promptMessages.map((msg, idx) => {
+            if (idx === 0 && (msg as any).prompt && (msg as any).prompt.template !== undefined) {
+                // This is likely a SystemMessagePromptTemplate — inject modeSuffix
+                const template = (msg as any).prompt.template as string
+                if (template && !template.includes(modeSuffix)) {
+                    const modifiedMsg = { ...msg }
+                    ;(modifiedMsg as any).prompt = { ...(msg as any).prompt, template: template + modeSuffix }
+                    return modifiedMsg
+                }
+            }
+            return msg
+        })
+
+        const humanPrompt = modifiedMessages[modifiedMessages.length - 1]
         const messages = [
-            ...chatPromptTemplate.promptMessages.slice(0, -1),
+            ...modifiedMessages.slice(0, -1),
             new MessagesPlaceholder('chat_history'),
             humanPrompt,
             new MessagesPlaceholder('agent_scratchpad')

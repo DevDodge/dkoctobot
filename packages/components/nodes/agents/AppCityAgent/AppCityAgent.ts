@@ -52,7 +52,7 @@ class AppCityAgent_Agents implements INode {
   constructor(fields?: { sessionId?: string }) {
     this.label = "AppCity Agent";
     this.name = "appCityAgent";
-    this.version = 1.0;
+    this.version = 1.1;
     this.type = "AgentExecutor";
     this.category = "AppCity";
     this.icon = "appCityAgent.svg";
@@ -215,11 +215,22 @@ class AppCityAgent_Agents implements INode {
       allSourceDocuments.push(...(salesResult.sourceDocuments || []));
       allArtifacts.push(...(salesResult.artifacts || []));
 
-      // Step 2: ERP Agent processes with sales context
+      // Step 2: ERP Agent processes with sales context + FULL conversation
+      // 🔧 FIX: Previously only the LAST customer message was sent.
+      // Now we include the full chat history so ERP can extract order data
+      // from earlier messages in multi-message flows.
+      const fullConversation = chatHistory && chatHistory.length > 0
+        ? chatHistory.map(m => {
+            const content = typeof m.content === 'string' ? m.content : JSON.stringify(m.content)
+            const role = m._getType ? m._getType() : (m.constructor as any).name?.replace('Message', '')
+            return `${role}: ${content}`
+          }).join('\n') + `\nhuman: ${input}`
+        : input;
+
       const erpInput =
         erpResponseMode === "modifyResponse"
-          ? `Customer message: ${input}\n\nSales Agent response: ${salesResult.output}\n\nPlease modify and enrich the Sales Agent's response with ERP data.`
-          : `Customer message: ${input}\n\nSales Agent response: ${salesResult.output}`;
+          ? `FULL CONVERSATION:\n${fullConversation}\n\nSales Agent response: ${salesResult.output}\n\nPlease modify and enrich the Sales Agent's response with ERP data.`
+          : `FULL CONVERSATION:\n${fullConversation}\n\nSales Agent response: ${salesResult.output}\n\nDetect any order data in the conversation above. If you find customer name + phone number + order details, call create_crm_order IMMEDIATELY.`;
       const erpResult = await this.runAgent(
         erpAgent,
         erpInput,
@@ -251,8 +262,16 @@ class AppCityAgent_Agents implements INode {
         );
       }
     } else if (thinkingOrder === "erpFirst") {
-      // Step 1: ERP Agent analyzes first — pass the raw customer message so tools (like monitoring) can trigger
-      const erpInput = `${input}`;
+      // Step 1: ERP Agent analyzes first — pass FULL conversation so tools can detect order data
+      // 🔧 FIX: Include full chat history + current input so ERP can extract order data
+      const fullConversation = chatHistory && chatHistory.length > 0
+        ? chatHistory.map(m => {
+            const content = typeof m.content === 'string' ? m.content : JSON.stringify(m.content)
+            const role = m._getType ? m._getType() : (m.constructor as any).name?.replace('Message', '')
+            return `${role}: ${content}`
+          }).join('\n') + `\nhuman: ${input}`
+        : input;
+      const erpInput = `FULL CONVERSATION:\n${fullConversation}\n\nDetect any order data in the conversation above. If you find customer name + phone number + order details, call create_crm_order IMMEDIATELY.`;
       const erpResult = await this.runAgent(
         erpAgent,
         erpInput,
@@ -289,7 +308,15 @@ class AppCityAgent_Agents implements INode {
         finalOutput = salesResult.output;
       }
     } else if (thinkingOrder === "parallel") {
-      // Run both agents in parallel
+      // Run both agents in parallel — ERP gets full conversation
+      const parallelFullConversation = chatHistory && chatHistory.length > 0
+        ? chatHistory.map(m => {
+            const content = typeof m.content === 'string' ? m.content : JSON.stringify(m.content)
+            const role = m._getType ? m._getType() : (m.constructor as any).name?.replace('Message', '')
+            return `${role}: ${content}`
+          }).join('\n') + `\nhuman: ${input}`
+        : input;
+
       const [salesResult, erpResult] = await Promise.all([
         this.runAgent(
           salesAgent,
@@ -303,7 +330,7 @@ class AppCityAgent_Agents implements INode {
         ),
         this.runAgent(
           erpAgent,
-          input,
+          `FULL CONVERSATION:\n${parallelFullConversation}\n\nDetect any order data and call tools IMMEDIATELY.`,
           chatHistory,
           loggerHandler,
           callbacks,
@@ -417,7 +444,9 @@ class AppCityAgent_Agents implements INode {
         : [loggerHandler, ...callbacks];
 
     // Pass chat history as prependMessages for the agent's memory placeholder
-    const invokeOptions: any = { input };
+    // 🔧 FIX: Previously chatHistory was loaded but NEVER passed to agent.invoke().
+    // The ERP Agent (and any agent) needs chat context to understand multi-message flows.
+    const invokeOptions: any = { input, prependMessages: chatHistory || [] };
 
     let res: ChainValues;
     try {

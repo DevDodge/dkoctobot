@@ -1,6 +1,5 @@
 import { StructuredTool } from "@langchain/core/tools";
 import { z } from "zod";
-import { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import {
   INode,
   INodeData,
@@ -12,6 +11,76 @@ import {
   convertMultiOptionsToStringArray,
 } from "../../../src/utils";
 import { TOOL_ARGS_PREFIX, formatToolError } from "../../../src/agents";
+
+// ── Retry helper ───────────────────────────────────────────────────────
+
+async function fetchWithRetry(
+  url: string,
+  options: any,
+  retries = 2,
+  timeoutMs = 10000
+): Promise<Response> {
+  let lastError: Error | null = null;
+
+  for (let i = 0; i < retries; i++) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+
+      if (response.ok) return response;
+      if (response.status >= 400 && response.status < 500) return response;
+    } catch (e: any) {
+      lastError = e;
+    }
+
+    if (i < retries - 1) {
+      await new Promise((r) => setTimeout(r, 1000 * (i + 1)));
+    }
+  }
+
+  throw lastError || new Error(`CRM request failed after ${retries} retries`);
+}
+
+// ── Monitoring Input Schema (data comes from the Agent's own LLM) ─────
+// The Agent analyzes the conversation itself and passes structured data.
+// This tool only forwards it to the CRM — no secondary LLM call inside.
+
+const MonitoringInputSchema = z.object({
+  note: z
+    .string()
+    .describe(
+      "A concise professional note summarizing what happened in this customer message. Write in Arabic."
+    ),
+  keys: z
+    .record(z.string(), z.string())
+    .optional()
+    .describe(
+      "Key-value pairs of dynamic business data extracted from this message (e.g. budget, product interest, location)"
+    ),
+  sentiment: z
+    .enum(["positive", "neutral", "negative", "mixed"])
+    .optional()
+    .default("neutral")
+    .describe("The customer's emotional tone in this message"),
+  alert_level: z
+    .enum(["none", "warning", "danger"])
+    .optional()
+    .default("none")
+    .describe(
+      "Alert level — use 'warning' for issues like customer frustration, objections, or complaints. Use 'danger' for cancellation intent or legal threats."
+    ),
+  alert_reason: z
+    .string()
+    .optional()
+    .describe(
+      "If alert_level is 'warning' or 'danger', explain briefly why in Arabic"
+    ),
+});
 
 class CRMMonitoringTool_Tools implements INode {
   label: string;
@@ -27,12 +96,12 @@ class CRMMonitoringTool_Tools implements INode {
   constructor() {
     this.label = "CRM Monitoring Tool";
     this.name = "crmMonitoringTool";
-    this.version = 2.0;
+    this.version = 3.0;
     this.type = "CRMMonitoringTool";
     this.icon = "crm-monitoring.svg";
     this.category = "AppCity";
     this.description =
-      "Dynamic monitoring node to extract metadata, sentiment and alerts for any business type. Uses structured input via function calling.";
+      "Forwards conversation analysis data to the CRM dashboard. The main Agent handles the analysis — this tool only sends the results to CRM.";
     this.baseClasses = [
       this.type,
       "StructuredTool",
@@ -40,20 +109,6 @@ class CRMMonitoringTool_Tools implements INode {
       ...getBaseClasses(StructuredTool),
     ];
     this.inputs = [
-      {
-        label: "Chat Model",
-        name: "model",
-        type: "BaseChatModel",
-        description:
-          "Select the high-speed economical LLM model for background monitoring.",
-      },
-      {
-        label: "Monitoring Prompt Template",
-        name: "monitoringPrompt",
-        type: "MonitoringPromptTemplate",
-        description:
-          "Connect the Monitoring Prompt Template here to define business keys.",
-      },
       {
         label: "CRM Base URL",
         name: "crmBaseUrl",
@@ -94,8 +149,6 @@ class CRMMonitoringTool_Tools implements INode {
       (nodeData.inputs?.crmBaseUrl as string) || "https://crm.octobot.it.com"
     ).replace(/\/+$/, "");
     const apiKey = nodeData.inputs?.apiKey as string;
-    const model = nodeData.inputs?.model as BaseChatModel;
-    const monitoringPrompt = nodeData.inputs?.monitoringPrompt as any;
 
     const selectedVars = convertMultiOptionsToStringArray(
       nodeData.inputs?.variables
@@ -105,14 +158,15 @@ class CRMMonitoringTool_Tools implements INode {
       ? (_options.sessionId as string) || (_options.chatId as string) || ""
       : "";
 
+    if (!apiKey) {
+      throw new Error(
+        "API Key is required. Generate one from the CRM Integration Keys page."
+      );
+    }
+
     return new CRMMonitoringToolImpl({
       crmBaseUrl,
       apiKey,
-      model,
-      extractionKeys: monitoringPrompt?.extractionKeys || [],
-      enableSentiment: monitoringPrompt?.enableSentiment ?? true,
-      alertRules: monitoringPrompt?.alertRules || [],
-      analysisInstructions: monitoringPrompt?.analysisInstructions || "",
       resolvedSessionId,
     });
   }
@@ -121,58 +175,24 @@ class CRMMonitoringTool_Tools implements INode {
 interface ToolConfig {
   crmBaseUrl: string;
   apiKey: string;
-  model: BaseChatModel;
-  extractionKeys: any[];
-  enableSentiment: boolean;
-  alertRules: any[];
-  analysisInstructions: string;
   resolvedSessionId: string;
 }
-
-// ── Structured Input Schema ─────────────────────────────────────────
-// The LLM sends { message, previousContext } directly via function calling.
-// No JSON parsing needed — the framework handles it.
-
-const MonitoringInputSchema = z.object({
-  message: z
-    .string()
-    .describe(
-      "The customer's latest message to analyze. Extract new information, sentiment, and check alert rules."
-    ),
-  previousContext: z
-    .string()
-    .optional()
-    .describe(
-      "Optional: Brief summary of the conversation so far to provide context for analysis."
-    ),
-});
 
 class CRMMonitoringToolImpl extends StructuredTool {
   name = "crm_monitoring_note";
   description =
-    "Analyzes customer messages and records key milestones, extracted data, sentiment, and alerts to the CRM dashboard. Call this after EVERY user turn that contains new information.";
+    "Send conversation insights to the CRM dashboard. Use after every user message to record: what happened (note), extracted business data (keys), customer sentiment, and any alerts. The Agent must analyze the message first, then call this tool with the results.";
 
-  // 🔥 StructuredTool with Zod schema — LLM calls this via function calling
   schema = MonitoringInputSchema;
 
   private crmBaseUrl: string;
   private apiKey: string;
-  private model: BaseChatModel;
-  private extractionKeys: any[];
-  private enableSentiment: boolean;
-  private alertRules: any[];
-  private analysisInstructions: string;
   private resolvedSessionId: string;
 
   constructor(config: ToolConfig) {
     super();
     this.crmBaseUrl = config.crmBaseUrl;
     this.apiKey = config.apiKey;
-    this.model = config.model;
-    this.extractionKeys = config.extractionKeys;
-    this.enableSentiment = config.enableSentiment;
-    this.alertRules = config.alertRules;
-    this.analysisInstructions = config.analysisInstructions;
     this.resolvedSessionId = config.resolvedSessionId;
   }
 
@@ -189,87 +209,6 @@ class CRMMonitoringToolImpl extends StructuredTool {
     }
   ): Promise<string> {
     try {
-      const message = arg.message;
-      const previousContext = arg.previousContext || "";
-
-      // ── Build the analysis prompt dynamically ──
-      const keysSchema = this.extractionKeys
-        .map((k) => {
-          const opts = k.options ? `, options: [${k.options}]` : "";
-          return `  - "${k.key}": "${k.display}" (type: ${k.type}${opts})`;
-        })
-        .join("\n");
-
-      const rulesSchema = this.alertRules
-        .map((r, i) => {
-          return `  Rule ${i + 1}: Name "${r.rule_name}" [Level: ${
-            r.alert_level
-          }] -> trigger condition: "${r.condition}"`;
-        })
-        .join("\n");
-
-      // Build context-aware system prompt
-      let systemPrompt = `${this.analysisInstructions}
-
-[Extraction Keys to Find]:
-${keysSchema || "None"}
-
-[Sentiment Analysis Enabled]: ${this.enableSentiment ? "Yes" : "No"}
-
-[Business Custom Alert Rules]:
-${rulesSchema || "None"}`;
-
-      // If previous context is provided, include it
-      if (previousContext) {
-        systemPrompt += `\n\n[Conversation Context So Far]:\n${previousContext}`;
-      }
-
-      systemPrompt += `\n\nFrom the customer's message, extract information strictly adhering to the configured extraction keys.
-Return a clean, raw JSON output without any markdown fence or text formatting.
-
-Output structure:
-{
-  "note": "Concise professional note summarizing only the new information, adhering strictly to the language specified in the system message",
-  "keys": {
-     // only populate keys that were explicitly discovered/updated in this message
-  },
-  "sentiment": "positive" | "neutral" | "negative" | "mixed",
-  "alert_level": "none" | "warning" | "danger",
-  "alert_reason": "why warning/danger alert triggered, empty string if none"
-}`;
-
-      const response = await this.model.invoke([
-        ["system", systemPrompt],
-        ["user", `Message: "${message}"`],
-      ]);
-
-      const content = (
-        typeof response.content === "string"
-          ? response.content
-          : JSON.stringify(response.content)
-      ).trim();
-
-      let note = message;
-      let keys: Record<string, any> = {};
-      let sentiment = "neutral";
-      let alert_level = "none";
-      let alert_reason = "";
-
-      try {
-        const jsonMatch = content.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0]);
-          note = parsed.note || message;
-          keys = parsed.keys || {};
-          if (this.enableSentiment) sentiment = parsed.sentiment || "neutral";
-          alert_level = parsed.alert_level || "none";
-          alert_reason = parsed.alert_reason || "";
-        }
-      } catch {
-        // If JSON parsing fails, use the raw content as note
-        note = content || message;
-      }
-
       // ── Resolve session ID ──
       const effectiveSessionId =
         flowConfig?.sessionId ||
@@ -277,18 +216,31 @@ Output structure:
         this.resolvedSessionId ||
         "";
 
-      // ── Send to CRM ──
+      // ── Auto-build keyDefinitions from the keys the LLM provided ──
+      // CRM backend requires key_definitions to exist before storing values.
+      // We auto-create them here so the LLM doesn't have to manage them.
+      const keys = arg.keys || {};
+      const keyDefinitions = Object.keys(keys)
+        .filter((k) => keys[k] !== null && keys[k] !== undefined && keys[k] !== "")
+        .map((k) => ({
+          key: k,
+          display: k.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+          type: "text",
+        }));
+
+      // ── Build payload from the Agent's analysis ──
       const payload = {
         sessionId: effectiveSessionId,
-        note,
+        note: arg.note,
         keys,
-        sentiment,
-        alertLevel: alert_level,
-        alertReason: alert_reason,
-        keyDefinitions: this.extractionKeys,
+        sentiment: arg.sentiment || "neutral",
+        alertLevel: arg.alert_level || "none",
+        alertReason: arg.alert_reason || "",
+        keyDefinitions, // auto-generated from keys — ensures CRM stores them
       };
 
-      const res = await fetch(
+      // ── Send to CRM with retry ──
+      const res = await fetchWithRetry(
         `${this.crmBaseUrl}/api/integration/monitoring/note`,
         {
           method: "POST",
@@ -300,23 +252,23 @@ Output structure:
         }
       );
 
-      const result = await res.json();
+      const result = (await res.json()) as any;
 
       if (!res.ok) {
         return formatToolError(
-          `Monitoring failed: ${result.message || res.status}`,
+          `Monitoring failed (${res.status}): ${result.message || "Unknown error"}`,
           payload
         );
       }
 
       return (
-        `Monitoring indexed — sentiment: ${sentiment}, alert: ${alert_level}` +
+        `Monitoring recorded — sentiment: ${arg.sentiment || "neutral"}, alert: ${arg.alert_level || "none"}` +
         TOOL_ARGS_PREFIX +
         JSON.stringify(payload)
       );
     } catch (error: any) {
       return formatToolError(
-        `Monitoring Tool system error: ${error.message}`,
+        `Monitoring tool system error: ${error.message}`,
         {}
       );
     }

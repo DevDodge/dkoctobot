@@ -3,15 +3,9 @@ import { BaseMessage } from '@langchain/core/messages'
 import { ChainValues } from '@langchain/core/utils/types'
 import { RunnableSequence } from '@langchain/core/runnables'
 import { BaseChatModel } from '@langchain/core/language_models/chat_models'
-import {
-    ChatPromptTemplate,
-    MessagesPlaceholder,
-    HumanMessagePromptTemplate,
-    SystemMessagePromptTemplate,
-    PromptTemplate
-} from '@langchain/core/prompts'
-import { formatToOpenAIToolMessages } from '@langchain/classic/agents/format_scratchpad/openai_tools'
-import { type ToolsAgentStep } from '@langchain/classic/agents/openai/output_parser'
+import { ChatPromptTemplate, MessagesPlaceholder, HumanMessagePromptTemplate, PromptTemplate } from '@langchain/core/prompts'
+import { formatToOpenAIToolMessages } from 'langchain/agents/format_scratchpad/openai_tools'
+import { type ToolsAgentStep } from 'langchain/agents/openai/output_parser'
 import {
     extractOutputFromArray,
     getBaseClasses,
@@ -44,8 +38,8 @@ You are an AUTOMATIC execution engine. Your ONLY purpose is to detect orders and
 4. **EXECUTE ALL MATCHING TOOLS** — If you see data for create_crm_order → call it. If monitoring_note is available → call it. Call EVERY relevant tool.
 
 5. **AFTER ALL TOOLS EXECUTE** — Output a minimal JSON summary:
-   - [[toolCalls: [[tool: create_crm_order, result: success, orderId: 123]], actionsExecuted: [created_order]]]
-   - If NO tools were called (no actionable data): [[toolCalls: [], actionsExecuted: [], note: "no actionable data detected"]]
+   - {"toolCalls": [{"tool": "create_crm_order", "result": "success", "orderId": 123}], "actionsExecuted": ["created_order"]}
+   - If NO tools were called (no actionable data): {"toolCalls": [], "actionsExecuted": [], "note": "no actionable data detected"}
 
 6. **TOOLS > TEXT** — You are a TOOL RUNNER first, not a writer. The Sales Agent handles customer communication. Your value is in EXECUTING tools, not writing responses.`,
 
@@ -78,7 +72,7 @@ class ERPAgent_Agents implements INode {
     constructor(fields?: { sessionId?: string }) {
         this.label = 'ERP Agent'
         this.name = 'erpAgent'
-        this.version = 1.2
+        this.version = 1.1
         this.type = 'ERPAgentExecutor'
         this.category = 'AppCity'
         this.icon = 'erpAgent.svg'
@@ -234,28 +228,7 @@ const prepareERPAgent = async (
 
     // Append response mode instructions to system message
     const modeSuffix = RESPONSE_MODE_SUFFIXES[responseMode] || ''
-
-    // 🔧 SMART KEY INJECTION: Collect tool descriptions and inject them into the system prompt
-    // so the LLM sees EXACT CRM key names from the tool's own description.
-    // No hardcoded mapping — works with any tool, any CRM, any configuration.
-    const toolDescriptions: string[] = []
-    if (tools && Array.isArray(tools)) {
-        for (const tool of tools) {
-            if (tool && typeof tool === 'object' && 'name' in tool && 'description' in tool) {
-                const tName = (tool as any).name
-                const tDesc = (tool as any).description
-                if (tName && tDesc) {
-                    toolDescriptions.push(`\n### TOOL SCHEMA: \`${tName}\`\n${tDesc}`)
-                }
-            }
-        }
-    }
-    const toolSchemaBlock =
-        toolDescriptions.length > 0
-            ? `\n\n## 🔑 AVAILABLE TOOL SCHEMAS (use EXACT key names from these schemas)\n${toolDescriptions.join('\n')}`
-            : ''
-
-    systemMessage = transformBracesWithColon(systemMessage + toolSchemaBlock + modeSuffix)
+    systemMessage = transformBracesWithColon(systemMessage + modeSuffix)
 
     const inputKey = 'input'
 
@@ -272,12 +245,17 @@ const prepareERPAgent = async (
     const chatPromptTemplate = nodeData.inputs?.chatPromptTemplate as ChatPromptTemplate
     if (chatPromptTemplate && chatPromptTemplate.promptMessages.length) {
         // 🔧 FIX: Inject modeSuffix into the first SystemMessagePromptTemplate
-        // Uses fromTemplate() to preserve LangChain prototype — never use spread on LC objects!
+        // Previously the modeSuffix was appended to systemMessage but then
+        // the entire prompt was replaced by chatPromptTemplate, discarding it.
+        // Now we find the first SystemMessage and inject the modeSuffix into it.
         const modifiedMessages = chatPromptTemplate.promptMessages.map((msg, idx) => {
             if (idx === 0 && (msg as any).prompt && (msg as any).prompt.template !== undefined) {
+                // This is likely a SystemMessagePromptTemplate — inject modeSuffix
                 const template = (msg as any).prompt.template as string
                 if (template && !template.includes(modeSuffix)) {
-                    return SystemMessagePromptTemplate.fromTemplate(template + modeSuffix)
+                    const modifiedMsg = { ...msg }
+                    ;(modifiedMsg as any).prompt = { ...(msg as any).prompt, template: template + modeSuffix }
+                    return modifiedMsg
                 }
             }
             return msg
@@ -290,7 +268,8 @@ const prepareERPAgent = async (
             humanPrompt,
             new MessagesPlaceholder('agent_scratchpad')
         ]
-        prompt = ChatPromptTemplate.fromMessages(messages as any)
+        // @ts-ignore — modifiedMessages are prompt template objects at runtime
+        prompt = ChatPromptTemplate.fromMessages(messages)
         if ((chatPromptTemplate as any).promptValues) {
             const promptValuesRaw = (chatPromptTemplate as any).promptValues
             const promptValues = handleEscapeCharacters(promptValuesRaw, true)
@@ -309,7 +288,7 @@ const prepareERPAgent = async (
         const visionChatModel = model as IVisionChatModal
         const messageContent = await addImagesToMessages(nodeData, options, model.multiModalOption)
         if (messageContent?.length) {
-            visionChatModel.setVisionModel?.()
+            visionChatModel.setVisionModel()
             let messagePlaceholder = prompt.promptMessages.pop() as MessagesPlaceholder
             if (prompt.promptMessages[prompt.promptMessages.length - 1] instanceof HumanMessagePromptTemplate) {
                 const lastMessage = prompt.promptMessages.pop() as HumanMessagePromptTemplate
@@ -320,7 +299,7 @@ const prepareERPAgent = async (
             }
             prompt.promptMessages.push(messagePlaceholder)
         } else {
-            visionChatModel.revertToOriginalModel?.()
+            visionChatModel.revertToOriginalModel()
         }
     }
 

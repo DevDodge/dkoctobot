@@ -13,7 +13,6 @@ import {
 } from "../../../src/utils";
 
 const DEFAULT_ERP_URL = "https://erp.octobot.it.com";
-const DEFAULT_CRM_URL = "https://crm.octobot.it.com";
 
 class AppCityRAG_Tools implements INode {
   label: string;
@@ -44,6 +43,14 @@ class AppCityRAG_Tools implements INode {
         default: DEFAULT_ERP_URL,
         description:
           "Base URL of the ERP OctoBot gateway (where RAG search runs)",
+      },
+      {
+        label: "CRM Base URL",
+        name: "crmBaseUrl",
+        type: "string",
+        default: "https://crm.octobot.it.com",
+        description:
+          "Base URL of the CRM backend (for search logging). Set to https://crm.octobot.it.com for development.",
       },
       {
         label: "CRM API Key",
@@ -112,7 +119,7 @@ class AppCityRAG_Tools implements INode {
       const erpBaseUrl = (
         (nodeData.inputs?.erpBaseUrl as string) || DEFAULT_ERP_URL
       ).replace(/\/+$/, "");
-      const crmBaseUrl = DEFAULT_CRM_URL.replace(/\/+$/, "");
+      const crmBaseUrl = ((nodeData.inputs?.crmBaseUrl as string) || "https://crm.octobot.it.com").replace(/\/+$/, "");
 
       // ═══════════════════════════════════════════════
       // MODE A: CRM Integration Key — Fetch allowed sheets
@@ -257,6 +264,9 @@ class AppCityRAG_Tools implements INode {
     const erpBaseUrl = (
       (nodeData.inputs?.erpBaseUrl as string) || DEFAULT_ERP_URL
     ).replace(/\/+$/, "");
+    const crmBaseUrl = (
+      (nodeData.inputs?.crmBaseUrl as string) || "https://crm.octobot.it.com"
+    ).replace(/\/+$/, "");
     const crmApiKey = nodeData.inputs?.crmApiKey as string;
     const toolName = (nodeData.inputs?.toolName as string) || "search_data";
     let toolDescription = (nodeData.inputs?.toolDescription as string) || "";
@@ -301,6 +311,7 @@ class AppCityRAG_Tools implements INode {
 
     return new AppCityRAGTool({
       erpBaseUrl,
+      crmBaseUrl,
       crmApiKey: crmApiKey || null,
       sheets,
       toolName,
@@ -318,6 +329,7 @@ interface SheetConfig {
 
 interface AppCityRAGToolConfig {
   erpBaseUrl: string;
+  crmBaseUrl: string;
   crmApiKey: string | null;
   sheets: SheetConfig[];
   toolName: string;
@@ -329,6 +341,7 @@ class AppCityRAGTool extends StructuredTool {
   name: string;
   description: string;
   private erpBaseUrl: string;
+  private crmBaseUrl: string;
   private crmApiKey: string | null;
   private sheets: SheetConfig[];
   private searchMode: string;
@@ -350,6 +363,7 @@ class AppCityRAGTool extends StructuredTool {
     this.name = config.toolName;
     this.description = config.toolDescription;
     this.erpBaseUrl = config.erpBaseUrl;
+    this.crmBaseUrl = config.crmBaseUrl;
     this.crmApiKey = config.crmApiKey;
     this.sheets = config.sheets;
     this.searchMode = config.searchMode;
@@ -608,8 +622,7 @@ class AppCityRAGTool extends StructuredTool {
     searchTimeMs: number
   ): Promise<void> {
     try {
-      const crmUrl = DEFAULT_CRM_URL.replace(/\/+$/, "");
-      await fetch(`${crmUrl}/api/integration/search-log`, {
+      await fetch(`${this.crmBaseUrl}/api/integration/search-log`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

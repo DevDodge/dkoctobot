@@ -4,8 +4,8 @@ import { ChainValues } from '@langchain/core/utils/types'
 import { RunnableSequence } from '@langchain/core/runnables'
 import { BaseChatModel } from '@langchain/core/language_models/chat_models'
 import { ChatPromptTemplate, MessagesPlaceholder, HumanMessagePromptTemplate, PromptTemplate } from '@langchain/core/prompts'
-import { formatToOpenAIToolMessages } from 'langchain/agents/format_scratchpad/openai_tools'
-import { type ToolsAgentStep } from 'langchain/agents/openai/output_parser'
+import { formatToOpenAIToolMessages } from '@langchain/classic/agents/format_scratchpad/openai_tools'
+import { type ToolsAgentStep } from '@langchain/classic/agents/openai/output_parser'
 import {
     extractOutputFromArray,
     getBaseClasses,
@@ -288,7 +288,7 @@ const prepareERPAgent = async (
         const visionChatModel = model as IVisionChatModal
         const messageContent = await addImagesToMessages(nodeData, options, model.multiModalOption)
         if (messageContent?.length) {
-            visionChatModel.setVisionModel()
+            visionChatModel.setVisionModel?.()
             let messagePlaceholder = prompt.promptMessages.pop() as MessagesPlaceholder
             if (prompt.promptMessages[prompt.promptMessages.length - 1] instanceof HumanMessagePromptTemplate) {
                 const lastMessage = prompt.promptMessages.pop() as HumanMessagePromptTemplate
@@ -299,7 +299,7 @@ const prepareERPAgent = async (
             }
             prompt.promptMessages.push(messagePlaceholder)
         } else {
-            visionChatModel.revertToOriginalModel()
+            visionChatModel.revertToOriginalModel?.()
         }
     }
 
